@@ -18,7 +18,7 @@ export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 (Gloria): Dentro de hdfs (dentro de opt/hadoop):
 
 ```
-bin/hadoop fs -cat /user/bigdata/compilar.bash | exec bash -s WordCount
+sudo bash run.sh WordCount
 ```
 
 # Para ejecutar
