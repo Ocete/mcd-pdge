@@ -14,54 +14,7 @@ header-includes:
 output:
     pdf_document
 ---
-    
-# Proceso 
 
-### Para instalar javac
-```bash
-yum install java-1.8.0-openjdk-devel
-```
-
-### Tras instalar openjdk
-Incluso si instalamos la versión 1.7 se instalará la versión 1.8. Hemos de cambiar los paths a las versión 1.8 para que funciona correctamente:
-```bash
-export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
-```
-
-Editamos el archivo `/opt/hadoop/etc/hadoop/hadoop.env.sh`:
-```bash
-export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
-```
-
-
-### Para compilar
-```bash
-bin/hadoop fs -cat /user/bigdata/compilar.bash | exec bash -s WordCount
-```
-
-# Para ejecutar
-
-Primero hay que iniciar el NameNode y el DataNode:
-```bash
-sbin/start-dfs.sh
-```
-
-Iniciar el ResourceManager y el NodeManager:
-
-```bash
-sbin/start-yarn.sh
-```
-
-Recuerda que hemos de subir el archivo utilizando:
-```bash
-/opt/hadoop/bin/hdfs dfs -put Quijote.txt /user/root
-```
-
-Lanzamos nuestro trabajo de MapReduce:
-
-```bash
-sudo /opt/hadoop/bin/hadoop jar WordCount.jar uam.WordCount Quijote.txt output/
-```
 
 
 # Cuestiones planteadas
@@ -122,6 +75,63 @@ Y también `etc/hadoop/yarn-site.xml`:
 
 
 ### Ejercicio 1.2: Para pasar a la ejecución de Hadoop sin HDFS, ¿ es suficiente con parar el servicio con `stop-dfs.sh`? ¿ Cómo se consigue ?
+
+    
+# Proceso 
+
+Describiremos a continuación los pasos que se han ido siguiendo para obtener los resultados finales de la práctica.
+
+### Instalamos java
+```bash
+yum install java-1.8.0-openjdk-devel
+```
+
+### Cambiamos la versión por defecto que se usaba en las transparencias
+Incluso si instalamos la versión 1.7 se instalará la versión 1.8. Hemos de cambiar los paths a las versión 1.8 para que funciona correctamente:
+```bash
+export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
+```
+
+Editamos el archivo `/opt/hadoop/etc/hadoop/hadoop.env.sh`:
+```bash
+export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
+```
+
+
+
+### Compilación
+
+Tomamos el código que se ha proporcionado y lo 
+
+```bash
+bin/hadoop fs -cat /user/bigdata/compilar.bash | exec bash -s WordCount
+```
+
+# Para ejecutar
+
+Primero hay que iniciar el NameNode y el DataNode:
+```bash
+sbin/start-dfs.sh
+```
+
+Iniciar el ResourceManager y el NodeManager:
+
+```bash
+sbin/start-yarn.sh
+```
+
+Recuerda que hemos de subir el archivo utilizando:
+```bash
+/opt/hadoop/bin/hdfs dfs -put Quijote.txt /user/root
+```
+
+Lanzamos nuestro trabajo de MapReduce:
+
+```bash
+sudo /opt/hadoop/bin/hadoop jar WordCount.jar uam.WordCount Quijote.txt output/
+```
+
+
 
 
 
