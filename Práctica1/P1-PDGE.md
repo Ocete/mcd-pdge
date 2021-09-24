@@ -13,6 +13,7 @@ header-includes:
 
 output:
     pdf_document
+   
 ---
 
 
@@ -28,6 +29,8 @@ Como se explica en  [https://stackoverflow.com/questions/17569423/what-is-best-w
 
 A continuación, para instalar Hadoop pseudo-distribuido, hemos modificado el fichero `/opt/hadoop/etc/hadoop/core-site.xml`:
 
+---
+
 ```xml
 <configuration>
     <property>
@@ -36,6 +39,8 @@ A continuación, para instalar Hadoop pseudo-distribuido, hemos modificado el fi
     </property>
 </configuration>
 ```
+
+---
 
 Y añadimos al fichero `/opt/hadoop/etc/hadoop/hdfs-site.xml` lo siguiente:
 ```xml
@@ -130,6 +135,41 @@ Lanzamos nuestro trabajo de MapReduce:
 ```bash
 sudo /opt/hadoop/bin/hadoop jar WordCount.jar uam.WordCount Quijote.txt output/
 ```
+
+Obtenemos en el directorio output la salida. En concreto, dos archivos:
+
+- Un archivo `SUCCESS` indicando que la tarea ha sido exitosa.
+- Un archivo `part-r-00000` que tiene la salida del programa que queríamos ejecutar.
+
+
+Mostramos una parte del fichero para mostrar parte de la salida (la salida completa se puede encontrar en [este archivo]([https://github.com/Ocete/mcd-pdge/blob/main/Pr%C3%A1ctica1/test)).
+
+```bash
+"Tablante",	1
+"dichosa	1
+"el	8
+"y	1
+"¡Oh,	1
+(Y	1
+(a	1
+(al	1
+(como	1
+(creyendo	1
+(de	2
+(habiéndose	1
+(por	2
+(porque	2
+(pues	1
+(que	21
+```
+
+Como podemos comprobar, las palabras quedan con ciertos símbolos de puntuación que no nos interesa que estén para realizar el conteo correcto de palabras. Para arreglar esto, solo debemos cambiar una linea en la función `Map` del archivo `WordCount.java`. En concreto, la dejamos de la siguiente forma:
+
+```java
+StringTokenizer itr = new StringTokenizer(value.toString().
+        toLowerCase().replaceAll("[^a-z ]", ""));
+```
+como vemos, hemos pasado las palabras a minúsculas usando `toLowerCase` y luego hemos eliminado todo aquello que no sean letras usando `replaceAll`.
 
 
 
