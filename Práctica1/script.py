@@ -36,6 +36,21 @@ plt.show()
 
 
 
+mf_t1 = get_most_frequent('test1',k=1000)
+mf_t2 = get_most_frequent('test2',k=1000)
+
+print("Número de veces que aparece la palabra")
+print("\t el")
+print("\t\t - Sin preprocesado {}".format(mf_t1['el']))
+print("\t\t - Con preprocesado {}".format(mf_t2['el']))
+
+
+print("\t dijo")
+print("\t\t - Sin preprocesado {}".format(mf_t1['dijo']))
+print("\t\t - Con preprocesado {}".format(mf_t2['dijo']))
+
+
+
 
 
 
