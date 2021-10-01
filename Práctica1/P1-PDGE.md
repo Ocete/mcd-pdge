@@ -244,3 +244,102 @@ Número de veces que aparece la palabra
 ```
 
 Puede comprobarse ejecutando el script indicado.
+
+
+# Parte 2 : Tutorial de Spark
+
+Seguimos el tutorial de spark y contestamos a las preguntas que se nos piden
+
+
+### Pregunta TS1.1 ¿Cómo hacer para obtener una lista de los elementos al cuadrado?
+
+Bastará en este caso usar sobre el RDD la función map pasándole como parámetro la función `lambda x: x*x` que eleva el número al cuadrado. El código es este, con el resultado debajo:
+
+```python
+numeros = sc.parallelize([1,2,3,4,5,6,7,8,9,10])
+cuadrados = numeros.map(lambda x : x*x)
+print(cuadrados.collect())
+
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+```
+### Pregunta TS1.2 ¿Cómo filtrar los impares?
+
+El código se nos entrega resuelto en este caso. Es bastante sencillo, si usamos sobre el RDD la función `filter` dándole como parámetro la función que calcula si cada elemento es impar, esto es, si su módulo 2 es 1 : `lambda x : x%2 == 1`, nos da todos los impares. El código completo es:
+
+```python
+rddi = numeros.filter (lambda e: e%2==1)
+print (rddi.collect())
+
+[1, 3, 5, 7, 9]
+```
+
+### Pregunta TS1.3 ¿Tiene sentido esta operación? ¿Si se repite se obtiene siempre el mismo resultado?
+
+Nos encontramos con el siguiente código:
+```python
+#Tiene sentido esta operación?
+numeros = sc.parallelize([1,2,3,4,5])
+
+print (numeros.reduce(lambda elem1,elem2: elem1-elem2))
+
+```
+
+Esta operacion no tiene sentido, pues para hacer el reduce necesitamos que la operación sea conmutativa, es decir, que $a-b = b-a$, lo cual **NO** es cierto en todos los casos. Por eso además no producirá siempre los mismos resultados. Si ejecutamos en múltiples ocasiones veremos que los resultados no son los mismos siempre.
+
+### Pregunta TS1.4 ¿Cómo lo ordenarías para que primero aparezcan los impares y luego los pares?
+
+Lo haremos para el caso general. Nos damos cuenta primero de que si el vector tiene $n$ posiciones y tratamos de tomar $m > n$ posiciones, Spark se quedará con todas las posibles. Por tanto, lo primero que hacemos es obtener un entero con el máximo de elementos
+
+```python
+numeros = sc.parallelize([3,2,1,4,5])
+
+n = numeros.count()
+```
+
+Por último, basta ahora tomar elementos ordenados especificando cuál es el criterio de orden. En este caso, queremos que los elementos pares sean los más grandes, por lo que debemos pasarle como argumento la función `lambda x: x%2 == 0`. De esta manera, escribiendo la línea siguiente, obtenemos el resultado.
+```python
+print(numeros.takeOrdered(n,lambda elem: elem%2== 0))
+
+[3, 1, 5, 2, 4]
+```
+
+
+### Pregunta TS1.5 ¿Cuántos elementos tiene cada rdd? ¿Cuál tiene más?
+
+Nos encontramos con el siguiente código
+
+```
+lineas = sc.parallelize(['', 'a', 'a b', 'a b c'])
+
+palabras_flat = lineas.flatMap(lambda elemento: elemento.split())
+palabras_map = lineas.map(lambda elemento: elemento.split())
+
+print (palabras_flat.collect())
+print (palabras_map.collect())
+```
+Cuya salida es:
+```python
+['a', 'a', 'b', 'a', 'b', 'c']
+[[], ['a'], ['a', 'b'], ['a', 'b', 'c']]
+```
+Para ver cuántos elementos tiene cada uno, podemos hacer 
+```python
+print(palabras_flat.count())
+print(palabras_map.count())
+
+6
+4
+```
+
+Claramente, `palabras_flat` tiene más. Esto ocurre porque en `flatMap`, cada elemento de entrada al que se le aplica la función `lambda`, puede tener como salida 0 o más (un vector) de elementos. Por tanto:
+
+- Con `flatMap` para cada elemento de `lineas` obtenemos un vector que luego separaremos por elementos e ignoraremos los elementos que estén vacíos. Por ello, de 4 elementos iniciales pasamos a 6 que es el total de letras que tenemos en el RDD.
+
+- Con `map`, a cada uno de los vectores iniciales se le aplica la función indicada y se introduce **tal cual** en el RDD resultante, no se separan los elementos de los vectores obtenidos como ocurría en el caso anterior.
+
+
+### Pregunta TS1.6 ¿De qué tipo son los elementos del rdd palabras_map? ¿Por qué palabras_map tiene el primer elemento vacío?
+
+Siguiendo la respuesta de la pregunta anterior, en `palabras_map` los elementos obtenidos tras aplicar a cada elemento de `líneas` la función, son vectores, por lo que los elementos de `palabras_map` son vectores. 
+
+Además, tiene el primer **elemento vacío** porque la función split aplicada sobre el elemento `''` devuelve un vector vacío pues no hay nada que separar.
