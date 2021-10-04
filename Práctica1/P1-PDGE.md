@@ -200,8 +200,10 @@ Y también `etc/hadoop/yarn-site.xml`:
 
 ### Ejercicio 1.2: Para pasar a la ejecución de Hadoop sin HDFS, ¿ es suficiente con parar el servicio con `stop-dfs.sh`? ¿ Cómo se consigue ?
 
-    
-    
+TODO
+
+
+
 
 
 ### Pregunta 3.1: ¿ Dónde se crea hdfs ? ¿ Cómo se puede decidir su localización ?
@@ -244,6 +246,16 @@ Número de veces que aparece la palabra
 ```
 
 Puede comprobarse ejecutando el script indicado.
+
+## Ejercicio 4
+
+Creamos un archivo con 20 copias del Quijote llamado `quijote20.txt`. Lo subimos al sistema de archivos de hdfs cambiando el tamaño de bloque a 2MB utilizando:
+
+```bash
+bin/hdfs dfs -D dfs.blocksize=2097152 -put quijote20.txt /user/bigdata/dreji
+```
+
+### Pregunta 3.5:  Cuántas veces aparecen las siguientes palabras: el, dijo
 
 
 # Parte 2 : Tutorial de Spark
