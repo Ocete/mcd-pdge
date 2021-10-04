@@ -386,3 +386,203 @@ print(inferr.collect())
 'E: e21', 'I: i11', 'I: i11', 'E: e45']
 
 ```
+### Pregunta TS1.9 ¿Cómo explica el funcionamiento de las celdas anteriores?
+
+Comentamos una a una las celdas anteriores:
+
+```python
+numeros = sc.parallelize([1,2,3,4,5])
+
+print (numeros.reduce(lambda elem1,elem2: elem2+elem1))
+```
+
+Esta primera celda solo crea un RDD y luego hace la operación reduce, que combina los valores usando una función que le indicamos, en este caso la suma de los valores. Así, devolverá la suma de todos los valores ya que esta operación es conmutativa y asociativa.
+
+
+```python
+#Tiene sentido esta operación?
+numeros = sc.parallelize([1,2,3,4,5])
+
+print (numeros.reduce(lambda elem1,elem2: elem1-elem2))
+```
+
+Esta celda hace lo mismo que la anterior salvo que la operación que realiza es la resta. Como ya hemos visto en una pregunta anterior, esta operación no tiene sentido pues la resta no es una operación conmutativa por lo que el resultado no siempre será el mismo.
+
+```python
+palabras = sc.parallelize(['HOLA', 'Que', 'TAL', 'Bien'])
+
+pal_minus = palabras.map(lambda elemento: elemento.lower())
+
+print (pal_minus.reduce(lambda elem1,elem2: elem1+"-"+elem2))
+#y esta tiene sentido esta operación?
+# Qué pasa si ponemos elem2+"-"+elem1
+```
+
+En esta celda se crea un RDD que tiene cadenas de caracteres, primero se pasan a minúsculas aplicándoles la funcion `.lower` y luego se concatenan todas las palabras a un solo scring uniéndolas por guiones, obteniendo como salida:
+```bash
+hola-que-tal-bien
+```
+
+Si cambiásemos el orden en elq ue se concatenan los elementos como se nos indica en el comentario, la salida cambia y las palabras se van uniendo en el orden inverso, debido a cómo se realiza la operación reduce. La salida es:
+```bash
+bien-tal-que-hola
+```
+
+```python
+r = sc.parallelize([('A', 1),('C', 4),('A', 1),('B', 1),('B', 4)])
+rr = r.reduceByKey(lambda v1,v2:v1+v2)
+print (rr.collect())
+```
+
+En esta celda se crea un RDD que tiene como elementos Tuplas `(clave,valor)`. A continuación, usando `reduceByKey` pasándole como argumento una función suma, lo que se hace es sumar los valores de las tuplas cuya clave sea la misma, obteniendo la salida esperada:
+```bash
+[('C', 4), ('A', 2), ('B', 5)]
+```
+
+La última celda es la siguiente:
+```python
+r = sc.parallelize([('A', 1),('C', 4),('A', 1),('B', 1),('B', 4)])
+rr1 = r.reduceByKey(lambda v1,v2:v1+v2)
+print (rr1.collect())
+rr2 = rr1.reduceByKey(lambda v1,v2:v1)
+print (rr2.collect())
+```
+
+De nuevo, se crea un RDD cuyos elementos son tuplas `(clave,valor)` , primero se realiza lo mismo que en la celda anterior, y luego se vuelve a aplicar sobre el RDD obtenido la función `reduceByKey`, esta vez pasándole como función simplemente mantenerla clave que tiene. Sin embargo, esto no parece producir ningún efecto sobre el RDD, pues cuando se realiza la operación `collect` para ver los elementos del mismo, la salida es la misma que se produce en la celda anterior.
+
+Como **conclusión** a esta pregunta, podemos decir que es importante cómo se aplica la función `reduce` sobre los RDD y que hay que tener cuidado con las operaciones que indicamos a esta función pues podrían no producir los resultados que se desean. 
+
+### Pregunta `groupByKey`
+
+Dada la siguiente celda
+```python
+r = sc.parallelize([('A', 1),('C', 2),('A', 3),('B', 4),('B', 5)])
+rr = r.groupByKey()
+res= rr.collect()
+
+print(rr.collect())
+
+
+# Que operación realizar al RDD rr para que la operacion sea como un reduceByKey
+```
+
+Lo priemro que vemos es que la operación `rr.collect` devuelve una lista con tuplas `(clave, pyspark Result Iterable)`. Estos iterables debemos pasarlos primero a una lista, y luego realizar sobre ellos la operación que quisiésemos hacer con el `reduceByKey`. Vemos que los pasamos a una lista utilizando `mapValues(list)` que convierte los valores a un tipo:
+
+```python
+rrf = rr.mapValues(list).collect()
+print(rrf)
+
+[('C', [2]), ('A', [1, 3]), ('B', [4, 5])]
+```
+
+Y, a continuación, podemos realizar la operación que haríamos con el reduce. Por ejemplo, si queremos hacer la suma de los vectores utilizando `map`, podríamos hacer todo en una linea de la siguiente manera:
+```python
+rrf = rr.mapValues(list).map(lambda x : (x[0],sum(x[1])))
+print(rrf.collect())
+
+[('C', 2), ('A', 4), ('B', 9)]
+```
+
+Ahora, se nos pide simular el `groupByKey` usando `reduceByKey` y `map`. Para ello, usando `reduceByKey` podemos obtener las listas que obtendríamos tras aplicar el `mapValues(list)` que hemos obtenido anteriormente.
+```python
+simul_group = r.reduceByKey(lambda v1,v2: [v1,v2])
+print(simul_group.collect())
+
+[('C', 2), ('A', [1, 3]), ('B', [4, 5])]
+```
+
+### Pregunta sobre `join`
+
+```python
+rdd1 = sc.parallelize([('A',1),('B',2),('C',3)])
+rdd2 = sc.parallelize([('A',4),('B',5),('C',6)])
+
+rddjoin = rdd1.join(rdd2)
+```
+
+El resultado de esto es 
+```bash
+[('A', (1, 4)), ('B', (2, 5)), ('C', (3, 6))]
+```
+
+Es decir, un nuevo RDD en el que los valores son tuplas con los valores que hay en cada uno de los RDD. Se nos pide que, dado ese código, cambiemos las claves de los dos RDDs iniciales para ver qué RDD se crea finalmente. Si lo hacemos, cambiando por ejemplo los RDD del siguiente modo:
+```python
+rdd1 = sc.parallelize([('A',1),('B',2),('D',3)])
+rdd2 = sc.parallelize([('A',4),('B',5),('E',6)])
+
+rddjoin = rdd1.join(rdd2)
+```
+El resultado obtenido es el siguiente:
+```bash
+[('A', (1, 4)), ('B', (2, 5))]
+```
+Es decir, que el `join` está haciendo la unión de los elementos cuyas claves están en la intersección del conjunto de claves. Como `D` y `E` no están en ambos RDD, no están en la intersección del conjunto de claves y por tanto no se obtienen en el RDD final.
+
+### Tipos de Join
+
+Se nos pregunta que qué ocurre cuando sustituimos `join` por `leftOuter/rightOuter/fullOuter` join. El resultado es que estos tipos de `join` crean elementos en el nuevo RDD aunque sus claves no estén en ambos RDD iniciales. En concreto:
+
+- `leftOuter` añade al nuevo RDD también las tuplas `(clave,valor)` cuya clave esté en el `RDD` sobre el que se llama la función, pero no estén en el RDD que se pasa como parámetro. Se añade un `None` en la tupla conjunta del RDD final:
+```python
+rdd1 = sc.parallelize([('A',1),('B',2),('C',3)])
+rdd2 = sc.parallelize([('A',4),('A',5),('B',6),('D',7)])
+rddjoin = rdd1.leftOuterJoin(rdd2)
+
+[('A', (1, 4)), ('A', (1, 5)), ('B', (2, 6)), ('C', (3, None))]
+```
+
+- `rightOuter` hace lo mismo que el anterior pero en el sentido opuesto, es decir, usando el segundo RDD.
+- `fullOuter` combina los dos anteriores
+
+### Pregunta TS1.10 Borra la salida y cambia las particiones en parallelize. ¿ Qué sucede ?
+
+Lo que ocurre si ponemos 10 particiones es lo siguiente (borrando anteriormente el contenido del directorio donde tenemos la salida):
+```python
+numeros = sc.parallelize(range(0,1000),10)
+numeros.saveAsTextFile('salida')
+
+%ls -la salida/*
+
+
+
+-rw-r--r-- 1 root root 290 Oct  4 10:42 salida/part-00000
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00001
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00002
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00003
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00004
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00005
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00006
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00007
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00008
+-rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00009
+-rw-r--r-- 1 root root   0 Oct  4 10:42 salida/_SUCCESS
+```
+
+Como se podía esperar, se crea un archivo para cada una de las particiones de salida, según el número de particiones que le hayamos indicado.
+
+## Procesamiento El Quijote
+
+### Pregunta TS2.1 Explica la utilidad de cada transformación y detalle para cada una de ellas si cambia el número de elementos en el RDD resultante. Es decir si el RDD de partida tiene N elementos, y el de salida M elementos, indica si N>M, N=M o N<M.
+
+Dado el siguiente código:
+```python
+charsPerLine = quijote.map(lambda s: len(s))
+allWords = quijote.flatMap(lambda s: s.split())
+allWordsNoArticles = allWords.filter(lambda a: a.lower() not in ["el", "la"])
+allWordsUnique = allWords.map(lambda s: s.lower()).distinct()
+sampleWords = allWords.sample(withReplacement=True, fraction=0.2, seed=666)
+weirdSampling = sampleWords.union(allWordsNoArticles.sample(False, fraction=0.3))
+```
+Se nos pide indicar qué hace cada una de las transformaciones. Procedemos línea a línea:
+
+1. `charsPerLine = quijote.map(lambda s: len(s))` esta línea obtiene un nuevo RDD en el que se cambian las líneas del quijote por la longitud de cada línea. No se modifica el número de elementos, se tiene $N = M$.
+
+2. `allWords = quijote.flatMap(lambda s: s.split())`  obtiene un nuevo RDD en el que se separa cada uno de los strings iniciales en cada una de sus palabras y luego cada palabra se convierte en un elemento del RDD. Por tanto, el RDD de salida tiene muchos más elementos que el de entrada, podemos decir que $M >> N$.
+
+3. `allWordsNoArticles = allWords.filter(lambda a: a.lower() not in ["el", "la"])` se toma el RDD de las palabras y se pasa un filtro que elimina todos los artículos *el* y *la* (sin distinción de mayúsculas/minúsculas) del documento. Al eliminar elementos, el número de elementos en la salida será menor que en la entrada por lo que $M < N $.
+
+4. `allWordsUnique = allWords.map(lambda s: s.lower()).distinct()` se crea un RDD que tiene un elemento por cada palabra distinta (sin distinción mayúsculas/minúsculas) que haya en el RDD `allWords`. De nuevo, se eliminan elementos repetidos por lo que el número de elementos en la salida será menor que en la entrada, $M < N$.
+
+5. `sampleWords = allWords.sample(withReplacement=True, fraction=0.2, seed=666)` se extrae aleatoriamente con reemplazamiento un $20\%$ de las palabras que hay en `allWords` para crear un nuevo RDD. Por supuesto, se tendrá que $M = 0.2 N$ ($M < N$).
+
+6. `weirdSampling = sampleWords.union(allWordsNoArticles.sample(False, fraction=0.3))` priemro extrae sin reemplazamiento un $30\%$ de elementos que tenemos en el RDD que no tiene artículos (en este caso, tendríamos $M < N$ pues reducimos elementos) y a continuación une estos elementos extraídos al RDD que tiene una muestra del $20\%$ que hemos obtenido en el paso anterior. En esta unión aumenta el tamaño del RDD por lo que en este paso $M > N$.
