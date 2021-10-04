@@ -340,6 +340,49 @@ Claramente, `palabras_flat` tiene más. Esto ocurre porque en `flatMap`, cada el
 
 ### Pregunta TS1.6 ¿De qué tipo son los elementos del rdd palabras_map? ¿Por qué palabras_map tiene el primer elemento vacío?
 
-Siguiendo la respuesta de la pregunta anterior, en `palabras_map` los elementos obtenidos tras aplicar a cada elemento de `líneas` la función, son vectores, por lo que los elementos de `palabras_map` son vectores. 
+Siguiendo la respuesta de la pregunta anterior, en `palabras_map` los elementos obtenidos tras aplicar a cada elemento de `líneas` la función, son vectores, por lo que los elementos de `palabras_map` son vectores.  Lo podemos ver en la salida del código
+
+```python
+print (palabras_map.collect())
+
+[[], ['a'], ['a', 'b'], ['a', 'b', 'c']]
+```
 
 Además, tiene el primer **elemento vacío** porque la función split aplicada sobre el elemento `''` devuelve un vector vacío pues no hay nada que separar.
+
+
+### Pregunta TS1.7. Prueba la transformación distinct si lo aplicamos a cadenas.
+
+Para probarlo, realizamos el siguiente código en el que ponemos en un RDD ejemplos de prueba con las mismas palabras en mayúscula y minúscula, con espacios o signos de puntuación:
+
+```python
+test = sc.parallelize(["abcd", "abcd","dcba","abCd","a bcd","hola","HOLA","hola!","HoLa","ho la"])
+
+dis = test.distinct()
+
+print(dis.collect())
+```
+La salida que obtenemos es:
+
+```python
+['abcd', 'abCd', 'a bcd', 'hola', 'hola!', 'dcba', 'HOLA', 'HoLa', 'ho la']
+```
+
+Como podemos ver, teníamos un único ejemplo duplicado (el primero) que es el único que se ha eliminado. Esto nos indica que el comparador de elementos de los rdd comparan los strings *caracter a caracter*.
+
+### Pregunta TS1.8 ¿Cómo se podría obtener la misma salida pero utilizando una sola transformación y sin realizar la unión?
+
+
+Se podría hacer que el filtro se quede con los elementos que empiecen por I o por E, haciendo el código del siguiente modo:
+
+```python
+log = sc.parallelize(['E: e21', 'I: i11', 'W: w12', 'I: i11', 'W: w13', 'E: e45'])
+
+inferr = log.filter(lambda elem: elem[0] in ['I','E'])
+
+
+print(inferr.collect())
+
+'E: e21', 'I: i11', 'I: i11', 'E: e45']
+
+```
