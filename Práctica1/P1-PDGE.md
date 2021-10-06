@@ -255,8 +255,26 @@ Creamos un archivo con 20 copias del Quijote llamado `quijote20.txt`. Lo subimos
 bin/hdfs dfs -D dfs.blocksize=2097152 -put quijote20.txt /user/bigdata/dreji
 ```
 
-### Pregunta 3.5:  Cuántas veces aparecen las siguientes palabras: el, dijo
+Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloque para no tener que especificar el tamaño 2MB cada vez que subamos un archivo. Para ello cambiamos el tamaño de bloque en los archivos de configuración de hdfs editando `hdfs-site.xml`, añadiendo:
 
+```xml
+<property>
+        <name>dfs.block.size</name>
+        <value>2097152</value>
+</property>
+```
+
+Y reiniciamos dfs y yarn para asegurarnos que la configuración activa incluye los cambios realizados. Subimos de nuevo el archivo `quijote20.txt` sin especificar el tamaño de bloque utilizando la siguiente orden:
+
+```bash
+bin/hdfs dfs -put quijote20.txt /user/bigdata/dreji/quijote20-newdefault.txt
+```
+
+A continuación accedemos a [http://localhost:50070/explorer.html#/user/bigdata/dreji] para comprobar los resultados.
+
+TODO: añadir imagen quijote20
+
+Podemos ver cómo las dos versiones del `quijote20.txt` subidas tienen tamaño de bloque de 2MB, mientras que cuando subimos un archivo antes de cambiar el valor de tamaño de bloques por defecto, este tenía 128MB de tamaño de bloque. Esto responde a los apartados 4.1, 4.2 y 4.3 del guión.
 
 # Parte 2 : Tutorial de Spark
 
