@@ -43,7 +43,7 @@
 \usepackage{minted}
 \usepackage{pdfpages}
 
-\def\inline{\inline[basicstyle=\ttfamily,keywordstyle={}]}
+\def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
 
 \titlespacing*{\subsection}{0pt}{5.5ex}{3.3ex}
 \titlespacing*{\section}{0pt}{5.5ex}{1ex}
@@ -54,6 +54,8 @@
 \begin{document}
 
 \maketitle
+
+\tableofcontents
 
 \section{Parte 1}
 
@@ -293,6 +295,34 @@ bin/hdfs dfs -D dfs.blocksize=2097152 -put quijote20.txt /user/bigdata/dreji
 \end{minted}
 
 
+
+Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloque para no tener que especificar el tamaño 2MB cada vez que subamos un archivo. Para ello cambiamos el tamaño de bloque en los archivos de configuración de hdfs editando \inline{hdfs-site.xml}, añadiendo:
+
+\begin{minted}{xml}
+<property>
+        <name>dfs.block.size</name>
+        <value>2097152</value>
+</property>
+\end{minted}
+
+Y reiniciamos dfs y yarn para asegurarnos que la configuración activa incluye los cambios realizados. Subimos de nuevo el archivo \inline{quijote20.txt} sin especificar el tamaño de bloque utilizando la siguiente orden:
+
+\begin{minted}{bash}
+bin/hdfs dfs -put quijote20.txt /user/bigdata/dreji/quijote20-newdefault.txt
+\end{minted}
+
+A continuación accedemos a \inline{http://localhost:50070/explorer.html#/user/bigdata/dreji} para comprobar los resultados.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{figures/quijote20}
+  \caption{Captura del explorador del HDFS de hadoop}
+\end{figure}
+
+Podemos ver cómo las dos versiones del \inline{quijote20.txt} subidas tienen tamaño de bloque de 2MB, mientras que cuando subimos un archivo antes de cambiar el valor de tamaño de bloques por defecto, este tenía 128MB de tamaño de bloque. Esto responde a los apartados 4.1, 4.2 y 4.3 del guión.
+
+
+\newpage
 
 \section{ Tutorial de Spark}
 
