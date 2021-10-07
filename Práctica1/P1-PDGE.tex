@@ -288,15 +288,19 @@ Puede comprobarse ejecutando el script indicado.
 
 \subsection{ Ejercicio 4 }
 
-Creamos un archivo con 20 copias del Quijote llamado  \inline{quijote20.txt}. Lo subimos al sistema de archivos de hdfs cambiando el tamaño de bloque a 2MB utilizando:
+Creamos un archivo con 15 copias del Quijote llamado \inline{quijote15.txt}. Lo subimos al sistema de archivos de hdfs:
 
 \begin{minted}{bash}
-bin/hdfs dfs -D dfs.blocksize=2097152 -put quijote20.txt /user/bigdata/dreji
+	bin/hdfs dfs -put quijote15.txt /user/root/quijote15-128mb.txt
 \end{minted}
 
+A continuación, volvemos a subir el archivo indicando el tamaño de bloque a utilizar, 2MB:
 
+\begin{minted}{bash}
+bin/hdfs dfs -D dfs.blocksize=2097152 -put quijote15.txt /user/root/quijote15-2mb.txt
+\end{minted}
 
-Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloque para no tener que especificar el tamaño 2MB cada vez que subamos un archivo. Para ello cambiamos el tamaño de bloque en los archivos de configuración de hdfs editando \inline{hdfs-site.xml}, añadiendo:
+Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloque para no tener que especificar el tamaño 2MB cada vez que subamos un archivo. Para ello cambiamos el respectivo parámetro (\inline{dfs.block.size}) en los archivos de configuración de hdfs editando \inline{hdfs-site.xml}, añadiendo:
 
 \begin{minted}{xml}
 <property>
@@ -305,22 +309,43 @@ Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloq
 </property>
 \end{minted}
 
-Y reiniciamos dfs y yarn para asegurarnos que la configuración activa incluye los cambios realizados. Subimos de nuevo el archivo \inline{quijote20.txt} sin especificar el tamaño de bloque utilizando la siguiente orden:
+Y reiniciamos dfs y yarn para asegurarnos que la configuración activa incluye los cambios realizados. Subimos de nuevo el archivo \inline{quijote15.txt} sin especificar el tamaño de bloque utilizando la siguiente orden:
 
 \begin{minted}{bash}
-bin/hdfs dfs -put quijote20.txt /user/bigdata/dreji/quijote20-newdefault.txt
+bin/hdfs dfs -put quijote15.txt /user/bigdata/dreji/quijote15-2mb-default.txt
 \end{minted}
 
-A continuación accedemos a \inline{http://localhost:50070/explorer.html#/user/bigdata/dreji} para comprobar los resultados.
+A continuación accedemos a \inline{http://localhost:50070/explorer.html#/user/root} para comprobar los resultados.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=0.5]{figures/quijote20}
+  \includegraphics[scale=0.5]{figures/quijote15}
   \caption{Captura del explorador del HDFS de hadoop}
 \end{figure}
 
-Podemos ver cómo las dos versiones del \inline{quijote20.txt} subidas tienen tamaño de bloque de 2MB, mientras que cuando subimos un archivo antes de cambiar el valor de tamaño de bloques por defecto, este tenía 128MB de tamaño de bloque. Esto responde a los apartados 4.1, 4.2 y 4.3 del guión.
+Podemos comprobar como la primera versión del archivo \inline{quijote15.txt} subida tienen tamaño de bloque de 128MB, mientras que las dos últimas tienen tamño de bloque 2MB. Esto responde a los apartados 4.1, 4.2 y 4.3 del guión.
 
+Procedemos a comparar la ejecución de nuestro programa para distintos tamaños de bloque. Para ello ejecutamos el programa contador de palabras utilizando los archivos de entrada \inline{quijote15-128mb.txt} y \inline{quijote15-2mb.txt} subidos anteriormente. Utilizando 2MB como tamaño de bloque obtenemos la siguiente salida:
+
+\begin{minted}{bash}
+	[...]
+	Shuffled Maps=3
+	Merged Map outputs=3
+	[...]
+\end{minted}
+
+Indicando que se han realizado 3 operaciones \emph{map} y 3 operaciones \emph{reduce}. Este número de operaciones encaja con lo esperado, pues el archivo \inline{quijote15.txt} pesa 4.54MB y se divide en tres bloques de 2MB. Al repetir la ejecución con 128MB para el tamaño de bloque obtenemos:
+
+\begin{minted}{bash}
+	[...]
+	Shuffled Maps=1
+	Merged Map outputs=1
+	[...]
+\end{minted}
+
+Obteniendo una única operación map y reduce, pues un único bloque de 128MB es suficiente para para el archivo de 4.54MB. De esta forma hemos comprobado como afecta el tamaño de bloque en la ejecución de un programa MapReduce: Afecta al número de bloques creados y, por lo tanto, al nñumero de operaciones map/reduce realizadas.
+
+Las salidas de estas últimas ejecuciones pueden encontrarse en los archivos \inline{output-quijote15-2mb.txt} y \inline{output-quijote15-128mb.txt} respectivamente.
 
 \newpage
 

@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class WordCount2 {
+public class WordCount {
 
   public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable>{
 
@@ -51,7 +51,7 @@ public class WordCount2 {
 
     @SuppressWarnings("deprecation")
     Job job = new Job(conf, "wordcount");
-    job.setJarByClass(WordCount2.class);
+    job.setJarByClass(WordCount.class);
     job.setMapperClass(TokenizerMapper.class);
     job.setCombinerClass(IntSumReducer.class);
     job.setReducerClass(IntSumReducer.class);

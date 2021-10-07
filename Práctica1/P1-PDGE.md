@@ -46,10 +46,10 @@ export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 
 ### Compilación
 
-Tomamos el código que se ha proporcionado y lo compilamos utilizando la orden
+Tomamos el código que se ha proporcionado y lo compilamos utilizando la orden:
 
 ```bash
-bin/hadoop fs -cat /user/bigdata/compilar.bash | exec bash -s WordCount
+./run.bash WordCount
 ```
 
 ### Ejecución 
@@ -65,7 +65,8 @@ Iniciar el ResourceManager y el NodeManager:
 sbin/start-yarn.sh
 ```
 
-Recuerda que hemos de subir el archivo utilizando:
+Recuerda que hemos de subir el archivo de entrada a hdfs utilizando:
+
 ```bash
 /opt/hadoop/bin/hdfs dfs -put Quijote.txt /user/root
 ```
