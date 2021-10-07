@@ -57,24 +57,24 @@
 
 \tableofcontents
 
-\section{Parte 1}
+\section{Hadoop}
 
 \subsection{Proceso}
 
 Instalamos Java
 
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 yum install java-1.8.0-openjdk-devel
 \end{minted}
 
 Cambiamos la versión por defecto que se usaba en las transparencias. Incluso si instalamos la versión 1.7 se instalará la versión 1.8. Hemos de cambiar los paths a las versión 1.8 para que funciona correctamente:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 \end{minted}
 
 Editamos el archivo  \inline{/opt/hadoop/etc/hadoop/hadoop.env.sh}:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 \end{minted}
 
@@ -84,31 +84,31 @@ export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 
 Tomamos el código que se ha proporcionado y lo compilamos utilizando la orden
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 bin/hadoop fs -cat /user/bigdata/compilar.bash | exec bash -s WordCount
 \end{minted}
 
 \subsubsection*{ Ejecución }
 
 Primero hay que iniciar el NameNode y el DataNode:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 sbin/start-dfs.sh
 \end{minted}
 
 Iniciar el ResourceManager y el NodeManager:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 sbin/start-yarn.sh
 \end{minted}
 
 Recuerda que hemos de subir el archivo utilizando:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 /opt/hadoop/bin/hdfs dfs -put Quijote.txt /user/root
 \end{minted}
 
 Lanzamos nuestro trabajo de MapReduce:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 sudo /opt/hadoop/bin/hadoop jar WordCount.jar uam.WordCount Quijote.txt output/
 \end{minted}
 
@@ -120,7 +120,7 @@ Obtenemos en el directorio output la salida. En concreto, dos archivos:
 
 Mostramos una parte del fichero para mostrar parte de la salida.
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
     "Tablante",	1
     "dichosa	1
     "el	8
@@ -143,7 +143,7 @@ Como podemos comprobar, las palabras quedan con ciertos símbolos de puntuación
 
 Para arreglar esto, solo debemos cambiar una linea en la función \inline{Map }del archivo  \inline{WordCount.java}. En concreto, la dejamos de la siguiente forma:
 
-\begin{minted}{java}
+\begin{minted}[linenos]{java}
 StringTokenizer itr = new StringTokenizer(value.toString().
         toLowerCase().replaceAll("[^a-z ]", ""));
 \end{minted}
@@ -184,13 +184,13 @@ Hemos modificado el fichero \inline{/opt/hadoop-2.8.1/etc/hadoop/hadoop-env.sh }
 Como se explica en  \href{https://stackoverflow.com/questions/17569423/what-is-best-way-to-start-and-stop-hadoop-ecosystem-with-command-line}{esta respuesta de Stack Overflow}, el script \inline{stop-all.sh }detiene todos los daemons de Hadoop a la vez, pero está obsoleto. En lugar de eso es recomendable parar los daemons de HDFS y YARN por separado en todas las máquinas utilizando \inline|stop-dfs.sh| y  \inline{stop-yarn.sh}.
 
 A continuación, para instalar Hadoop pseudo-distribuido, hemos modificado el fichero 
-\begin{minted}{bash} 
+\begin{minted}[linenos]{bash} 
     /opt/hadoop/etc/hadoop/core-site.xml
 \end{minted}
 del siguiente modo:
 
 
-\begin{minted}{xml}
+\begin{minted}[linenos]{xml}
 <configuration>
     <property>
         <name>fs.defaultFS</name>
@@ -201,7 +201,7 @@ del siguiente modo:
 
 
 Y añadimos al fichero  \inline{/opt/hadoop/etc/hadoop/hdfs-site.xml} lo siguiente:
-\begin{minted}{xml}
+\begin{minted}[linenos]{xml}
 <configuration>
     <property>
         <name>dfs.replication</name>
@@ -212,7 +212,7 @@ Y añadimos al fichero  \inline{/opt/hadoop/etc/hadoop/hdfs-site.xml} lo siguien
 
 A continuación, hemos realizado la instalación del sistema pseudo-distribuido usando  \inline{YARN}, así que hemos modificado los siguientes ficheros \textbf{para configurar el uso de YARN (no de HDFS)}.  \inline{etc/hadoop/mapred-site.xml}:
 
-\begin{minted}{xml}
+\begin{minted}[linenos]{xml}
 <configuration>
     <property>
         <name>mapreduce.framework.name</name>
@@ -222,7 +222,7 @@ A continuación, hemos realizado la instalación del sistema pseudo-distribuido 
 \end{minted}
 Y también  \inline{etc/hadoop/yarn-site.xml}:
 
-\begin{minted}{xml}
+\begin{minted}[linenos]{xml}
 <configuration>
     <property>
         <name>yarn.nodemanager.aux-services</name>
@@ -248,10 +248,10 @@ TODO
 \subsubsection*{ Pregunta 3.1: ¿ Dónde se crea hdfs ? ¿ Cómo se puede decidir su localización ? }
 
 El sistema de archivos HDFS se crea donde la variable \inline{dfs.datanode.data.dir }indique. Esta variable se puede modificar en el archivo  \inline{hdfs-site.xml}. \href{https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml}{Su valor por defecto} es
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 	file://${hadoop.tmp.dir}/dfs/data
 \end{minted}
-y, podemos ver que la variable  \inline{hadoop.tmp.dir} tiene el valor \inline|/tmp/hadoop-${user.name}|.
+y, podemos ver que la variable  \inline{hadoop.tmp.dir} tiene el valor \inline|/tmp/hadoop-${user.name}| .
 
 
 \subsubsection*{ Pregunta 3.2: ¿ Cómo se puede borrar todo el contenido del HDFS, incluido su estructura ?}
@@ -266,7 +266,7 @@ Recordamos que hemos hecho una serie de cambios en archivos \inline{xml }para co
 
 Esta pregunta ya ha sido mostrada anteriormente en la Figura 1. Las palabras más utilizadas son:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 que,de,y,la,a,el,en,no,se,los
 \end{minted}
 
@@ -274,7 +274,7 @@ que,de,y,la,a,el,en,no,se,los
 
 Para esta pregunta, volvemos a usar nuestro fichero \inline{script.py }que nos imprimirá cuántas veces aparece cada una de ellas en el texto, primero usando preprocesado y a continuación sin utilizarlo.
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 Numero de veces que aparece la palabra
     el
         - Sin preprocesado 1173
@@ -290,19 +290,19 @@ Puede comprobarse ejecutando el script indicado.
 
 Creamos un archivo con 15 copias del Quijote llamado \inline{quijote15.txt}. Lo subimos al sistema de archivos de hdfs:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 	bin/hdfs dfs -put quijote15.txt /user/root/quijote15-128mb.txt
 \end{minted}
 
 A continuación, volvemos a subir el archivo indicando el tamaño de bloque a utilizar, 2MB:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 bin/hdfs dfs -D dfs.blocksize=2097152 -put quijote15.txt /user/root/quijote15-2mb.txt
 \end{minted}
 
 Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloque para no tener que especificar el tamaño 2MB cada vez que subamos un archivo. Para ello cambiamos el respectivo parámetro (\inline{dfs.block.size}) en los archivos de configuración de hdfs editando \inline{hdfs-site.xml}, añadiendo:
 
-\begin{minted}{xml}
+\begin{minted}[linenos]{xml}
 <property>
         <name>dfs.block.size</name>
         <value>2097152</value>
@@ -311,7 +311,7 @@ Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloq
 
 Y reiniciamos dfs y yarn para asegurarnos que la configuración activa incluye los cambios realizados. Subimos de nuevo el archivo \inline{quijote15.txt} sin especificar el tamaño de bloque utilizando la siguiente orden:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 bin/hdfs dfs -put quijote15.txt /user/bigdata/dreji/quijote15-2mb-default.txt
 \end{minted}
 
@@ -327,7 +327,7 @@ Podemos comprobar como la primera versión del archivo \inline{quijote15.txt} su
 
 Procedemos a comparar la ejecución de nuestro programa para distintos tamaños de bloque. Para ello ejecutamos el programa contador de palabras utilizando los archivos de entrada \inline{quijote15-128mb.txt} y \inline{quijote15-2mb.txt} subidos anteriormente. Utilizando 2MB como tamaño de bloque obtenemos la siguiente salida:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 	[...]
 	Shuffled Maps=3
 	Merged Map outputs=3
@@ -336,7 +336,7 @@ Procedemos a comparar la ejecución de nuestro programa para distintos tamaños 
 
 Indicando que se han realizado 3 operaciones \emph{map} y 3 operaciones \emph{reduce}. Este número de operaciones encaja con lo esperado, pues el archivo \inline{quijote15.txt} pesa 4.54MB y se divide en tres bloques de 2MB. Al repetir la ejecución con 128MB para el tamaño de bloque obtenemos:
 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 	[...]
 	Shuffled Maps=1
 	Merged Map outputs=1
@@ -358,7 +358,7 @@ Seguimos el tutorial de spark y contestamos a las preguntas que se nos piden
 
 Bastará en este caso usar sobre el RDD la función map pasándole como parámetro la función  \inline{lambda x: x*x} que eleva el número al cuadrado. El código es este, con el resultado debajo:
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 numeros = sc.parallelize([1,2,3,4,5,6,7,8,9,10])
 cuadrados = numeros.map(lambda x : x*x)
 print(cuadrados.collect())
@@ -369,7 +369,7 @@ print(cuadrados.collect())
 
 El código se nos entrega resuelto en este caso. Es bastante sencillo, si usamos sobre el RDD la función  \inline{filter} dándole como parámetro la función que calcula si cada elemento es impar, esto es, si su módulo 2 es 1 :  \inline{lambda x : x%2 == 1}, nos da todos los impares. El código completo es:
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 rddi = numeros.filter (lambda e: e%2==1)
 print (rddi.collect())
 
@@ -379,7 +379,7 @@ print (rddi.collect())
 \subsubsection*{ Pregunta TS1.3 ¿Tiene sentido esta operación? ¿Si se repite se obtiene siempre el mismo resultado?}
 
 Nos encontramos con el siguiente código:
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 #Tiene sentido esta operacion?
 numeros = sc.parallelize([1,2,3,4,5])
 
@@ -393,14 +393,14 @@ Esta operacion no tiene sentido, pues para hacer el reduce necesitamos que la op
 
 Lo haremos para el caso general. Nos damos cuenta primero de que si el vector tiene $n$ posiciones y tratamos de tomar $m > n$ posiciones, Spark se quedará con todas las posibles. Por tanto, lo primero que hacemos es obtener un entero con el máximo de elementos
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 numeros = sc.parallelize([3,2,1,4,5])
 
 n = numeros.count()
 \end{minted}
 
 Por último, basta ahora tomar elementos ordenados especificando cuál es el criterio de orden. En este caso, queremos que los elementos pares sean los más grandes, por lo que debemos pasarle como argumento la función  \inline{lambda x: x%2 == 0}. De esta manera, escribiendo la línea siguiente, obtenemos el resultado.
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 print(numeros.takeOrdered(n,lambda elem: elem%2== 0))
 
 [3, 1, 5, 2, 4]
@@ -411,7 +411,7 @@ print(numeros.takeOrdered(n,lambda elem: elem%2== 0))
 
 Nos encontramos con el siguiente código
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 lineas = sc.parallelize(['', 'a', 'a b', 'a b c'])
 
 palabras_flat = lineas.flatMap(lambda elemento: elemento.split())
@@ -421,12 +421,12 @@ print (palabras_flat.collect())
 print (palabras_map.collect())
 \end{minted}
 Cuya salida es:
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 ['a', 'a', 'b', 'a', 'b', 'c']
 [[], ['a'], ['a', 'b'], ['a', 'b', 'c']]
 \end{minted}
 Para ver cuántos elementos tiene cada uno, podemos hacer 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 print(palabras_flat.count())
 print(palabras_map.count())
 
@@ -444,7 +444,7 @@ Claramente,  \inline{palabras_flat} tiene más. Esto ocurre porque en \inline{fl
 
 Siguiendo la respuesta de la pregunta anterior, en \inline{palabras_map }los elementos obtenidos tras aplicar a cada elemento de  \inline{lineas }la función, son vectores, por lo que los elementos de \inline{palabras_map} son vectores.  Lo podemos ver en la salida del código
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 print (palabras_map.collect())
 
 [[], ['a'], ['a', 'b'], ['a', 'b', 'c']]
@@ -457,8 +457,9 @@ Además, tiene el primer \textbf{elemento vacío} porque la función split aplic
 
 Para probarlo, realizamos el siguiente código en el que ponemos en un RDD ejemplos de prueba con las mismas palabras en mayúscula y minúscula, con espacios o signos de puntuación:
 
-\begin{minted}{python}
-test = sc.parallelize(["abcd", "abcd","dcba","abCd","a bcd","hola","HOLA","hola!","HoLa","ho la"])
+\begin{minted}[linenos]{python}
+test = sc.parallelize(["abcd", "abcd","dcba","abCd","a bcd","hola",
+        "HOLA","hola!","HoLa","ho la"])
 
 dis = test.distinct()
 
@@ -466,7 +467,7 @@ print(dis.collect())
 \end{minted}
 La salida que obtenemos es:
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 ['abcd', 'abCd', 'a bcd', 'hola', 'hola!', 'dcba', 'HOLA', 'HoLa', 'ho la']
 \end{minted}
 
@@ -477,8 +478,9 @@ Como podemos ver, teníamos un único ejemplo duplicado (el primero) que es el �
 
 Se podría hacer que el filtro se quede con los elementos que empiecen por I o por E, haciendo el código del siguiente modo:
 
-\begin{minted}{python}
-log = sc.parallelize(['E: e21', 'I: i11', 'W: w12', 'I: i11', 'W: w13', 'E: e45'])
+\begin{minted}[linenos]{python}
+log = sc.parallelize(['E: e21', 'I: i11', 'W: w12', 'I: i11',
+                     'W: w13', 'E: e45'])
 
 inferr = log.filter(lambda elem: elem[0] in ['I','E'])
 
@@ -492,7 +494,7 @@ print(inferr.collect())
 
 Comentamos una a una las celdas anteriores:
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 numeros = sc.parallelize([1,2,3,4,5])
 
 print (numeros.reduce(lambda elem1,elem2: elem2+elem1))
@@ -501,7 +503,7 @@ print (numeros.reduce(lambda elem1,elem2: elem2+elem1))
 Esta primera celda solo crea un RDD y luego hace la operación reduce, que combina los valores usando una función que le indicamos, en este caso la suma de los valores. Así, devolverá la suma de todos los valores ya que esta operación es conmutativa y asociativa.
 
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 #Tiene sentido esta operacion?
 numeros = sc.parallelize([1,2,3,4,5])
 
@@ -510,7 +512,7 @@ print (numeros.reduce(lambda elem1,elem2: elem1-elem2))
 
 Esta celda hace lo mismo que la anterior salvo que la operación que realiza es la resta. Como ya hemos visto en una pregunta anterior, esta operación no tiene sentido pues la resta no es una operación conmutativa por lo que el resultado no siempre será el mismo.
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 palabras = sc.parallelize(['HOLA', 'Que', 'TAL', 'Bien'])
 
 pal_minus = palabras.map(lambda elemento: elemento.lower())
@@ -521,28 +523,28 @@ print (pal_minus.reduce(lambda elem1,elem2: elem1+"-"+elem2))
 \end{minted}
 
 En esta celda se crea un RDD que tiene cadenas de caracteres, primero se pasan a minúsculas aplicándoles la funcion \inline{.lower }y luego se concatenan todas las palabras a un solo scring uniéndolas por guiones, obteniendo como salida:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 hola-que-tal-bien
 \end{minted}
 
 Si cambiásemos el orden en elq ue se concatenan los elementos como se nos indica en el comentario, la salida cambia y las palabras se van uniendo en el orden inverso, debido a cómo se realiza la operación reduce. La salida es:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 bien-tal-que-hola
 \end{minted}
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 r = sc.parallelize([('A', 1),('C', 4),('A', 1),('B', 1),('B', 4)])
 rr = r.reduceByKey(lambda v1,v2:v1+v2)
 print (rr.collect())
 \end{minted}
 
 En esta celda se crea un RDD que tiene como elementos Tuplas  \inline{(clave,valor)}. A continuación, usando \inline{reduceByKey }pasándole como argumento una función suma, lo que se hace es sumar los valores de las tuplas cuya clave sea la misma, obteniendo la salida esperada:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 [('C', 4), ('A', 2), ('B', 5)]
 \end{minted}
 
 La última celda es la siguiente:
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 r = sc.parallelize([('A', 1),('C', 4),('A', 1),('B', 1),('B', 4)])
 rr1 = r.reduceByKey(lambda v1,v2:v1+v2)
 print (rr1.collect())
@@ -557,7 +559,7 @@ Como \textbf{conclusión} a esta pregunta, podemos decir que es importante cómo
 \subsubsection*{ Pregunta  \inline{groupByKey}}
 
 Dada la siguiente celda
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 r = sc.parallelize([('A', 1),('C', 2),('A', 3),('B', 4),('B', 5)])
 rr = r.groupByKey()
 res= rr.collect()
@@ -570,7 +572,7 @@ print(rr.collect())
 
 Lo priemro que vemos es que la operación \inline{rr.collect }devuelve una lista con tuplas  \inline{(clave, pyspark Result Iterable)}. Estos iterables debemos pasarlos primero a una lista, y luego realizar sobre ellos la operación que quisiésemos hacer con el  \inline{reduceByKey}. Vemos que los pasamos a una lista utilizando \inline{mapValues(list) }que convierte los valores a un tipo:
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 rrf = rr.mapValues(list).collect()
 print(rrf)
 
@@ -578,7 +580,7 @@ print(rrf)
 \end{minted}
 
 Y, a continuación, podemos realizar la operación que haríamos con el reduce. Por ejemplo, si queremos hacer la suma de los vectores utilizando \inline{map }podríamos hacer todo en una linea de la siguiente manera:
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 rrf = rr.mapValues(list).map(lambda x : (x[0],sum(x[1])))
 print(rrf.collect())
 
@@ -586,7 +588,7 @@ print(rrf.collect())
 \end{minted}
 
 Ahora, se nos pide simular el \inline{groupByKey }usando \inline{reduceByKey }y  \inline{map}. Para ello, usando \inline{reduceByKey }podemos obtener las listas que obtendríamos tras aplicar el \inline{mapValues(list) }que hemos obtenido anteriormente.
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 simul_group = r.reduceByKey(lambda v1,v2: [v1,v2])
 print(simul_group.collect())
 
@@ -595,7 +597,7 @@ print(simul_group.collect())
 
 \subsubsection*{ Pregunta sobre  \inline{join}}
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 rdd1 = sc.parallelize([('A',1),('B',2),('C',3)])
 rdd2 = sc.parallelize([('A',4),('B',5),('C',6)])
 
@@ -603,19 +605,19 @@ rddjoin = rdd1.join(rdd2)
 \end{minted}
 
 El resultado de esto es 
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 [('A', (1, 4)), ('B', (2, 5)), ('C', (3, 6))]
 \end{minted}
 
 Es decir, un nuevo RDD en el que los valores son tuplas con los valores que hay en cada uno de los RDD. Se nos pide que, dado ese código, cambiemos las claves de los dos RDDs iniciales para ver qué RDD se crea finalmente. Si lo hacemos, cambiando por ejemplo los RDD del siguiente modo:
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 rdd1 = sc.parallelize([('A',1),('B',2),('D',3)])
 rdd2 = sc.parallelize([('A',4),('B',5),('E',6)])
 
 rddjoin = rdd1.join(rdd2)
 \end{minted}
 El resultado obtenido es el siguiente:
-\begin{minted}{bash}
+\begin{minted}[linenos]{bash}
 [('A', (1, 4)), ('B', (2, 5))]
 \end{minted}
 Es decir, que el \inline{join }está haciendo la unión de los elementos cuyas claves están en la intersección del conjunto de claves. Como \inline{D }y \inline{E }no están en ambos RDD, no están en la intersección del conjunto de claves y por tanto no se obtienen en el RDD final.
@@ -625,7 +627,7 @@ Es decir, que el \inline{join }está haciendo la unión de los elementos cuyas c
 Se nos pregunta que qué ocurre cuando sustituimos \inline{join }por \inline{leftOuter/rightOuter/fullOuter }join. El resultado es que estos tipos de \inline{join }crean elementos en el nuevo RDD aunque sus claves no estén en ambos RDD iniciales. En concreto:
 \begin{itemize}
 \item  \inline{leftOuter }añade al nuevo RDD también las tuplas  \inline{(clave,valor)} cuya clave esté en el \inline{RDD }sobre el que se llama la función, pero no estén en el RDD que se pasa como parámetro. Se añade un \inline{None }en la tupla conjunta del RDD final:
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 rdd1 = sc.parallelize([('A',1),('B',2),('C',3)])
 rdd2 = sc.parallelize([('A',4),('A',5),('B',6),('D',7)])
 rddjoin = rdd1.leftOuterJoin(rdd2)
@@ -641,7 +643,7 @@ rddjoin = rdd1.leftOuterJoin(rdd2)
 \subsubsection*{ Pregunta TS1.10 Borra la salida y cambia las particiones en parallelize. ¿ Qué sucede ?}
 
 Lo que ocurre si ponemos 10 particiones es lo siguiente (borrando anteriormente el contenido del directorio donde tenemos la salida):
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 numeros = sc.parallelize(range(0,1000),10)
 numeros.saveAsTextFile('salida')
 
@@ -669,7 +671,7 @@ Como se podía esperar, se crea un archivo para cada una de las particiones de s
 \subsubsection*{ Pregunta TS2.1 Explica la utilidad de cada transformación y detalle para cada una de ellas si cambia el número de elementos en el RDD resultante. Es decir si el RDD de partida tiene N elementos, y el de salida M elementos, indica si N>M, N=M o N<M.}
 
 Dado el siguiente código:
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 charsPerLine = quijote.map(lambda s: len(s))
 allWords = quijote.flatMap(lambda s: s.split())
 allWordsNoArticles = allWords.filter(lambda a: a.lower() not in ["el", "la"])
@@ -690,7 +692,11 @@ Se nos pide indicar qué hace cada una de las transformaciones. Procedemos líne
 
 \item  \inline{sampleWords = allWords.sample(withReplacement=True, fraction=0.2, seed=666)} se extrae aleatoriamente con reemplazamiento un $20\%$ de las palabras que hay en \inline{allWords }para crear un nuevo RDD. Por supuesto, se tendrá que $M = 0.2 N$ ($M < N$).
 
-\item  \inline{weirdSampling = sampleWords.union(allWordsNoArticles.sample(False, fraction=0.3))} priemro extrae sin reemplazamiento un $30\%$ de elementos que tenemos en el RDD que no tiene artículos (en este caso, tendríamos $M < N$ pues reducimos elementos) y a continuación une estos elementos extraídos al RDD que tiene una muestra del $20\%$ que hemos obtenido en el paso anterior. En esta unión aumenta el tamaño del RDD por lo que en este paso $M > N$.
+\item  \begin{minted}[linenos]{python}
+    weirdSampling = sampleWords.union
+        (allWordsNoArticles.sample(False, fraction=0.3))
+\end{minted} 
+primero extrae sin reemplazamiento un $30\%$ de elementos que tenemos en el RDD que no tiene artículos (en este caso, tendríamos $M < N$ pues reducimos elementos) y a continuación une estos elementos extraídos al RDD que tiene una muestra del $20\%$ que hemos obtenido en el paso anterior. En esta unión aumenta el tamaño del RDD por lo que en este paso $M > N$.
 
 \end{enumerate}
 Ahora, explicamos las funciones en general, su utilidad y si cambia el número de elementos del RDD resultante:
@@ -711,27 +717,31 @@ Ahora, explicamos las funciones en general, su utilidad y si cambia el número d
 
 \end{itemize}
 
-\subsubsection{ Pregunta TS2.2 Explica el funcionamiento de cada acción anterior }
+\subsubsection*{ Pregunta TS2.2 Explica el funcionamiento de cada acción anterior }
 
 Tenemos el siguiente código:
-\begin{minted}{python}
-    numLines = quijote.count()
-    numChars = charsPerLine.reduce(lambda a,b: a+b) # also charsPerLine.sum()
-    sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))
-    numLines, numChars, sortedWordsByLength
+\begin{minted}[linenos]{python}
+numLines = quijote.count()
+numChars = charsPerLine.reduce(lambda a,b: a+b) # also charsPerLine.sum()
+sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))
+numLines, numChars, sortedWordsByLength
 \end{minted}
 
 Este código hace lo siguiente
 \begin{enumerate}
 \item \inline{numLines = quijote.count()} cuenta el número de líneas que tiene el quijote
 \item \inline{numChars = charsPerLine.reduce(lambda a,b: a+b)} utiliza un RDD anterior que tiene el número de caracteres que tiene cada línea y los suma, obteniendo así el número de caracteres total.
-\item \inline{sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))} toma el RDD que tiene todas las palabras y toma las 20 palabras que tienen MAYOR longitud
+\item La siguiente línea
+\begin{minted}[linenos]{python}
+sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))
+\end{minted} 
+toma el RDD que tiene todas las palabras y toma las 20 palabras que tienen MAYOR longitud
 \end{enumerate}
 
 A continuación, se pide que se implemente la acción \inline{count} que nos dice el número de elementos que tiene un RDD usando lo siguiente:
 \begin{itemize}
     \item Usando \inline{map} y \inline{reduce}. Lo podemos hacer de la siguiente forma
-    \begin{minted}{python}
+    \begin{minted}[linenos]{python}
     numlines =  quijote.map(lambda s: 1)
     total_lines = numlines.reduce(lambda a,b: a+b )
 
@@ -741,7 +751,7 @@ A continuación, se pide que se implemente la acción \inline{count} que nos dic
     Hacemos un map para transformar cada línea en un $1$, y luego los sumamos todos con reduce.
 
     \item Usando solo \inline{reduce}. Lo podemos hacer pero debemos definir una función para distinguir si los elementos que se van a sumar son strings o son ya parte de la suma total. El código completo es el siguiente:
-    \begin{minted}{python}
+    \begin{minted}[linenos]{python}
     def f(a,b):
         int_a = a if type(a) == int else 1
         int_b = b if type(b) == int else 1
@@ -753,20 +763,26 @@ A continuación, se pide que se implemente la acción \inline{count} que nos dic
     5534
     \end{minted}
 
+\end{itemize}
 
-\subsubsection{ Pregunta TS2.3 Explica el proposito de cada una de las operaciones anteriores}
+\subsubsection*{ Pregunta TS2.3 Explica el proposito de cada una de las operaciones anteriores}
 
-\begin{minted}{python}
-    import requests
-    import re
-    allWords = allWords.flatMap(lambda w: re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.lower()).split(" ")).filter(lambda a: len(a)>0)
-    allWords2 = sc.parallelize(requests.get("https://gist.githubusercontent.com/jsdario/9d871ed773c81bf217f57d1db2d2503f/raw/585de69b0631c805dabc6280506717943b82ba4a/el_quijote_ii.txt").iter_lines())
-    allWords2 = allWords2.flatMap(lambda w: re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.decode("utf8").lower()).split(" ")).filter(lambda a: len(a)>0)
+\begin{minted}[linenos]{python}
+import requests
+import re
+allWords = allWords.flatMap(lambda w: 
+        re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.lower()).split(" "))
+        .filter(lambda a: len(a)>0)
+allWords2 = sc.parallelize(
+        requests.get("[url]el_quijote_ii.txt").iter_lines())
+allWords2 = allWords2.flatMap(lambda w: 
+        re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.decode("utf8").lower())
+        .split(" ")).filter(lambda a: len(a)>0)
 \end{minted}
 
 Esta celda se dedica a importar la librería \inline{requests} que sirve para hacer peticiones web, y la librería \inline{re} para trabajar con expresiones regulares, y a continuación crea dos RDD diferentes: uno en el que elimina todos los caracteres que no forman parte de palabras como tal, y otro en el que lee la segunda parte del Quijote, obtiene todas sus líneas y luego las separa y le quita los caracteres que no son parte de las palabras igual que hizo con la primera parte.
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
 allWords.take(10)
 allWords2.take(10)
 \end{minted}
@@ -774,7 +790,7 @@ allWords2.take(10)
 Esta celda simplemente muestra los $10$ primeros elementos de cada uno de los RDD creados.
 
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
     words = allWords.map(lambda e: (e,1))
     words2 = allWords2.map(lambda e: (e,1))
     
@@ -783,7 +799,7 @@ Esta celda simplemente muestra los $10$ primeros elementos de cada uno de los RD
 
 En esta celda se tranforman los elementos de cada RDD en tuplas \inline{(clave,valor)} cada una con un $1$ como valor. Luego, se muestran las $10$ primeras de uno de los RDD.
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
     frequencies = words.reduceByKey(lambda a,b: a+b)
     frequencies2 = words2.reduceByKey(lambda a,b: a+b)
     frequencies.takeOrdered(10, key=lambda a: -a[1])
@@ -791,12 +807,116 @@ En esta celda se tranforman los elementos de cada RDD en tuplas \inline{(clave,v
 
 Esta celda usa \inline{reduceByKey} para crear un RDD en el que se suman los valores de los elementos que tienen la misma clave. En este caso, lo que se está haciendo es crear un RDD en el que se ha contado cuántas veces aparece cada palabra en el texto. Luego, se muestran las 10 palabras que más salen usando \inline{takeOrdered} con una función que ordena los elementos de mayor a menor.
 
-\begin{minted}{python}
+\begin{minted}[linenos]{python}
     res = words.groupByKey().takeOrdered(10, key=lambda a: -len(a))
     res # To see the content, res[i][1].data
 \end{minted}
 
-Esta celda hace lo mismo que la anterior pero solo para las palabras de la primera parte del quijote.
+En esta celda se agrupan en listas los valores que compartan clave. Es decir, si tenemos dos parejas \inline{(palabra1,1),(palabra1,1)}, obtendremos como resultado \inline{(palabra1,[1,1])}. El vector en realidad queda como un \inline{ResultIterable} de \inline{pyspark}, pero podemos convertirlo a una lista como hicimos anteriormente.
 
 
+
+\begin{minted}[linenos]{python}
+joinFreq = frequencies.join(frequencies2)
+joinFreq.take(10)
+\end{minted}
+En esta celda, creamos un nuevo RDD que tiene \inline{(palabra, (valor1,valor2))} donde valor1 es la frecuencia de esa palabra en el primer texto del Quijote y valor2 es la frecuencia de esa palabra en el segundo texto. Luego, se muestran 10.
+
+
+
+\begin{minted}[linenos]{python}
+joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
+    .takeOrdered(10, lambda v: -v[1]),
+joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
+    .takeOrdered(10, lambda v: +v[1])
+\end{minted}
+
+En esta celda, se transforma el RDD anterior para convertirlo en un RDD que tiene \inline{(palabra,valor)}. Ahora, sin embargo, el número que toma valor es 
+\[
+\frac{\text{Apariciones palabra texto 1} - \text{Apariciones palabra texto 2}}{\text{Apariciones palabra texto 1} + \text{Apariciones palabra texto 2}}    
+\]
+
+Indica, respecto al total de veces que aparece la palabra en ambos textos, cuántas veces más aparece en el primer texto que en el segundo. Es decir, si en el primero aparece muchas más que en el segundo, este valor será más cercano a 1, y si en el segundo aparece más veces, este valor será cercano a -1. Así, podemos ver qué palabras aparecen más en el primero que en el segundo y viceversa. Eso es lo que hace la celda después usando \inline{takeOrdered}.
+
+\subsubsection*{Pregunta TS2.4 ¿Cómo puede implementarse la frecuencia con groupByKey y transformaciones? }
+
+Podemos realizarlo usando el siguiente código, cuyos comentarios indican qué se está haciendo en cada paso:  
+
+\begin{minted}[linenos]{python}
+# Usamos GroupByKey y sobre la salida, mapeamos cada elemento a
+# elemento = (clave, [1,....,])
+res = words.groupByKey().map(lambda x : (x[0], list(x[1])))
+# Mapeamos de nuevo los elementos a (elemento, suma([1,...,1]))
+res = res.map(lambda x: (x[0],sum(x[1])))
+res.take(5)
+
+[('el', 1232), ('hidalgo', 14), ('don', 370), ('mancha', 26), ('saavedra', 1)]
+\end{minted}
+
+
+\subsubsection*{Pregunta TS2.5 ¿Cuál de las dos siguientes celdas es más eficiente? Justifique la respuesta.}
+
+Se nos presentan esta primera celda: 
+\begin{minted}[linenos]{python}
+joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
+    .takeOrdered(10, lambda v: -v[1]),
+joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
+    .takeOrdered(10, lambda v: +v[1])
+\end{minted}
+Y esta segunda
+\begin{minted}[linenos]{python}
+result = joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
+result.cache()
+result.takeOrdered(10, lambda v: -v[1]), result.takeOrdered(10, lambda v: +v[1])
+\end{minted}
+Y queremos saber cual de las dos es más eficiente. En este caso, la respuesta es sencilla: 
+
+La segunda celda es más eficiente, pues no estamos realizando dos veces la transformación de cada uno de los elementos (con sus correspondientes sumas, restas y divisiones) sino que estamos haciendo el RDD persistente y luego de ese mismo, tomando los elementos según un orden u otro. Por eso, deberíamos utilizar en general siempre la segunda opción.
+
+Además, si nos fijamos en el \href{https://spark.apache.org/docs/2.2.0/rdd-programming-guide.html#rdd-persistence}{enlace a la persistencia de los RDD}, nos indica que si lo guardamos en caché las acciones reutilizan el mismo RDD y así las operaciones pueden llegar a ir hasta $10$ veces más rápido.
+
+\subsubsection*{Antes de guardar el fichero, utilice coalesce con diferente valores ¿Cuál es la diferencia?}
+
+
+Vamos a probar esto. Primero, en la \href{https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.RDD.coalesce.html}{documentación de coalesce} leemos que sirve para devolver un nuevo RDD hecho en menos particiones. Vemos también que, en principio, el RDD que vamos a usar tiene 2 particiones:
+
+\begin{minted}[linenos]{python}
+allWords2.getNumPartitions()
+
+2
+\end{minted}
+
+A continuación, intentamos usar \inline{coalesce} para modificar estas particiones incrementándolas.
+\begin{minted}[linenos]{python}
+for i in range(1,6):
+    print("Usamos coalesce con numpartitions={}".format(i))
+    !rm -rf palabras_parte2
+    allWords2 = allWords2.coalesce(numPartitions=i)
+                .saveAsTextFile("palabras_parte2")
+    !ls palabras_parte2
+
+Usamos coalesce con numpartitions=1
+    part-00000  _SUCCESS
+Usamos coalesce con numpartitions=2
+    part-00000  part-00001	_SUCCESS
+Usamos coalesce con numpartitions=3
+    part-00000  part-00001	_SUCCESS
+...
+\end{minted}
+Vemos que, a partir de $2$ particiones, el número de particiones que se ven reflejadas en disco no aumenta más, esto ocurre porque \inline{coalesce} con esos parámetros solo sirve para reducir. Podríamos usar como parámetro \inline{shuffle = True}, lo cual haría que se barajasen de nuevo los elementos y así sí que se pueden crear nuevas particiones. La salida del código anterior poniendo este parámetro es: 
+\begin{minted}[linenos]{python}
+Usamos coalesce con numpartitions=1
+part-00000  _SUCCESS
+Usamos coalesce con numpartitions=2
+part-00000  part-00001	_SUCCESS
+Usamos coalesce con numpartitions=3
+part-00000  part-00001	part-00002  _SUCCESS
+Usamos coalesce con numpartitions=4
+part-00000  part-00001	part-00002  part-00003	_SUCCESS
+Usamos coalesce con numpartitions=5
+part-00000  part-00001	part-00002  part-00003	part-00004 
+                                             _SUCCESS
+\end{minted}
+
+Sin embargo, esto sería equivalente a usar la función \inline{repartition} que hemos visto anteriormente, que como se nos indica no tiene en cuenta que los datos tengan que moverse en el disco para rehacer las particiones.
 \end{document}
