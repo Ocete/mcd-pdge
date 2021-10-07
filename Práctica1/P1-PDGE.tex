@@ -157,7 +157,7 @@ El resultado que se obtiene es que las palabras son las mismas y prácticamente 
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.8]{barplot.pdf}
+\includegraphics[scale=0.8]{figures/barplot.pdf}
 \caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
 \end{figure}
 
@@ -710,6 +710,93 @@ Ahora, explicamos las funciones en general, su utilidad y si cambia el número d
 \item  \inline{union }une dos RDDs en uno
 
 \end{itemize}
+
+\subsubsection{ Pregunta TS2.2 Explica el funcionamiento de cada acción anterior }
+
+Tenemos el siguiente código:
+\begin{minted}{python}
+    numLines = quijote.count()
+    numChars = charsPerLine.reduce(lambda a,b: a+b) # also charsPerLine.sum()
+    sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))
+    numLines, numChars, sortedWordsByLength
+\end{minted}
+
+Este código hace lo siguiente
+\begin{enumerate}
+\item \inline{numLines = quijote.count()} cuenta el número de líneas que tiene el quijote
+\item \inline{numChars = charsPerLine.reduce(lambda a,b: a+b)} utiliza un RDD anterior que tiene el número de caracteres que tiene cada línea y los suma, obteniendo así el número de caracteres total.
+\item \inline{sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))} toma el RDD que tiene todas las palabras y toma las 20 palabras que tienen MAYOR longitud
+\end{enumerate}
+
+A continuación, se pide que se implemente la acción \inline{count} que nos dice el número de elementos que tiene un RDD usando lo siguiente:
+\begin{itemize}
+    \item Usando \inline{map} y \inline{reduce}. Lo podemos hacer de la siguiente forma
+    \begin{minted}{python}
+    numlines =  quijote.map(lambda s: 1)
+    total_lines = numlines.reduce(lambda a,b: a+b )
+
+    5534
+    \end{minted}
+
+    Hacemos un map para transformar cada línea en un $1$, y luego los sumamos todos con reduce.
+
+    \item Usando solo \inline{reduce}. Lo podemos hacer pero debemos definir una función para distinguir si los elementos que se van a sumar son strings o son ya parte de la suma total. El código completo es el siguiente:
+    \begin{minted}{python}
+    def f(a,b):
+        int_a = a if type(a) == int else 1
+        int_b = b if type(b) == int else 1
+      
+        return int_a + int_b
+      
+    total_lines = quijote.reduce(f)
+
+    5534
+    \end{minted}
+
+
+\subsubsection{ Pregunta TS2.3 Explica el proposito de cada una de las operaciones anteriores}
+
+\begin{minted}{python}
+    import requests
+    import re
+    allWords = allWords.flatMap(lambda w: re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.lower()).split(" ")).filter(lambda a: len(a)>0)
+    allWords2 = sc.parallelize(requests.get("https://gist.githubusercontent.com/jsdario/9d871ed773c81bf217f57d1db2d2503f/raw/585de69b0631c805dabc6280506717943b82ba4a/el_quijote_ii.txt").iter_lines())
+    allWords2 = allWords2.flatMap(lambda w: re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.decode("utf8").lower()).split(" ")).filter(lambda a: len(a)>0)
+\end{minted}
+
+Esta celda se dedica a importar la librería \inline{requests} que sirve para hacer peticiones web, y la librería \inline{re} para trabajar con expresiones regulares, y a continuación crea dos RDD diferentes: uno en el que elimina todos los caracteres que no forman parte de palabras como tal, y otro en el que lee la segunda parte del Quijote, obtiene todas sus líneas y luego las separa y le quita los caracteres que no son parte de las palabras igual que hizo con la primera parte.
+
+\begin{minted}{python}
+allWords.take(10)
+allWords2.take(10)
+\end{minted}
+
+Esta celda simplemente muestra los $10$ primeros elementos de cada uno de los RDD creados.
+
+
+\begin{minted}{python}
+    words = allWords.map(lambda e: (e,1))
+    words2 = allWords2.map(lambda e: (e,1))
+    
+    words.take(10)
+\end{minted}
+
+En esta celda se tranforman los elementos de cada RDD en tuplas \inline{(clave,valor)} cada una con un $1$ como valor. Luego, se muestran las $10$ primeras de uno de los RDD.
+
+\begin{minted}{python}
+    frequencies = words.reduceByKey(lambda a,b: a+b)
+    frequencies2 = words2.reduceByKey(lambda a,b: a+b)
+    frequencies.takeOrdered(10, key=lambda a: -a[1])
+\end{minted}
+
+Esta celda usa \inline{reduceByKey} para crear un RDD en el que se suman los valores de los elementos que tienen la misma clave. En este caso, lo que se está haciendo es crear un RDD en el que se ha contado cuántas veces aparece cada palabra en el texto. Luego, se muestran las 10 palabras que más salen usando \inline{takeOrdered} con una función que ordena los elementos de mayor a menor.
+
+\begin{minted}{python}
+    res = words.groupByKey().takeOrdered(10, key=lambda a: -len(a))
+    res # To see the content, res[i][1].data
+\end{minted}
+
+Esta celda hace lo mismo que la anterior pero solo para las palabras de la primera parte del quijote.
 
 
 \end{document}
