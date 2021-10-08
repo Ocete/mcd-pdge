@@ -922,4 +922,85 @@ part-00000  part-00001	part-00002  part-00003	part-00004
 \end{minted}
 
 Sin embargo, esto sería equivalente a usar la función \inline{repartition} que hemos visto anteriormente, que como se nos indica no tiene en cuenta que los datos tengan que moverse en el disco para rehacer las particiones.
+
+
+\section{Parte Opcional}
+
+En esta sección, realizaremos el ejercicio opcional utilizando una de las bases de datos proporcionadas. En concreto, utilizaremos el archivo \inline{players.csv} que se nos proporciona y trataremos de utilizar operaciones map y reduce para realizar algunos cálculos sobre estos datos.
+
+Nuestro objetivo principal es, dados los datos de los jugadores de la liga inglesa, obtener la media y la desviación típica de las edades de los jugadores para poder así dibujar las gráficas de las distribuciones normales de edad que obtenemos en cada uno de los equipos de la liga, para poder dibujarlas conjuntamente y tener una perspectiva visual conjunta de las distribuciones de edad en esta liga.
+
+Para ello, utilizaremos una forma de calcular la desviación típica que nos permitirá calcular tanto esta como la media en paralelo. Si llamamos $S = \sum_{i=1}^n e_i^2$ siendo $e_i$ la edad del jugador $i-$-ésimo, entonces podemos calcular la desviación típica como:
+\[
+\sigma = \sqrt{\frac{S}{n} - \mu^2}.
+\]
+Así, si obtenemos para cada jugador un vector $(Equipo,edad,edad^2)$ (lo cual obtendremos en la función map), podremos hacer los cálculos de forma bastante sencilla (lo cual haremos en la función reduce).
+
+\subsection{Hadoop}
+
+
+\subsection{Spark}
+
+Vamos a realizar el mismo proceso pero ahora en Spark, usando \inline{pyspark}. Veamos la secuencia de pasos que hemos seguido:
+
+Primeramente, tras obtener los datos, realizamos un primer mapeado a un RDD que contenga solamente Nombre,Equipo,Edad, para posteriormente utilizar solamente los dos últimos que son los que nos interesan. Esto lo hacemos del siguiente modo:
+
+\begin{minted}[linenos]{python}
+#Read the csv file
+players = sc.textFile("players.csv")
+# Split lines and keep Name, Team, Age
+players = players.map(lambda x : x.split(",")[0:3])
+\end{minted}
+
+A continuación, utilizamos una función \inline{map} que nos lleve cada elemento a un nuevo elemento del tipo \inline{(Equipo, [edad,edad^2,1])}. Este 1 nos servirá para que en la operación reduce, se sume uno por cada jugador y obtener así el total de jugadores, necesario para tanto la media como la desviación típica. Obtendríamos así nuestro RDD preparado para hacer la operación reduce.
+
+
+\begin{minted}[linenos]{python}
+# Create (key,val) with: (team,age_of_player)
+players = players.map(lambda x: (x[1],[int(x[2]),int(x[2])**2,1]))
+
+players.sample(fraction=0.018,withReplacement=False).collect()
+
+[('Crystal+Palace', [31, 961, 1]),
+  ('Everton', [24, 576, 1]),
+  ('Manchester+City', [23, 529, 1]),
+  ('Southampton', [26, 676, 1]),
+  ('West+Brom', [27, 729, 1])]
+\end{minted}
+
+Ahora, nos quedaría utilizar la operación reduce. Queremos que esta operación se haga entre los elementos que tengan la misma clave, es decir, jugadores que pertenezcan al mismo equipo. Por tanto, usamos la función \inline{reduceByKey} que \inline{pyspark} nos proporciona. La operación reduce debe crear un RDD que, para cada equipo, tenga la suma de las edades, la suma de las edades al cuadrado, y el total de jugadores. Para esto, solo tenemos que sumar los elementos que habíamos obtenido tras la operación \inline{map}.
+
+\begin{minted}[linenos]{python}
+counted_ages = players.reduceByKey(lambda x1,x2:
+                            [x1[0]+x2[0],x1[1]+x2[1],x1[2]+x2[2]])
+counted_ages.sample(fraction=0.1,withReplacement=False).collect()
+
+[('Southampton', [574, 14576, 23]),
+  ('Swansea', [675, 18595, 25]),
+  ('Stoke+City', [617, 17745, 22])]]
+\end{minted}
+
+Como podemos ver, obtenemos con el reduce para cada equipo un vector del total de edades sumadas, los cuadrados de las edades sumados y el total de jugadores. Ahora, tenemos que cambiar esos valores para obtener los que nos interesan. Usamos la fórmula de la media y la de la desviación típica enunciada al principio de la sección usando una función \inline{map} del siguiente modo:
+\begin{minted}[linenos]{python}
+ counted_ages =
+ counted_ages.map(lambda x:
+                        (x[0],
+                         [ x[1][0]/x[1][2],
+                         math.sqrt(x[1][1] / x[1][2] - (x[1][0]/x[1][2])**2)]))
+counted_ages.sample(fraction=0.2,withReplacement=False).collect()
+
+
+[('Chelsea', [27.05, 3.69425229241318]),
+ ('Manchester+City', [27.0, 4.593473631142343]),
+ ('Southampton', [24.956521739130434, 3.303203463169149]),
+ ('Bournemouth', [26.875, 4.3041888511851605])]
+\end{minted}
+
+
+Y, como vemos, ya tenemos la media y la desviación típica calculadas para cada uno de los equipos utilizando operaciones \inline{map} y \inline{reduceByKey}, por lo que podemos usar estos datos para dibujar las funciones de densidad de distribuciones normales con estas medias y desviaciones típicas.
+
+
+
+
+
 \end{document}
