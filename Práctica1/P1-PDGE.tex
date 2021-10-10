@@ -69,13 +69,13 @@ Comenzamos explicando el proceso seguido a partir de la máquina virtual proporc
 yum install java-1.8.0-openjdk-devel
 \end{minted}
 
-A continuación, cambiamos la versión por defecto que se usaba en las transparencias. Incluso si instalamos la versión 1.7 se instalará la versión 1.8. Hemos de cambiar los paths a las versión 1.8 para que funciona correctamente:
+A continuación, cambiamos la versión por defecto que se usaba en las transparencias. Incluso si instalamos la versión 1.7 se instalará la versión 1.8. Hemos de cambiar los paths globales del sistema para indicar la versión 1.8 para que todo funcione correctamente:
 
 \begin{minted}[linenos]{bash}
 export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 \end{minted}
 
-Editamos el archivo \inline{/opt/hadoop/etc/hadoop/hadoop.env.sh} añadiendo el \inline{JAVA_HOME}:
+Añadimos también esta configuración en el archivo \inline{/opt/hadoop/etc/hadoop/hadoop.env.sh} añadiendo el \inline{JAVA_HOME}:
 
 \begin{minted}[linenos]{bash}
 export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
@@ -143,7 +143,7 @@ Mostramos una parte del fichero para ser conscientes de la salida obtenida:
 (que	21
 \end{minted}
 
-Como podemos comprobar, las palabras quedan con ciertos símbolos de puntuación que no deberían ser parte de las palabras. Este repercuteo en un incorrecto conteo. 
+Como podemos comprobar, las palabras quedan con ciertos símbolos de puntuación que no deberían ser parte de las palabras. Este repercute en la ejecución, resultando en un incorrecto conteo de la frecuencia de las palabras. 
 
 \subsubsection*{ Modificación del programa }
 
@@ -154,11 +154,11 @@ StringTokenizer itr = new StringTokenizer(value.toString().
         toLowerCase().replaceAll("[^a-z ]", ""));
 \end{minted}
 
-Como podemos comprobar, hemos pasado las palabras a minúsculas usando \inline{toLowerCase} y luego hemos eliminado todo aquello que no sean letras usando \inline{replaceAll}.
+Como podemos comprobar, hemos pasado las palabras a minúsculas usando \inline{toLowerCase} y luego hemos eliminado todo aquello que no sean letras usando \inline{replaceAll}.\\
 
-Una vez realizada esta modificación, debemos compilar de nuevo el programa como lo hemos hecho anteriormente y, seguidamente, ejecutar de nuevo el programa java para que realice el conteo de palabras. En este caso, indicamos que la salida la realice sobre la carpeta \inline{output2/} para tener las dos salidas por separado y poder compararlas. Obtenemos los dos mismos ficheros que anteriormente.
+Una vez realizada esta modificación, debemos compilar de nuevo el programa como lo hemos hecho anteriormente y, seguidamente, ejecutar de nuevo el programa java para que realice el conteo de palabras. En este caso, indicamos que la salida la realice sobre la carpeta \inline{output2/} para tener las dos salidas por separado y poder compararlas. Obtenemos los dos mismos ficheros que anteriormente.\\
 
-Hecho esto, utilizamos el archivo \inline{script.py} que hemos creado usando \inline{Python}, que toma todas las palabras que hay en los ficheros de salida y el número de veces que aparece cada una, las ordena y toma las 10 primeras para mostrarlas por pantalla.
+Hecho esto, utilizamos el archivo \inline{script.py} que hemos creado usando \inline{Python}, que toma todas las palabras que hay en los ficheros de salida y el número de veces que aparece cada una, las ordena y toma las 10 primeras para mostrarlas por pantalla.\\
 
 El resultado que se obtiene es que las palabras son las mismas y prácticamente en el mismo orden, salvo una pequeña variación entre dos de ellas. Podemos verlo gráficamente en la siguiente figura:
 
@@ -180,7 +180,9 @@ Hemos modificado el fichero \inline{/opt/hadoop-2.8.1/etc/hadoop/hadoop-env.sh} 
 
 Como se explica en \href{https://stackoverflow.com/questions/17569423/what-is-best-way-to-start-and-stop-hadoop-ecosystem-with-command-line}{esta respuesta de Stack Overflow}, el script \inline{stop-all.sh} detiene todos los daemons de Hadoop a la vez, pero está obsoleto. En lugar de eso es recomendable parar los daemons de HDFS y YARN por separado en todas las máquinas utilizando \inline|stop-dfs.sh| y \inline{stop-yarn.sh}.
 
-A continuación, para instalar Hadoop pseudo-distribuido, hemos modificado el fichero \inline{etc/hadoop/core-site.xml} añadiendo la siguiente propiedad:
+A continuación, para instalar Hadoop pseudo-distribuido, hemos modificado el fichero
+
+\inline{etc/hadoop/core-site.xml} añadiendo la siguiente propiedad:
 
 \begin{minted}[linenos]{xml}
 <configuration>
@@ -241,7 +243,7 @@ El sistema de archivos HDFS se crea donde la variable \inline{dfs.datanode.data.
 \begin{minted}[linenos]{bash}
 file://${hadoop.tmp.dir}/dfs/data
 \end{minted}
-y, podemos ver que la variable \inline{hadoop.tmp.dir} tiene el valor \inline{/tmp/hadoop-\${user.name}} .
+y, podemos ver que la variable \inline{hadoop.tmp.dir} tiene el valor \inline|/tmp/hadoop-\${user.name}| .
 
 \subsubsection*{ Pregunta 3.2: ¿ Cómo se puede borrar todo el contenido del HDFS, incluido su estructura ?}
 
@@ -314,7 +316,7 @@ A continuación accedemos a \inline{http://localhost:50070/explorer.html#/user/r
   \caption{Captura del explorador del HDFS de hadoop}
 \end{figure}
 
-Podemos comprobar como la primera versión del archivo \inline{quijote15.txt} subida tienen tamaño de bloque de 128MB, mientras que las dos últimas tienen tamño de bloque 2MB. Esto responde a las preguntas 4.1, 4.2 y 4.3 del guión, que nos piden comparar distintas formas de modificar el tamaño de bloque al subir archivos a HDFS.
+Podemos comprobar como la primera versión del archivo \inline{quijote15.txt} subida tienen tamaño de bloque de 128MB, mientras que las dos últimas tienen tamño de bloque 2MB. \textbf{Esto responde a las preguntas 4.1, 4.2 y 4.3 del guión}, que nos piden comparar distintas formas de modificar el tamaño de bloque al subir archivos a HDFS.
 
 Procedemos a comparar la ejecución de nuestro programa para distintos tamaños de bloque. Para ello ejecutamos el programa contador de palabras utilizando los archivos de entrada \inline{quijote15-128mb.txt} y \inline{quijote15-2mb.txt} subidos anteriormente. Utilizando 2MB como tamaño de bloque obtenemos la siguiente salida:
 
@@ -334,7 +336,7 @@ Merged Map outputs=1
 [...]
 \end{minted}
 
-Obteniendo una única operación map y reduce, pues un único bloque de 128MB es suficiente para para el archivo de 4.54MB. De esta forma hemos comprobado como afecta el tamaño de bloque en la ejecución de un programa MapReduce: Afecta al número de bloques creados y, por lo tanto, al nñumero de operaciones map/reduce realizadas.
+Obteniendo una única operación map y reduce, pues un único bloque de 128MB es suficiente para para el archivo de 4.54MB. De esta forma hemos comprobado como afecta el tamaño de bloque en la ejecución de un programa MapReduce: Afecta al número de bloques creados y, por lo tanto, al nñumero de operaciones map/reduce realizadas.\\
 
 Las salidas de estas últimas ejecuciones pueden encontrarse en los archivos \inline{output-quijote15-2mb.txt} y \inline{output-quijote15-128mb.txt} respectivamente.
 
@@ -399,7 +401,7 @@ print(numeros.takeOrdered(n,lambda elem: elem%2== 0))
 
 \subsubsection*{ Pregunta TS1.5 ¿Cuántos elementos tiene cada rdd? ¿Cuál tiene más? }
 
-Se nos proporciona el sigueinte código:
+Se nos proporciona el siguiente código:
 
 \begin{minted}[linenos]{python}
 lineas = sc.parallelize(['', 'a', 'a b', 'a b c'])
@@ -467,7 +469,7 @@ La salida que obtenemos es:
 ['abcd', 'abCd', 'a bcd', 'hola', 'hola!', 'dcba', 'HOLA', 'HoLa', 'ho la']
 \end{minted}
 
-Como podemos ver, teníamos un único ejemplo duplicado (el primero) que es el único que se ha eliminado. Esto nos indica que el comparador de elementos de los rdd comparan los strings *caracter a caracter*.
+Como podemos ver, teníamos un único ejemplo duplicado (el primero) que es el único que se ha eliminado. Esto nos indica que el comparador de elementos de los rdd comparan los strings \emph{caracter a caracter}.
 
 \subsubsection*{ Pregunta TS1.8 ¿Cómo se podría obtener la misma salida pero utilizando una sola transformación y sin realizar la unión?}
 
@@ -565,7 +567,7 @@ print(rr.collect())
 # Que operacion realizar al RDD rr para que la operacion sea como un reduceByKey
 \end{minted}
 
-Lo priemro que vemos es que la operación \inline{rr.collect} devuelve una lista con tuplas \inline{(clave, pyspark Result Iterable)}. Estos iterables debemos pasarlos primero a una lista, y luego realizar sobre ellos la operación que quisiésemos hacer con el \inline{reduceByKey}. Vemos que los pasamos a una lista utilizando \inline{mapValues(list)} que convierte los valores a un tipo:
+Lo primero que vemos es que la operación \inline{rr.collect} devuelve una lista con tuplas \inline{(clave, pyspark Result Iterable)}. Estos iterables debemos pasarlos primero a una lista, y luego realizar sobre ellos la operación que quisiésemos hacer con el \inline{reduceByKey}. Vemos que los pasamos a una lista utilizando \inline{mapValues(list)} que convierte los valores a un tipo:
 
 \begin{minted}[linenos]{python}
 rrf = rr.mapValues(list).collect()
@@ -983,7 +985,7 @@ public static class PlayersReducer extends Reducer<Text, IntWritable, Text, Iter
 }
 \end{minted}
 
-Merece la pena destacar dos detalles del fragmento de código anterior. Por un lado, la entrada del método \inline{reduce} ha pasado a ser del tipo \inline{Iterable<IntWritable>}, pues ahora recibe un vector de edades. Por otro lado, puesto que queremos que nuestro reducer devuelva \inline{(nombre del equipo, [media, desviación típica])}, hemos de crear un vector de números reales \inline{result[]}, y utilizarlo para formatear la salida.
+Merece la pena destacar dos detalles del fragmento de código anterior. Por un lado, la entrada del método \inline{reduce} ha pasado a ser del tipo \inline{Iterable<IntWritable>}, pues ahora recibe un vector de edades. Por otro lado, puesto que queremos que nuestro reducer devuelva \inline{(nombre del equipo, [media, desviacion tipica])}, hemos de crear un vector de números reales \inline{result[]}, y utilizarlo para formatear la salida.
 
 Finalmente, en el \inline{main} bastará con adecuar las asignaciones a los nuevos nombres de los métodos \inline{map} y \inline{reduce}:
 
