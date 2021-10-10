@@ -22,10 +22,9 @@ def read_players(file="output-hadoop.txt"):
 			
 		return result
     
-def plot_normal(mu, var, color):
-	sigma = math.sqrt(var)
+def plot_normal(mu, std, color):
 	x = np.linspace(10, 40, 100)
-	plt.plot(x, stats.norm.pdf(x, mu, sigma))
+	plt.plot(x, stats.norm.pdf(x, mu, std))
 
 def color_generator(n_colors):
 	cm = pylab.get_cmap('gist_rainbow')
