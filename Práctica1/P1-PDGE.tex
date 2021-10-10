@@ -438,7 +438,7 @@ Como podemos ver, \inline{palabras_flat} tiene más elementos. Esto ocurre porqu
 
 \subsubsection*{ Pregunta TS1.6 ¿De qué tipo son los elementos del rdd \inline{palabras\_map}? ¿Por qué \inline{palabras\_map} tiene el primer elemento vacío?}
 
-Siguiendo la respuesta de la pregunta anterior, en \inline{palabras_map} los elementos obtenidos tras aplicar a cada elemento de \inline{lineas} la función, son vectores, por lo que los elementos de \inline{palabras_map} son vectores. Lo podemos ver en la salida del siguiente código:
+Siguiendo la respuesta de la pregunta anterior, en \inline{palabras_map} obtenemos un vector tras aplicar la función a cada elemento de \inline{lineas}, por lo que los elementos de \inline{palabras_map} son vectores. Lo podemos ver en la salida del siguiente código:
 
 \begin{minted}[linenos]{python}
 print (palabras_map.collect())
@@ -448,10 +448,9 @@ print (palabras_map.collect())
 
 Además, tiene el primer \textbf{elemento vacío} porque la función split aplicada sobre el elemento \inline{''} devuelve un vector vacío pues no hay nada que separar.
 
-
 \subsubsection*{ Pregunta TS1.7. Prueba la transformación \inline{distinct} si lo aplicamos a cadenas.}
 
-Para probarlo, realizamos el siguiente código en el que ponemos en un RDD ejemplos de prueba con las mismas palabras en mayúscula y minúscula, con espacios o signos de puntuación:
+Para probarlo, ejecutamos el siguiente código en el que ponemos en un RDD ejemplos de prueba con las mismas palabras en mayúscula y minúscula, con espacios o signos de puntuación:
 
 \begin{minted}[linenos]{python}
 test = sc.parallelize(["abcd", "abcd","dcba","abCd","a bcd","hola",
@@ -461,16 +460,16 @@ dis = test.distinct()
 
 print(dis.collect())
 \end{minted}
+
 La salida que obtenemos es:
 
 \begin{minted}[linenos]{python}
 ['abcd', 'abCd', 'a bcd', 'hola', 'hola!', 'dcba', 'HOLA', 'HoLa', 'ho la']
 \end{minted}
 
-Como podemos ver, teníamos un único ejemplo duplicado (el primero) que es el único que se ha eliminado. Esto nos indica que el comparador de elementos de los rdd comparan los strings *caracter a caracter*.
+Como podemos ver, teníamos un único ejemplo duplicado (el primero) que es el único que se ha eliminado. Esto nos indica que el comparador de elementos de los rdd comparan los strings \textbf{caracter a caracter}.
 
 \subsubsection*{ Pregunta TS1.8 ¿Cómo se podría obtener la misma salida pero utilizando una sola transformación y sin realizar la unión?}
-
 
 Se podría hacer que el filtro se quede con los elementos que empiecen por I o por E, haciendo el código del siguiente modo:
 
@@ -479,13 +478,11 @@ log = sc.parallelize(['E: e21', 'I: i11', 'W: w12', 'I: i11',
                      'W: w13', 'E: e45'])
 
 inferr = log.filter(lambda elem: elem[0] in ['I','E'])
-
-
 print(inferr.collect())
 
 'E: e21', 'I: i11', 'I: i11', 'E: e45']
-
 \end{minted}
+
 \subsubsection*{ Pregunta TS1.9 ¿Cómo explica el funcionamiento de las celdas anteriores?}
 
 Comentamos una a una las celdas anteriores:
@@ -497,7 +494,6 @@ print (numeros.reduce(lambda elem1,elem2: elem2+elem1))
 \end{minted}
 
 Esta primera celda solo crea un RDD y luego hace la operación reduce, que combina los valores usando una función que le indicamos, en este caso la suma de los valores. Así, devolverá la suma de todos los valores ya que esta operación es conmutativa y asociativa.
-
 
 \begin{minted}[linenos]{python}
 #Tiene sentido esta operacion?
@@ -519,11 +515,13 @@ print (pal_minus.reduce(lambda elem1,elem2: elem1+"-"+elem2))
 \end{minted}
 
 En esta celda se crea un RDD que tiene cadenas de caracteres, primero se pasan a minúsculas aplicándoles la funcion \inline{.lower} y luego se concatenan todas las palabras a un solo scring uniéndolas por guiones, obteniendo como salida:
+
 \begin{minted}[linenos]{bash}
 hola-que-tal-bien
 \end{minted}
 
-Si cambiásemos el orden en elq ue se concatenan los elementos como se nos indica en el comentario, la salida cambia y las palabras se van uniendo en el orden inverso, debido a cómo se realiza la operación reduce. La salida es:
+Si cambiásemos el orden en el que se concatenan los elementos como se nos indica en el comentario, la salida cambia y las palabras se van uniendo en el orden inverso, debido a cómo se realiza la operación reduce. La salida es:
+
 \begin{minted}[linenos]{bash}
 bien-tal-que-hola
 \end{minted}
@@ -535,11 +533,13 @@ print (rr.collect())
 \end{minted}
 
 En esta celda se crea un RDD que tiene como elementos Tuplas \inline{(clave,valor)}. A continuación, usando \inline{reduceByKey} pasándole como argumento una función suma, lo que se hace es sumar los valores de las tuplas cuya clave sea la misma, obteniendo la salida esperada:
+
 \begin{minted}[linenos]{bash}
 [('C', 4), ('A', 2), ('B', 5)]
 \end{minted}
 
 La última celda es la siguiente:
+
 \begin{minted}[linenos]{python}
 r = sc.parallelize([('A', 1),('C', 4),('A', 1),('B', 1),('B', 4)])
 rr1 = r.reduceByKey(lambda v1,v2:v1+v2)
@@ -555,6 +555,7 @@ Como \textbf{conclusión} a esta pregunta, podemos decir que es importante cómo
 \subsubsection*{ Pregunta \inline{groupByKey}}
 
 Dada la siguiente celda
+
 \begin{minted}[linenos]{python}
 r = sc.parallelize([('A', 1),('C', 2),('A', 3),('B', 4),('B', 5)])
 rr = r.groupByKey()
@@ -565,7 +566,7 @@ print(rr.collect())
 # Que operacion realizar al RDD rr para que la operacion sea como un reduceByKey
 \end{minted}
 
-Lo priemro que vemos es que la operación \inline{rr.collect} devuelve una lista con tuplas \inline{(clave, pyspark Result Iterable)}. Estos iterables debemos pasarlos primero a una lista, y luego realizar sobre ellos la operación que quisiésemos hacer con el \inline{reduceByKey}. Vemos que los pasamos a una lista utilizando \inline{mapValues(list)} que convierte los valores a un tipo:
+Lo primero que vemos es que la operación \inline{rr.collect} devuelve una lista con tuplas \inline{(clave, pyspark Result Iterable)}. Estos iterables debemos pasarlos primero a una lista, y luego realizar sobre ellos la operación que quisiésemos hacer con el \inline{reduceByKey}. Vemos que los pasamos a una lista utilizando \inline{mapValues(list)} que convierte los valores a un tipo:
 
 \begin{minted}[linenos]{python}
 rrf = rr.mapValues(list).collect()
@@ -575,6 +576,7 @@ print(rrf)
 \end{minted}
 
 Y, a continuación, podemos realizar la operación que haríamos con el reduce. Por ejemplo, si queremos hacer la suma de los vectores utilizando \inline{map} podríamos hacer todo en una linea de la siguiente manera:
+
 \begin{minted}[linenos]{python}
 rrf = rr.mapValues(list).map(lambda x : (x[0],sum(x[1])))
 print(rrf.collect())
@@ -583,6 +585,7 @@ print(rrf.collect())
 \end{minted}
 
 Ahora, se nos pide simular el \inline{groupByKey} usando \inline{reduceByKey} y \inline{map}. Para ello, usando \inline{reduceByKey} podemos obtener las listas que obtendríamos tras aplicar el \inline{mapValues(list)} que hemos obtenido anteriormente.
+
 \begin{minted}[linenos]{python}
 simul_group = r.reduceByKey(lambda v1,v2: [v1,v2])
 print(simul_group.collect())
@@ -599,22 +602,27 @@ rdd2 = sc.parallelize([('A',4),('B',5),('C',6)])
 rddjoin = rdd1.join(rdd2)
 \end{minted}
 
-El resultado de esto es 
+El resultado de esto es:
+
 \begin{minted}[linenos]{bash}
 [('A', (1, 4)), ('B', (2, 5)), ('C', (3, 6))]
 \end{minted}
 
 Es decir, un nuevo RDD en el que los valores son tuplas con los valores que hay en cada uno de los RDD. Se nos pide que, dado ese código, cambiemos las claves de los dos RDDs iniciales para ver qué RDD se crea finalmente. Si lo hacemos, cambiando por ejemplo los RDD del siguiente modo:
+
 \begin{minted}[linenos]{python}
 rdd1 = sc.parallelize([('A',1),('B',2),('D',3)])
 rdd2 = sc.parallelize([('A',4),('B',5),('E',6)])
 
 rddjoin = rdd1.join(rdd2)
 \end{minted}
+
 El resultado obtenido es el siguiente:
+
 \begin{minted}[linenos]{bash}
 [('A', (1, 4)), ('B', (2, 5))]
 \end{minted}
+
 Es decir, que el \inline{join} está haciendo la unión de los elementos cuyas claves están en la intersección del conjunto de claves. Como \inline{D} y \inline{E} no están en ambos RDD, no están en la intersección del conjunto de claves y por tanto no se obtienen en el RDD final.
 
 \subsubsection*{ Tipos de Join }
@@ -645,8 +653,6 @@ numeros = sc.parallelize(range(0,1000),10)
 numeros.saveAsTextFile('salida')
 
 %ls -la salida/*
-
-
 
 -rw-r--r-- 1 root root 290 Oct  4 10:42 salida/part-00000
 -rw-r--r-- 1 root root 400 Oct  4 10:42 salida/part-00001
@@ -711,12 +717,13 @@ Ahora, explicamos las funciones en general, su utilidad y si cambia el número d
 	
 	\item \inline{sample} toma una muestra del tamaño indicado. En este caso, el RDD no se modifica solo que se toman ejemplos del mismo, por lo que podemos decir que el tamaño del RDD se mantiene, $M=N$.
 	
-	\item \inline{union} une dos RDDs en uno
+	\item \inline{union} une dos RDDs en uno.
 \end{itemize}
 
 \subsubsection*{ Pregunta TS2.2 Explica el funcionamiento de cada acción anterior }
 
 Tenemos el siguiente código:
+
 \begin{minted}[linenos]{python}
 numLines = quijote.count()
 numChars = charsPerLine.reduce(lambda a,b: a+b) # also charsPerLine.sum()
@@ -724,15 +731,19 @@ sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))
 numLines, numChars, sortedWordsByLength
 \end{minted}
 
-Este código hace lo siguiente
+Este código hace lo siguiente:
+
 \begin{enumerate}
-\item \inline{numLines = quijote.count()} cuenta el número de líneas que tiene el quijote
-\item \inline{numChars = charsPerLine.reduce(lambda a,b: a+b)} utiliza un RDD anterior que tiene el número de caracteres que tiene cada línea y los suma, obteniendo así el número de caracteres total.
-\item La siguiente línea
-\begin{minted}[linenos]{python}
+	\item \inline{numLines = quijote.count()} cuenta el número de líneas que tiene el quijote.
+	
+	\item \inline{numChars = charsPerLine.reduce(lambda a,b: a+b)} utiliza un RDD anterior que
+	tiene el número de caracteres que tiene cada línea y los suma, obteniendo así el número de caracteres total.
+	
+	\item La siguiente línea
+	\begin{minted}[linenos]{python}
 sortedWordsByLength = allWordsNoArticles.takeOrdered(20, key=lambda x: -len(x))
-\end{minted} 
-toma el RDD que tiene todas las palabras y toma las 20 palabras que tienen MAYOR longitud
+	\end{minted} 
+	toma el RDD que tiene todas las palabras y toma las 20 palabras que tienen MAYOR longitud
 \end{enumerate}
 
 A continuación, se pide que se implemente la acción \inline{count} que nos dice el número de elementos que tiene un RDD usando lo siguiente:
@@ -840,13 +851,15 @@ Podemos realizarlo usando el siguiente código, cuyos comentarios indican qué s
 # Usamos GroupByKey y sobre la salida, mapeamos cada elemento a
 # elemento = (clave, [1,....,])
 res = words.groupByKey().map(lambda x : (x[0], list(x[1])))
+
 # Mapeamos de nuevo los elementos a (elemento, suma([1,...,1]))
 res = res.map(lambda x: (x[0],sum(x[1])))
+
+# Mostramos los resultados
 res.take(5)
 
 [('el', 1232), ('hidalgo', 14), ('don', 370), ('mancha', 26), ('saavedra', 1)]
 \end{minted}
-
 
 \subsubsection*{Pregunta TS2.5 ¿Cuál de las dos siguientes celdas es más eficiente? Justifique la respuesta.}
 
