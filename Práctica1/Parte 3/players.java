@@ -15,8 +15,8 @@ public class Players {
 
   public static class PlayersMapper extends Mapper<Object, Text, Text, IntWritable>{
 
-    private final static IntWritable age = new IntWritable();
     private Text team = new Text();
+    private final static IntWritable age = new IntWritable();
 
     public void map(Object key, Text value, Context context)
         throws IOException, InterruptedException {
@@ -61,7 +61,7 @@ public class Players {
     }*/
 
     @SuppressWarnings("deprecation")
-    Job job = new Job(conf, "wordcount");
+    Job job = new Job(conf, "players");
     job.setJarByClass(Players.class);
     job.setMapperClass(PlayersMapper.class);
     // job.setCombinerClass(PlayersReducer.class);

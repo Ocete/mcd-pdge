@@ -154,9 +154,9 @@ Hecho esto, utilizamos el archivo  \inline{script.py} que hemos creado usando  \
 El resultado que se obtiene es que las palabras son las mismas y prácticamente en el mismo orden, salvo una pequeña variación entre dos de ellas. Podemos verlo gráficamente en la siguiente figura:
 
 \begin{figure}[H]
-\centering
-\includegraphics[scale=0.8]{figures/barplot.pdf}
-\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
+	\centering
+	\includegraphics[scale=0.8]{figures/barplot.pdf}
+	\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
 \end{figure}
 
 Se puede apreciar que, al aplicar el preprocesado, la palabra \inline{a }aparece un número de veces ligeramente superior al que lo hace cuando no tenemos el preprocesador previo del texto.
@@ -926,18 +926,88 @@ Sin embargo, esto sería equivalente a usar la función \inline{repartition} que
 
 \section{Parte Opcional}
 
-En esta sección, realizaremos el ejercicio opcional utilizando una de las bases de datos proporcionadas. En concreto, utilizaremos el archivo \inline{players.csv} que se nos proporciona y trataremos de utilizar operaciones map y reduce para realizar algunos cálculos sobre estos datos.
+En esta sección, realizaremos el ejercicio opcional utilizando una de las bases de datos proporcionadas. En concreto, utilizaremos el archivo \inline{players.csv} y utilizaremos operaciones map y reduce para realizar algunos cálculos sobre estos datos.
 
-Nuestro objetivo principal es, dados los datos de los jugadores de la liga inglesa, obtener la media y la desviación típica de las edades de los jugadores para poder así dibujar las gráficas de las distribuciones normales de edad que obtenemos en cada uno de los equipos de la liga, para poder dibujarlas conjuntamente y tener una perspectiva visual conjunta de las distribuciones de edad en esta liga.
+Nuestro objetivo principal es, dados los datos de los jugadores de la liga inglesa, obtener la media y la desviación típica de las edades de los jugadores para poder así dibujar las gráficas de las distribuciones normales de edad que obtenemos en cada uno de los equipos, para poder dibujarlas conjuntamente y tener una perspectiva visual conjunta de las distribuciones de edad en esta liga.
 
 Para ello, utilizaremos una forma de calcular la desviación típica que nos permitirá calcular tanto esta como la media en paralelo. Si llamamos $S = \sum_{i=1}^n e_i^2$ siendo $e_i$ la edad del jugador $i-$-ésimo, entonces podemos calcular la desviación típica como:
+
 \[
 \sigma = \sqrt{\frac{S}{n} - \mu^2}.
 \]
-Así, si obtenemos para cada jugador un vector $(Equipo,edad,edad^2)$ (lo cual obtendremos en la función map), podremos hacer los cálculos de forma bastante sencilla (lo cual haremos en la función reduce).
+
+De esta forma no será necesario hacer primera pasada por los datos para conocer la media, y una segunda para calcular la desviación típica.
 
 \subsection{Hadoop}
 
+Para obtener la media y desviaciones típicas de las edades de los distintos equipos en Hadoop tomamos el programa utilizado para contar palabras y realizamos pequeñas alteraciones. Por un lado, en el \inline{mapper} hemos de tomar únicamente el nombre del equipo y la edad del jugador para cada línea de nuestro archivo de entrada. Pondremos estos valores en el formato \inline{(clave, valor)}, donde la clave será el nombre del equipo y el valor, la edad del jugador:
+
+\begin{minted}[linenos]{java}
+	public static class PlayersMapper extends Mapper<Object, Text, Text, IntWritable>{
+		
+		private Text team = new Text();
+		private final static IntWritable age = new IntWritable();
+		
+		public void map(Object key, Text value, Context context)
+		throws IOException, InterruptedException {
+			String[] data = value.toString().split(",");
+			team.set(data[1]);
+			age.set(Integer.parseInt(data[2]));
+			context.write(team, age);
+		}
+	}
+\end{minted}
+
+Al agrupar por clave obtenemos parejas \inline{(nombre del equipo, [edad1, edad2, ...])}. En el \inline{reducer} recibimos este vector y calculamos la media y la desviación típica utilizando la fórmula explicada en la introducción:
+
+\begin{minted}[linenos]{java}
+	public static class PlayersReducer extends Reducer<Text, IntWritable, Text, Iterable<IntWritable>> {
+		
+		private FloatWritable mean = new FloatWritable();
+		private FloatWritable std = new FloatWritable();
+		
+		public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+			float sum = 0;
+			float sum_squared = 0;
+			int n_elems = 0;
+			
+			for (IntWritable val : values) {
+				n_elems++;
+				sum += val.get();
+				sum_squared += val.get() * val.get();
+			}
+			
+			mean.set(sum / n_elems);
+			std.set((float)Math.sqrt(sum_squared / n_elems - mean.get() * mean.get()));
+			
+			FloatWritable result[] = {mean, std};
+			context.write(key, Arrays.asList(result));
+		}
+	}
+\end{minted}
+
+Merece la pena destacar dos detalles del fragmento de código anterior. Por un lado, la entrada del método \inline{reduce} ha pasado a ser del tipo \inline{Iterable<IntWritable>}, pues ahora recibe un vector de edades. Por otro lado, puesto que queremos que nuestro reducer devuelva \inline{(nombre del equipo, [media, desviación típica])}, hemos de crear un vector de números reales \inline{result[]}, y utilizarlo para formatear la salida.
+
+Finalmente, en el \inline{main} bastará con adecuar las asignaciones a los nuevos nombres de los métodos \inline{map} y \inline{reduce}:
+
+\begin{minted}[linenos]{java}
+	Job job = new Job(conf, "players");
+	job.setMapperClass(PlayersMapper.class);
+	job.setReducerClass(PlayersReducer.class);
+	job.setOutputKeyClass(Text.class);
+	job.setOutputValueClass(IntWritable.class);
+\end{minted}
+
+Al ejecutar este programa en nuestra máquina virtual con la correspondiente entrada obtenemos los siguientes resultados:
+
+\begin{minted}[linenos]{text}
+	Arsenal	[26.678572, 3.3705935]
+	Bournemouth	[26.875, 4.304191]
+	Brighton+and+Hove	[28.318182, 3.5596976]
+	Burnley	[27.944445, 2.8180392]
+	Chelsea	[27.05, 3.6942554]
+	[...]
+\end{minted}
 
 \subsection{Spark}
 
@@ -953,7 +1023,6 @@ players = players.map(lambda x : x.split(",")[0:3])
 \end{minted}
 
 A continuación, utilizamos una función \inline{map} que nos lleve cada elemento a un nuevo elemento del tipo \inline{(Equipo, [edad,edad^2,1])}. Este 1 nos servirá para que en la operación reduce, se sume uno por cada jugador y obtener así el total de jugadores, necesario para tanto la media como la desviación típica. Obtendríamos así nuestro RDD preparado para hacer la operación reduce.
-
 
 \begin{minted}[linenos]{python}
 # Create (key,val) with: (team,age_of_player)
@@ -981,6 +1050,7 @@ counted_ages.sample(fraction=0.1,withReplacement=False).collect()
 \end{minted}
 
 Como podemos ver, obtenemos con el reduce para cada equipo un vector del total de edades sumadas, los cuadrados de las edades sumados y el total de jugadores. Ahora, tenemos que cambiar esos valores para obtener los que nos interesan. Usamos la fórmula de la media y la de la desviación típica enunciada al principio de la sección usando una función \inline{map} del siguiente modo:
+
 \begin{minted}[linenos]{python}
  counted_ages =
  counted_ages.map(lambda x:
@@ -996,11 +1066,18 @@ counted_ages.sample(fraction=0.2,withReplacement=False).collect()
  ('Bournemouth', [26.875, 4.3041888511851605])]
 \end{minted}
 
+Y, como vemos, ya tenemos la media y la desviación típica calculadas para cada uno de los equipos utilizando operaciones \inline{map} y \inline{reduceByKey}.
 
-Y, como vemos, ya tenemos la media y la desviación típica calculadas para cada uno de los equipos utilizando operaciones \inline{map} y \inline{reduceByKey}, por lo que podemos usar estos datos para dibujar las funciones de densidad de distribuciones normales con estas medias y desviaciones típicas.
+\subsection{Conclusiones}
 
+Tras realizar sendos experimentos utilizando Hadoop y Spark hemos obtenido los mismo resultados. Se pueden encontrar en los archivos \inline{output-hadoop.txt} y \inline{output-spark.txt} respectivamente.
 
+Por el Teorema Central del Límite sabemos que el conjunto de edades de los miembros de un equipo tiende a una distribución normal con cierta media y desviación típica. Utilizamos este resultado para hacernos una idea de las distribuciones de edad de los distintos equipos, conociendo unicamente las medias y desviaciones típicas calculadas previamente.
 
-
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/players.pdf}
+	\caption{}
+\end{figure}
 
 \end{document}
