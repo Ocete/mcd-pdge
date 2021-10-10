@@ -4,5 +4,6 @@ $(file): $(file).tex
 	pdflatex --shell-escape $(file).tex
 	pdflatex --shell-escape $(file).tex
 
-clean:
+clean: $(file)
 	rm *.bbl *.aux *.blg *.fdb_latexmk *.out *.log *.toc *.fls *.lof *.lot
+	rm -rf _minted-$(file)
