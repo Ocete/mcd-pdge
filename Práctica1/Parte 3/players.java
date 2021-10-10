@@ -2,6 +2,7 @@
 package uam;
 import java.io.IOException;
 import java.util.*;
+import java.lang.Math;
 
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.mapreduce.*;
@@ -26,14 +27,14 @@ public class Players {
     }
   }
 
-  public static class PlayersReducer extends Reducer<Text, IntWritable, Text, Iterable<IntWritable>> {
+  public static class PlayersReducer extends Reducer<Text, IntWritable, Text, Iterable<FloatWritable>> {
 
-    private IntWritable mean = new IntWritable();
-    private IntWritable variance = new IntWritable();
+    private FloatWritable mean = new FloatWritable();
+    private FloatWritable std = new FloatWritable();
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-      int sum = 0;
-      int sum_squared = 0;
+      float sum = 0;
+      float sum_squared = 0;
       int n_elems = 0;
       
       for (IntWritable val : values) {
@@ -43,9 +44,9 @@ public class Players {
       }
 
       mean.set(sum / n_elems);
-      variance.set(sum_squared / n_elems - mean.get() * mean.get());
+      std.set((float)Math.sqrt(sum_squared / n_elems - mean.get() * mean.get()));
 
-      IntWritable result[] = {mean, variance};
+      FloatWritable result[] = {mean, std};
       context.write(key, Arrays.asList(result));
     }
   }
