@@ -66,19 +66,19 @@ En esta primera sección realizamos diversos experimentos y contestamos a las pr
 Comenzamos explicando el proceso seguido a partir de la máquina virtual proporcionada para reproducir estos experimentos. En primer lugar, instalamos Java:
 
 \begin{minted}[linenos]{bash}
-	yum install java-1.8.0-openjdk-devel
+yum install java-1.8.0-openjdk-devel
 \end{minted}
 
 A continuación, cambiamos la versión por defecto que se usaba en las transparencias. Incluso si instalamos la versión 1.7 se instalará la versión 1.8. Hemos de cambiar los paths a las versión 1.8 para que funciona correctamente:
 
 \begin{minted}[linenos]{bash}
-	export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
+export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 \end{minted}
 
 Editamos el archivo \inline{/opt/hadoop/etc/hadoop/hadoop.env.sh} añadiendo el \inline{JAVA_HOME}:
 
 \begin{minted}[linenos]{bash}
-	export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
+export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk
 \end{minted}
 
 \subsubsection*{ Compilación}
@@ -86,7 +86,7 @@ Editamos el archivo \inline{/opt/hadoop/etc/hadoop/hadoop.env.sh} añadiendo el 
 Tomamos el script proporcionado para compilación y lo ejecutamos utilizando la siguiente orden:
 
 \begin{minted}[linenos]{bash}
-	./compilar.sh WordCount
+./compilar.sh WordCount
 \end{minted}
 
 \subsubsection*{ Ejecución }
@@ -94,19 +94,19 @@ Tomamos el script proporcionado para compilación y lo ejecutamos utilizando la 
 En primer lugar hemos de iniciar el \emph{NameNode} y el \emph{DataNode}:
 
 \begin{minted}[linenos]{bash}
-	sbin/start-dfs.sh
+sbin/start-dfs.sh
 \end{minted}
 
 Así como el \emph{ResourceManager} y el \emph{NodeManager}:
 
 \begin{minted}[linenos]{bash}
-	sbin/start-yarn.sh
+sbin/start-yarn.sh
 \end{minted}
 
 También hemos de subir los archivos de entrada de nuestros programas al sistema de archivo de Hadoop. Para ello utilizamos la siguiente orden:
 
 \begin{minted}[linenos]{bash}
-	/opt/hadoop/bin/hdfs dfs -put Quijote.txt /user/root
+/opt/hadoop/bin/hdfs dfs -put Quijote.txt /user/root
 \end{minted}
 
 Finalmente, lanzamos nuestro trabajo de MapReduce:
@@ -127,20 +127,20 @@ Obtenemos en el directorio output dos archivos de salida:
 Mostramos una parte del fichero para ser conscientes de la salida obtenida:
 
 \begin{minted}[linenos]{bash}
-    "Tablante",	1
-    "dichosa	1
-    "el	8
-    "y	1
-    (Y	1
-    (a	1
-    (al	1
-    (como	1
-    (creyendo	1
-    (de	2
-    (por	2
-    (porque	2
-    (pues	1
-    (que	21
+"Tablante",	1
+"dichosa	1
+"el	8
+"y	1
+(Y	1
+(a	1
+(al	1
+(como	1
+(creyendo	1
+(de	2
+(por	2
+(porque	2
+(pues	1
+(que	21
 \end{minted}
 
 Como podemos comprobar, las palabras quedan con ciertos símbolos de puntuación que no deberían ser parte de las palabras. Este repercuteo en un incorrecto conteo. 
@@ -239,7 +239,7 @@ No. La ejecución de dicho script únicamente para el servicio HDFS en ejecució
 
 El sistema de archivos HDFS se crea donde la variable \inline{dfs.datanode.data.dir} indique. Esta variable se puede modificar en el archivo \inline{hdfs-site.xml}. \href{https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml}{Su valor por defecto} es
 \begin{minted}[linenos]{bash}
-	file://${hadoop.tmp.dir}/dfs/data
+file://${hadoop.tmp.dir}/dfs/data
 \end{minted}
 y, podemos ver que la variable \inline{hadoop.tmp.dir} tiene el valor \inline{/tmp/hadoop-\${user.name}} .
 
@@ -250,7 +250,7 @@ Si con \emph{todo el contenido} nos referimos a una desistalación completa pode
 Por otro lado, para borrar toda la estructura interna de archivos de HDFS podemos utilizar el comando:
 
 \begin{minted}[linenos]{bash}
-	bin/hdfs dfs -rm -R /
+bin/hdfs dfs -rm -R /
 \end{minted}
 
 \subsubsection*{ Pregunta 3.3: Si estás usando hdfs, ¿ cómo puedes volver a ejecutar WordCount como si fuese single.node ? }
@@ -282,7 +282,7 @@ Puede comprobarse ejecutando el script indicado.
 Creamos un archivo con 15 copias del Quijote llamado \inline{quijote15.txt}. Lo subimos al sistema de archivos de hdfs:
 
 \begin{minted}[linenos]{bash}
-	bin/hdfs dfs -put quijote15.txt /user/root/quijote15-128mb.txt
+bin/hdfs dfs -put quijote15.txt /user/root/quijote15-128mb.txt
 \end{minted}
 
 A continuación, volvemos a subir el archivo indicando el tamaño de bloque a utilizar, 2MB:
@@ -294,16 +294,16 @@ A continuación, volvemos a subir el archivo indicando el tamaño de bloque a ut
 Por otro lado, también podemos cambiar el valor por defecto del tamaño de bloque para no tener que especificar el tamaño 2MB cada vez que subamos un archivo. Para ello cambiamos el respectivo parámetro (\inline{dfs.block.size}) en los archivos de configuración de hdfs editando \inline{hdfs-site.xml}, añadiendo:
 
 \begin{minted}[linenos]{xml}
-	<property>
-	        <name>dfs.block.size</name>
-	        <value>2097152</value>
-	</property>
+<property>
+     <name>dfs.block.size</name>
+     <value>2097152</value>
+</property>
 \end{minted}
 
 Y reiniciamos dfs y yarn para asegurarnos que la configuración activa incluye los cambios realizados. Subimos de nuevo el archivo \inline{quijote15.txt} sin especificar el tamaño de bloque utilizando la siguiente orden:
 
 \begin{minted}[linenos]{bash}
-	bin/hdfs dfs -put quijote15.txt /user/bigdata/dreji/quijote15-2mb-default.txt
+bin/hdfs dfs -put quijote15.txt /user/bigdata/dreji/quijote15-2mb-default.txt
 \end{minted}
 
 A continuación accedemos a \inline{http://localhost:50070/explorer.html#/user/root} para comprobar los resultados.
@@ -319,19 +319,19 @@ Podemos comprobar como la primera versión del archivo \inline{quijote15.txt} su
 Procedemos a comparar la ejecución de nuestro programa para distintos tamaños de bloque. Para ello ejecutamos el programa contador de palabras utilizando los archivos de entrada \inline{quijote15-128mb.txt} y \inline{quijote15-2mb.txt} subidos anteriormente. Utilizando 2MB como tamaño de bloque obtenemos la siguiente salida:
 
 \begin{minted}[linenos]{bash}
-	[...]
-	Shuffled Maps=3
-	Merged Map outputs=3
-	[...]
+[...]
+Shuffled Maps=3
+Merged Map outputs=3
+[...]
 \end{minted}
 
 Indicando que se han realizado 3 operaciones \emph{map} y 3 operaciones \emph{reduce}. Este número de operaciones encaja con lo esperado, pues el archivo \inline{quijote15.txt} pesa 4.54MB y se divide en tres bloques de 2MB. Al repetir la ejecución con 128MB para el tamaño de bloque obtenemos:
 
 \begin{minted}[linenos]{bash}
-	[...]
-	Shuffled Maps=1
-	Merged Map outputs=1
-	[...]
+[...]
+Shuffled Maps=1
+Merged Map outputs=1
+[...]
 \end{minted}
 
 Obteniendo una única operación map y reduce, pues un único bloque de 128MB es suficiente para para el archivo de 4.54MB. De esta forma hemos comprobado como afecta el tamaño de bloque en la ejecución de un programa MapReduce: Afecta al número de bloques creados y, por lo tanto, al nñumero de operaciones map/reduce realizadas.
@@ -562,7 +562,6 @@ res= rr.collect()
 
 print(rr.collect())
 
-
 # Que operacion realizar al RDD rr para que la operacion sea como un reduceByKey
 \end{minted}
 
@@ -626,11 +625,11 @@ Se nos pregunta que qué ocurre cuando sustituimos \inline{join} por \inline{lef
 		\item \inline{leftOuter} añade al nuevo RDD también las tuplas \inline{(clave,valor)} cuya clave esté en el \inline{RDD} sobre el que se llama la función, pero no estén en el RDD que se pasa como parámetro. Se añade un \inline{None} en la tupla conjunta del RDD final:
 		
 		\begin{minted}[linenos]{python}
-		rdd1 = sc.parallelize([('A',1),('B',2),('C',3)])
-		rdd2 = sc.parallelize([('A',4),('A',5),('B',6),('D',7)])
-		rddjoin = rdd1.leftOuterJoin(rdd2)
-		
-		[('A', (1, 4)), ('A', (1, 5)), ('B', (2, 6)), ('C', (3, None))]
+rdd1 = sc.parallelize([('A',1),('B',2),('C',3)])
+rdd2 = sc.parallelize([('A',4),('A',5),('B',6),('D',7)])
+rddjoin = rdd1.leftOuterJoin(rdd2)
+
+[('A', (1, 4)), ('A', (1, 5)), ('B', (2, 6)), ('C', (3, None))]
 		\end{minted}
 	
 		\item \inline{rightOuter} hace lo mismo que el anterior pero en el sentido opuesto, es decir, usando el segundo RDD.
@@ -640,6 +639,7 @@ Se nos pregunta que qué ocurre cuando sustituimos \inline{join} por \inline{lef
 \subsubsection*{ Pregunta TS1.10 Borra la salida y cambia las particiones en parallelize. ¿ Qué sucede ?}
 
 Lo que ocurre si ponemos 10 particiones es lo siguiente (borrando anteriormente el contenido del directorio donde tenemos la salida):
+
 \begin{minted}[linenos]{python}
 numeros = sc.parallelize(range(0,1000),10)
 numeros.saveAsTextFile('salida')
@@ -668,6 +668,7 @@ Como se podía esperar, se crea un archivo para cada una de las particiones de s
 \subsubsection*{ Pregunta TS2.1 Explica la utilidad de cada transformación y detalle para cada una de ellas si cambia el número de elementos en el RDD resultante. Es decir si el RDD de partida tiene N elementos, y el de salida M elementos, indica si N>M, N=M o N<M.}
 
 Dado el siguiente código:
+
 \begin{minted}[linenos]{python}
 charsPerLine = quijote.map(lambda s: len(s))
 allWords = quijote.flatMap(lambda s: s.split())
@@ -676,6 +677,7 @@ allWordsUnique = allWords.map(lambda s: s.lower()).distinct()
 sampleWords = allWords.sample(withReplacement=True, fraction=0.2, seed=666)
 weirdSampling = sampleWords.union(allWordsNoArticles.sample(False, fraction=0.3))
 \end{minted}
+
 Se nos pide indicar qué hace cada una de las transformaciones. Procedemos línea a línea:
 
 \begin{enumerate}
@@ -690,8 +692,8 @@ Se nos pide indicar qué hace cada una de las transformaciones. Procedemos líne
 	\item \inline{sampleWords = allWords.sample(withReplacement=True, fraction=0.2, seed=666)} se extrae aleatoriamente con reemplazamiento un $20\%$ de las palabras que hay en \inline{allWords} para crear un nuevo RDD. Por supuesto, se tendrá que $M = 0.2 N$ ($M < N$).
 	
 	\item \begin{minted}[linenos]{python}
-	    weirdSampling = sampleWords.union
-	        (allWordsNoArticles.sample(False, fraction=0.3))
+weirdSampling = sampleWords.union
+     (allWordsNoArticles.sample(False, fraction=0.3))
 		\end{minted} 
 		primero extrae sin reemplazamiento un $30\%$ de elementos que tenemos en el RDD que no tiene artículos (en este caso, tendríamos $M < N$ pues reducimos elementos) y a continuación une estos elementos extraídos al RDD que tiene una muestra del $20\%$ que hemos obtenido en el paso anterior. En esta unión aumenta el tamaño del RDD por lo que en este paso $M > N$.
 \end{enumerate}
@@ -737,25 +739,25 @@ A continuación, se pide que se implemente la acción \inline{count} que nos dic
 \begin{itemize}
 	\item Usando \inline{map} y \inline{reduce}. Lo podemos hacer de la siguiente forma
 	\begin{minted}[linenos]{python}
-	numlines =  quijote.map(lambda s: 1)
-	total_lines = numlines.reduce(lambda a,b: a+b )
-	
-	5534
+numlines =  quijote.map(lambda s: 1)
+total_lines = numlines.reduce(lambda a,b: a+b )
+
+5534
 	\end{minted}
 	
 	Hacemos un map para transformar cada línea en un $1$, y luego los sumamos todos con reduce.
 	
 	\item Usando solo \inline{reduce}. Lo podemos hacer pero debemos definir una función para distinguir si los elementos que se van a sumar son strings o son ya parte de la suma total. El código completo es el siguiente:
 	\begin{minted}[linenos]{python}
-		def f(a,b):
-		    int_a = a if type(a) == int else 1
-		    int_b = b if type(b) == int else 1
-		  
-		    return int_a + int_b
-		  
-		total_lines = quijote.reduce(f)
-		
-		5534
+def f(a,b):
+int_a = a if type(a) == int else 1
+int_b = b if type(b) == int else 1
+
+return int_a + int_b
+
+total_lines = quijote.reduce(f)
+
+5534
 	\end{minted}
 
 \end{itemize}
@@ -763,55 +765,55 @@ A continuación, se pide que se implemente la acción \inline{count} que nos dic
 \subsubsection*{ Pregunta TS2.3 Explica el proposito de cada una de las operaciones anteriores}
 
 \begin{minted}[linenos]{python}
-	import requests
-	import re
-	allWords = allWords.flatMap(lambda w: 
-	        re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.lower()).split(" "))
-	        .filter(lambda a: len(a)>0)
-	allWords2 = sc.parallelize(
-	        requests.get("[url]el_quijote_ii.txt").iter_lines())
-	allWords2 = allWords2.flatMap(lambda w: 
-	        re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.decode("utf8").lower())
-	        .split(" ")).filter(lambda a: len(a)>0)
+import requests
+import re
+allWords = allWords.flatMap(lambda w: 
+     re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.lower()).split(" "))
+     .filter(lambda a: len(a)>0)
+allWords2 = sc.parallelize(
+     requests.get("[url]el_quijote_ii.txt").iter_lines())
+allWords2 = allWords2.flatMap(lambda w: 
+     re.sub(""";|:|\.|,|-|–|"|'|\s"""," ", w.decode("utf8").lower())
+     .split(" ")).filter(lambda a: len(a)>0)
 \end{minted}
 
 Esta celda se dedica a importar la librería \inline{requests} que sirve para hacer peticiones web, y la librería \inline{re} para trabajar con expresiones regulares, y a continuación crea dos RDD diferentes: uno en el que elimina todos los caracteres que no forman parte de palabras como tal, y otro en el que lee la segunda parte del Quijote, obtiene todas sus líneas y luego las separa y le quita los caracteres que no son parte de las palabras igual que hizo con la primera parte.
 
 \begin{minted}[linenos]{python}
-	allWords.take(10)
-	allWords2.take(10)
+allWords.take(10)
+allWords2.take(10)
 \end{minted}
 
 Esta celda simplemente muestra los $10$ primeros elementos de cada uno de los RDD creados.
 
 
 \begin{minted}[linenos]{python}
-    words = allWords.map(lambda e: (e,1))
-    words2 = allWords2.map(lambda e: (e,1))
-    
-    words.take(10)
+words = allWords.map(lambda e: (e,1))
+words2 = allWords2.map(lambda e: (e,1))
+
+words.take(10)
 \end{minted}
 
 En esta celda se tranforman los elementos de cada RDD en tuplas \inline{(clave,valor)} cada una con un $1$ como valor. Luego, se muestran las $10$ primeras de uno de los RDD.
 
 \begin{minted}[linenos]{python}
-    frequencies = words.reduceByKey(lambda a,b: a+b)
-    frequencies2 = words2.reduceByKey(lambda a,b: a+b)
-    frequencies.takeOrdered(10, key=lambda a: -a[1])
+frequencies = words.reduceByKey(lambda a,b: a+b)
+frequencies2 = words2.reduceByKey(lambda a,b: a+b)
+frequencies.takeOrdered(10, key=lambda a: -a[1])
 \end{minted}
 
 Esta celda usa \inline{reduceByKey} para crear un RDD en el que se suman los valores de los elementos que tienen la misma clave. En este caso, lo que se está haciendo es crear un RDD en el que se ha contado cuántas veces aparece cada palabra en el texto. Luego, se muestran las 10 palabras que más salen usando \inline{takeOrdered} con una función que ordena los elementos de mayor a menor.
 
 \begin{minted}[linenos]{python}
-    res = words.groupByKey().takeOrdered(10, key=lambda a: -len(a))
-    res # To see the content, res[i][1].data
+res = words.groupByKey().takeOrdered(10, key=lambda a: -len(a))
+res # To see the content, res[i][1].data
 \end{minted}
 
 En esta celda se agrupan en listas los valores que compartan clave. Es decir, si tenemos dos parejas \inline{(palabra1,1),(palabra1,1)}, obtendremos como resultado \inline{(palabra1,[1,1])}. El vector en realidad queda como un \inline{ResultIterable} de \inline{pyspark}, pero podemos convertirlo a una lista como hicimos anteriormente.
 
 \begin{minted}[linenos]{python}
-	joinFreq = frequencies.join(frequencies2)
-	joinFreq.take(10)
+joinFreq = frequencies.join(frequencies2)
+joinFreq.take(10)
 \end{minted}
 
 En esta celda, creamos un nuevo RDD que tiene \inline{(palabra, (valor1,valor2))} donde valor1 es la frecuencia de esa palabra en el primer texto del Quijote y valor2 es la frecuencia de esa palabra en el segundo texto. Luego, se muestran 10.
@@ -860,9 +862,9 @@ joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
 Y esta segunda:
 
 \begin{minted}[linenos]{python}
-	result = joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
-	result.cache()
-	result.takeOrdered(10, lambda v: -v[1]), result.takeOrdered(10, lambda v: +v[1])
+result = joinFreq.map(lambda e: (e[0], (e[1][0] - e[1][1])/(e[1][0] + e[1][1])))
+result.cache()
+result.takeOrdered(10, lambda v: -v[1]), result.takeOrdered(10, lambda v: +v[1])
 \end{minted}
 
 Y queremos saber cual de las dos es más eficiente. En este caso, la respuesta es sencilla: 
@@ -877,44 +879,44 @@ Además, si nos fijamos en el \href{https://spark.apache.org/docs/2.2.0/rdd-prog
 Vamos a probar esto. Primero, en la \href{https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.RDD.coalesce.html}{documentación de coalesce} leemos que sirve para devolver un nuevo RDD hecho en menos particiones. Vemos también que, en principio, el RDD que vamos a usar tiene 2 particiones:
 
 \begin{minted}[linenos]{python}
-	allWords2.getNumPartitions()
-	
-	2
+allWords2.getNumPartitions()
+
+2
 \end{minted}
 
 A continuación, intentamos usar \inline{coalesce} para modificar estas particiones incrementándolas.
 
 \begin{minted}[linenos]{python}
-	for i in range(1,6):
-	    print("Usamos coalesce con numpartitions={}".format(i))
-	    !rm -rf palabras_parte2
-	    allWords2 = allWords2.coalesce(numPartitions=i)
-	                .saveAsTextFile("palabras_parte2")
-	    !ls palabras_parte2
+for i in range(1,6):
+  print("Usamos coalesce con numpartitions={}".format(i))
+  !rm -rf palabras_parte2
+  allWords2 = allWords2.coalesce(numPartitions=i)
+              .saveAsTextFile("palabras_parte2")
+  !ls palabras_parte2
 	
 	Usamos coalesce con numpartitions=1
-	    part-00000  _SUCCESS
+  part-00000  _SUCCESS
 	Usamos coalesce con numpartitions=2
-	    part-00000  part-00001	_SUCCESS
+  part-00000  part-00001	_SUCCESS
 	Usamos coalesce con numpartitions=3
-	    part-00000  part-00001	_SUCCESS
-	...
+  part-00000  part-00001	_SUCCESS
+		...
 \end{minted}
 
 Vemos que, a partir de $2$ particiones, el número de particiones que se ven reflejadas en disco no aumenta más, esto ocurre porque \inline{coalesce} con esos parámetros solo sirve para reducir. Podríamos usar como parámetro \inline{shuffle = True}, lo cual haría que se barajasen de nuevo los elementos y así sí que se pueden crear nuevas particiones. La salida del código anterior poniendo este parámetro es: 
 
 \begin{minted}[linenos]{python}
-	Usamos coalesce con numpartitions=1
-	part-00000  _SUCCESS
-	Usamos coalesce con numpartitions=2
-	part-00000  part-00001	_SUCCESS
-	Usamos coalesce con numpartitions=3
-	part-00000  part-00001	part-00002  _SUCCESS
-	Usamos coalesce con numpartitions=4
-	part-00000  part-00001	part-00002  part-00003	_SUCCESS
-	Usamos coalesce con numpartitions=5
-	part-00000  part-00001	part-00002  part-00003	part-00004 
-	                                             _SUCCESS
+Usamos coalesce con numpartitions=1
+part-00000  _SUCCESS
+Usamos coalesce con numpartitions=2
+part-00000  part-00001	_SUCCESS
+Usamos coalesce con numpartitions=3
+part-00000  part-00001	part-00002  _SUCCESS
+Usamos coalesce con numpartitions=4
+part-00000  part-00001	part-00002  part-00003	_SUCCESS
+Usamos coalesce con numpartitions=5
+part-00000  part-00001	part-00002  part-00003	part-00004 
+                                          _SUCCESS
 \end{minted}
 
 Sin embargo, esto sería equivalente a usar la función \inline{repartition} que hemos visto anteriormente, que como se nos indica no tiene en cuenta que los datos tengan que moverse en el disco para rehacer las particiones.
@@ -938,47 +940,47 @@ De esta forma no será necesario hacer primera pasada por los datos para conocer
 Para obtener la media y desviaciones típicas de las edades de los distintos equipos en Hadoop tomamos el programa utilizado para contar palabras y realizamos pequeñas alteraciones. Por un lado, en el \inline{mapper} hemos de tomar únicamente el nombre del equipo y la edad del jugador para cada línea de nuestro archivo de entrada. Pondremos estos valores en el formato \inline{(clave, valor)}, donde la clave será el nombre del equipo y el valor, la edad del jugador:
 
 \begin{minted}[linenos]{java}
-	public static class PlayersMapper extends Mapper<Object, Text, Text, IntWritable>{
-		
-		private Text team = new Text();
-		private final static IntWritable age = new IntWritable();
-		
-		public void map(Object key, Text value, Context context)
-		throws IOException, InterruptedException {
-			String[] data = value.toString().split(",");
-			team.set(data[1]);
-			age.set(Integer.parseInt(data[2]));
-			context.write(team, age);
-		}
+public static class PlayersMapper extends Mapper<Object, Text, Text, IntWritable>{
+	
+	private Text team = new Text();
+	private final static IntWritable age = new IntWritable();
+	
+	public void map(Object key, Text value, Context context)
+	throws IOException, InterruptedException {
+		String[] data = value.toString().split(",");
+		team.set(data[1]);
+		age.set(Integer.parseInt(data[2]));
+		context.write(team, age);
 	}
+}
 \end{minted}
 
 Al agrupar por clave obtenemos parejas \inline{(nombre del equipo, [edad1, edad2, ...])}. En el \inline{reducer} recibimos este vector y calculamos la media y la desviación típica utilizando la fórmula explicada en la introducción:
 
 \begin{minted}[linenos]{java}
-	public static class PlayersReducer extends Reducer<Text, IntWritable, Text, Iterable<IntWritable>> {
+public static class PlayersReducer extends Reducer<Text, IntWritable, Text, Iterable<IntWritable>> {
+	
+	private FloatWritable mean = new FloatWritable();
+	private FloatWritable std = new FloatWritable();
+	
+	public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+		float sum = 0;
+		float sum_squared = 0;
+		int n_elems = 0;
 		
-		private FloatWritable mean = new FloatWritable();
-		private FloatWritable std = new FloatWritable();
-		
-		public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-			float sum = 0;
-			float sum_squared = 0;
-			int n_elems = 0;
-			
-			for (IntWritable val : values) {
-				n_elems++;
-				sum += val.get();
-				sum_squared += val.get() * val.get();
-			}
-			
-			mean.set(sum / n_elems);
-			std.set((float)Math.sqrt(sum_squared / n_elems - mean.get() * mean.get()));
-			
-			FloatWritable result[] = {mean, std};
-			context.write(key, Arrays.asList(result));
+		for (IntWritable val : values) {
+			n_elems++;
+			sum += val.get();
+			sum_squared += val.get() * val.get();
 		}
+		
+		mean.set(sum / n_elems);
+		std.set((float)Math.sqrt(sum_squared / n_elems - mean.get() * mean.get()));
+		
+		FloatWritable result[] = {mean, std};
+		context.write(key, Arrays.asList(result));
 	}
+}
 \end{minted}
 
 Merece la pena destacar dos detalles del fragmento de código anterior. Por un lado, la entrada del método \inline{reduce} ha pasado a ser del tipo \inline{Iterable<IntWritable>}, pues ahora recibe un vector de edades. Por otro lado, puesto que queremos que nuestro reducer devuelva \inline{(nombre del equipo, [media, desviación típica])}, hemos de crear un vector de números reales \inline{result[]}, y utilizarlo para formatear la salida.
@@ -986,22 +988,22 @@ Merece la pena destacar dos detalles del fragmento de código anterior. Por un l
 Finalmente, en el \inline{main} bastará con adecuar las asignaciones a los nuevos nombres de los métodos \inline{map} y \inline{reduce}:
 
 \begin{minted}[linenos]{java}
-	Job job = new Job(conf, "players");
-	job.setMapperClass(PlayersMapper.class);
-	job.setReducerClass(PlayersReducer.class);
-	job.setOutputKeyClass(Text.class);
-	job.setOutputValueClass(IntWritable.class);
+Job job = new Job(conf, "players");
+job.setMapperClass(PlayersMapper.class);
+job.setReducerClass(PlayersReducer.class);
+job.setOutputKeyClass(Text.class);
+job.setOutputValueClass(IntWritable.class);
 \end{minted}
 
 Al ejecutar este programa en nuestra máquina virtual con la correspondiente entrada obtenemos los siguientes resultados:
 
 \begin{minted}[linenos]{text}
-	Arsenal	[26.678572, 3.3705935]
-	Bournemouth	[26.875, 4.304191]
-	Brighton+and+Hove	[28.318182, 3.5596976]
-	Burnley	[27.944445, 2.8180392]
-	Chelsea	[27.05, 3.6942554]
-	[...]
+Arsenal	[26.678572, 3.3705935]
+Bournemouth	[26.875, 4.304191]
+Brighton+and+Hove	[28.318182, 3.5596976]
+Burnley	[27.944445, 2.8180392]
+Chelsea	[27.05, 3.6942554]
+[...]
 \end{minted}
 
 \subsection{Spark}
