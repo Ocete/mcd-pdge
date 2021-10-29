@@ -50,11 +50,11 @@
 \author{José Antonio Álvarez Ocete\\ Francisco Javier Sáez Maldonado}
 \date{\today}
 \title{Introducción a Hadoop y Spark\\\medskip
-\large Procesamiento de Datos a Gran Escala}
+\rarge Procesamiento de Datos a Gran Escala}
 
 \newcommand{\I}{\mathbb{I}}
 \newcommand{\ra}{\rangle}
-\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
 
 \begin{document}
 
@@ -95,13 +95,13 @@ TODO: Añadir enunciado
 La única operación no trivial aplicable sobre un único bit es la negación: la puerta NOT. De la misma forma, es natural preguntarse cuál es el equivalente a la puerta NOT en el mundo cuántico. Dado que un qubit está descrito por dos amplitudes $\alpha$ y $\beta$:
 
 \[
-	|\varphi\la = \alpha |0\la + \beta |1\la,
+	|\varphi\ra = \alpha |0\ra + \beta |1\ra,
 \]
 
 la puerta NOT será un intercambio entre las posiciones de estas amplitudes, obteniéndose así:
 
 \[
-	|\varphi\la = \beta |0\la + \alpha |1\la.
+	|\varphi\ra = \beta |0\ra + \alpha |1\ra.
 \]
 
 La matriz unitaria que describe esta transformación es sencilla:
@@ -122,11 +122,7 @@ Vemos la implementación de esta puerta en el Quantum Composer de IBM:
 	\caption{Circuito con puerta de Hadamard}
 \end{figure}
 
-Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre en el estado $|0\la$. Tras aplicarlo a nuestro qubit una puerta $X$ obtendremos $|1\ra$.
-
-\paragraph*{Puertas de Pauli}
-
-
+Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre en el estado $|0\ra$. Tras aplicarlo a nuestro qubit una puerta $X$ obtendremos $|1\ra$.
 
 \paragraph*{Puerta Hadamard}
 
@@ -140,19 +136,19 @@ Finalmente presentamos la puerta de Hadamard para un único bit. Está descrita 
 	\end{pmatrix}
 \]
 
-Uno de sus usos más comunes es la superposición de qubits. Si aplicamos esta puerta al estado $|0\la$ obtenemos el estado de Bell:
+Uno de sus usos más comunes es la superposición de qubits. Si aplicamos esta puerta al estado $|0\ra$ obtenemos el estado de Bell:
 
 \[
-	H|0\la = \frac{1}{\sqrt 2} |0\la + \frac{1}{\sqrt 2} |1\la = |+\la
+	H|0\ra = \frac{1}{\sqrt 2} |0\ra + \frac{1}{\sqrt 2} |1\ra = |+\ra
 \]
 
-Mientras que si se la aplicamos al estado $|1\la$ obtenemos:
+Mientras que si se la aplicamos al estado $|1\ra$ obtenemos:
 
 \[
-	H|1\la = \frac{1}{\sqrt 2} |0\la - \frac{1}{\sqrt 2} |1\la = |-\la
+	H|1\ra = \frac{1}{\sqrt 2} |0\ra - \frac{1}{\sqrt 2} |1\ra = |-\ra
 \]
 
-Que también supone una superposición exacta de $|0\la$ y $|1\la$ puesto que $|1/\sqrt 2|^2 = |-1/\sqrt 2|^2 = 1/2$.
+Que también supone una superposición exacta de $|0\ra$ y $|1\ra$ puesto que $|1/\sqrt 2|^2 = |-1/\sqrt 2|^2 = 1/2$.
 
 Podemos estudiar el comportamiento de esta puerta utilizando el Quantum Composer de IBM:
 
@@ -164,20 +160,69 @@ Podemos estudiar el comportamiento de esta puerta utilizando el Quantum Composer
 
 Mirando tanto la \href{URL}{esfera de Bloch} como las probabilidades vemos que tenemos la misma probabilidad de medir $0$ y $1$.
 
+\paragraph*{Puertas de Pauli}
+
+Un conjunto particularmente relevante de puertas son las descritas por las \text{matrices de Pauli}:
+
+\[
+X =
+	\begin{pmatrix}
+		0 & 1 \\
+		1 & 0 
+	\end{pmatrix}; \quad
+	Y =
+	\begin{pmatrix}
+		0 & -i \\
+		i & 0 
+	\end{pmatrix}; \quad
+	Z =
+	\begin{pmatrix}
+		1 & 0 \\
+		0 & -1 
+	\end{pmatrix}
+\]
+
+Ya conocemos la matriz $X$, descrita también como la puerta NOT quántica.
+
+\paragraph*{Puertas $T$}
+
+La puerta $\pi/8$, normalmente descrita por la letra $T$, es una \emph{puerta de fase}. Las puertas de fase son un tipo especial de puertas cuánticas que llevan $|0\ra \mapsto |0\ra$ y $|1\ra \mapsto e^{i\phi}|1\ra$, donde $\phi$ es un ángulo de giro. El término $e^{i\phi}$ se denomina \emph{fase} y no afecta a los resultados de las mediciones $0$ y $1$. En particular, la puerta $T$ cumple $\phi = \pi/4$, y la puerta $Z$ de Pauli es una puerta fase con $\phi = \pi/2$:
+
+\[
+	T =
+	\begin{pmatrix}
+		1 & 0 \\
+		0 & e^{i\frac{\pi}{4}}
+	\end{pmatrix}; \quad
+	Z =
+	\begin{pmatrix}
+		1 & 0 \\
+		0 & e^{i\frac{\pi}{2}} = -1
+	\end{pmatrix}
+\]
+
+En computación clásica, uno de los resultados básicos más relevante es que cualquier función booleana puede describirse utilizando únicamente las puertas clásicas AND, OR y NOT. De la misma forma, en computación cuántica se obtiene siguiente resultado
+
+\begin{theorem}
+	Toda matriz unitaria puede aproximarse con una combinación de puertas Hadamard, CNOT y $\pi/8$.
+\end{theorem}
+
+Esto es, todo circuito cuántico puede describirse utilizando únicamente dichas puertas.
+
 \subsection{Generación de números aleatorios con un Computador Cuántico}
 
 TODO: añadir enunciado
 
-Sabemos que utilizando la puerta de Hadarmad $H$ explicada en el apartado anterior ponemos un qubit $|0\la$ en superposición:
+Sabemos que utilizando la puerta de Hadarmad $H$ explicada en el apartado anterior ponemos un qubit $|0\ra$ en superposición:
 
 \[
-	H|0\la = \frac{1}{\sqrt 2} |0\la + \frac{1}{\sqrt 2} |1\la
+	H|0\ra = \frac{1}{\sqrt 2} |0\ra + \frac{1}{\sqrt 2} |1\ra
 \]
 
-Si ahora medimos este qubit obtendremos $|0\la$ con probabilidad $|1/\sqrt 2|^2 = 1/2$, y $|1\ra$ con probabilidad $1/2$. Esto es, hemos creado un generador de bits aleatorios utilizando un único qubit. Para crear un generador de 3 bits utilizaremos un sistema de 3 qubits. Inicialmente en el estado $|000\ra$, aplicaremos una puerta Hadamard a cada qubit de forma independiente, poniendo así cada qubit en superposición:
+Si ahora medimos este qubit obtendremos $|0\ra$ con probabilidad $|1/\sqrt 2|^2 = 1/2$, y $|1\ra$ con probabilidad $1/2$. Esto es, hemos creado un generador de bits aleatorios utilizando un único qubit. Para crear un generador de 3 bits utilizaremos un sistema de 3 qubits. Inicialmente en el estado $|000\ra$, aplicaremos una puerta Hadamard a cada qubit de forma independiente, poniendo así cada qubit en superposición:
 
 \[
-	\hat H_3|000\la = \frac{|000\la + |001\la + |010\la + |011\la + |100\la + |101\la + |110\la + |111\la}{\sqrt 8} |0\la
+	\hat H_3|000\ra = \frac{|000\ra + |001\ra + |010\ra + |011\ra + |100\ra + |101\ra + |110\ra + |111\ra}{\sqrt 8} |0\ra
 \]
 
 Donde la puerta $H_3$ tranformación de Hadamard para tres qubits. Se puede definir recursivamente de la siguiente forma:
@@ -208,20 +253,29 @@ H_3 = \frac{1}{2^{3/2}}
 
 Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos utilizando el Quantum Composer de IBM:
 
-%\begin{figure}[H]
-%	\centering
-%	\includegraphics[scale=0.8]{figures/barplot.pdf}
-%	\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
-%\end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/3bit_rand.png}
+	\caption{Circuito de generación de números aleatorios con 3 bits}
+\end{figure}
 
-Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. Comprobamos los resultados ejecutando un trabajo con este circuito en el ordenador cuántico de IBM:
+Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. En la parte inferior de la imagen vemos como tenemos la misma probabilidad de obtener cualquiera de los posibles resultados. Esto es, cualquiera de los números del $0$ al $7$, tomando así un número aleatorio de 3 bits. Añadimos tres medidas, una para cada qubit, y ejecutamos el circuito resultante utilizando un simulador de 
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/3bit_rand_result.png}
+	\caption{Resultados de la simulación con 1024 ejecuciones}
+\end{figure}
 
-
+Como podemos ver en la gráfica, obtenemos una probabilidad similar de medir cada uno de los posibles resultados.
 
 \subsection{Entrelazamiento}
 
+
+
 \subsection{Sumador de 2 qbits}
+
+
 
 \section{Ejercicios opcionales de la práctica 2}
 
