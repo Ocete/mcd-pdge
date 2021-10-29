@@ -238,17 +238,17 @@ Donde la puerta $H_3$ tranformación de Hadamard para tres qubits. Se puede defi
 Así obtenemos la puerta Hadamard para tres qubits:
 
 \[
-H_3 = \frac{1}{2^{3/2}}
-\begin{pmatrix}
-	1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
-	1 & -1 & 1 & -1 & 1 & -1 & 1 & -1 \\
-	1 & 1 & -1 & -1 & 1 & 1 & -1 & -1 \\
-	1 & -1 & -1 & 1 & 1 & -1 & -1 & 1 \\
-	1 & 1 & 1 & 1 & -1 & -1 & -1 & -1 \\
-	1 & -1 & 1 & -1 & -1 & 1 & -1 & 1 \\
-	1 & 1 & -1 & -1 & -1 & -1 & 1 & 1 \\
-	1 & -1 & -1 & 1 & -1 & 1 & 1 & -1
-\end{pmatrix}
+	H_3 = \frac{1}{2^{3/2}}
+	\begin{pmatrix}
+		1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+		1 & -1 & 1 & -1 & 1 & -1 & 1 & -1 \\
+		1 & 1 & -1 & -1 & 1 & 1 & -1 & -1 \\
+		1 & -1 & -1 & 1 & 1 & -1 & -1 & 1 \\
+		1 & 1 & 1 & 1 & -1 & -1 & -1 & -1 \\
+		1 & -1 & 1 & -1 & -1 & 1 & -1 & 1 \\
+		1 & 1 & -1 & -1 & -1 & -1 & 1 & 1 \\
+		1 & -1 & -1 & 1 & -1 & 1 & 1 & -1
+	\end{pmatrix}
 \]
 
 Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos utilizando el Quantum Composer de IBM:
@@ -270,6 +270,28 @@ Este simple circuito cuántico pone todos los qubits en superposición y despué
 Como podemos ver en la gráfica, obtenemos una probabilidad similar de medir cada uno de los posibles resultados.
 
 \subsection{Entrelazamiento}
+
+En este apartado explicaremos en detalle el siguiente circuito cuántico:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/entanglement_statement.png}
+\end{figure}
+
+Comenzaremos estudiando un circuito ligeramente más sencillo que también produce entrelazamiento cuántico:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/entanglement.png}
+\end{figure}
+
+Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicación de dicha puerta al estado $|0\ra$ será $|+\ra$. Utilizando a continuación de la puerta CNOT, como el estado de control tiene la misma probabilidad de ser $|0\ra$ que $|1\ra$, el segundo qubit tendrá la misma probabilidad de tener dichos valores. Analíticamente:
+
+\[
+	|+\ra|0\ra CNOT = \frac{|000\ra + |001\ra + |010\ra + |011\ra + |100\ra + |101\ra + |110\ra + |111\ra}{\sqrt 8} |0\ra
+\]
+
+\Phi
 
 
 
