@@ -1,0 +1,220 @@
+% Created 2021-10-06 mar 13:05
+% Intended LaTeX compiler: pdflatex
+%%% Local Variables:
+%%% LaTeX-command: "pdflatex --shell-escape"
+%%% End:
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black}
+\setlength{\parindent}{0in}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[spanish]{babel}
+\usepackage{mathtools}
+\usepackage{palatino}
+\usepackage{fancyhdr}
+\usepackage{sectsty}
+\usepackage{engord}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage[compact]{titlesec}
+\usepackage[center]{caption}
+\usepackage{placeins}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{bayesnet}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.text}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{minted}
+\usepackage{pdfpages}
+
+\def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
+
+\titlespacing*{\subsection}{0pt}{5.5ex}{3.3ex}
+\titlespacing*{\section}{0pt}{5.5ex}{1ex}
+\author{José Antonio Álvarez Ocete\\ Francisco Javier Sáez Maldonado}
+\date{\today}
+\title{Introducción a Hadoop y Spark\\\medskip
+\large Procesamiento de Datos a Gran Escala}
+
+\newcommand{\I}{\mathbb{I}}
+\newcommand{\ra}{\rangle}
+\newcommand{\la}{\langle}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Parte 1: Programación GPGPU}
+
+\subsection{Recursos de la GPU}
+\subsection{Suma de 2 vectores}
+\subsection{Suma de 2 matrices}
+\subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
+
+\section{Parte 2: Programación con QisKit: (Computación cuántica)}
+
+Para esta parte de la práctica utilizaremos el \href{https://quantum-computing.ibm.com/composer}{Quantum Composer de IBM}. Puesto que el tenemos un número limitado de procesos a ejecutar (únicamente 5) veremos los resultados en el simulador sin llegar a medirlo en muchos casos.
+
+\subsection{Puertas Cuánticas}
+
+TODO: Añadir enunciado
+
+
+\paragraph*{Puerta CNOT}
+
+La única operación no trivial aplicable sobre un único bit es la negación: la puerta NOT. De la misma forma, es natural preguntarse cuál es el equivalente a la puerta NOT en el mundo cuántico. Dado que un qubit está descrito por dos amplitudes $\alpha$ y $\beta$:
+
+\[
+	|\varphi\la = \alpha |0\la + \beta |1\la,
+\]
+
+la puerta NOT será un intercambio entre las posiciones de estas amplitudes, obteniéndose así:
+
+\[
+	|\varphi\la = \beta |0\la + \alpha |1\la.
+\]
+
+La matriz unitaria que describe esta transformación es sencilla:
+
+\[
+X = \frac{1}{\sqrt 2}
+\begin{pmatrix}
+	0 & 1 \\
+	1 & 0 
+\end{pmatrix}
+\]
+
+Vemos la implementación de esta puerta en el Quantum Composer de IBM:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/gate-x.png}
+	\caption{Circuito con puerta de Hadamard}
+\end{figure}
+
+Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre en el estado $|0\la$. Tras aplicarlo a nuestro qubit una puerta $X$ obtendremos $|1\ra$.
+
+\paragraph*{Puertas de Pauli}
+
+
+
+\paragraph*{Puerta Hadamard}
+
+Finalmente presentamos la puerta de Hadamard para un único bit. Está descrita por la siguiente matriz unitaria:
+
+\[
+	H_1 = \frac{1}{\sqrt 2}
+	\begin{pmatrix}
+		1 & 1 \\
+		1 & -1 
+	\end{pmatrix}
+\]
+
+Uno de sus usos más comunes es la superposición de qubits. Si aplicamos esta puerta al estado $|0\la$ obtenemos el estado de Bell:
+
+\[
+	H|0\la = \frac{1}{\sqrt 2} |0\la + \frac{1}{\sqrt 2} |1\la = |+\la
+\]
+
+Mientras que si se la aplicamos al estado $|1\la$ obtenemos:
+
+\[
+	H|1\la = \frac{1}{\sqrt 2} |0\la - \frac{1}{\sqrt 2} |1\la = |-\la
+\]
+
+Que también supone una superposición exacta de $|0\la$ y $|1\la$ puesto que $|1/\sqrt 2|^2 = |-1/\sqrt 2|^2 = 1/2$.
+
+Podemos estudiar el comportamiento de esta puerta utilizando el Quantum Composer de IBM:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/gate-hadamard.png}
+	\caption{Circuito con puerta de Hadamard}
+\end{figure}
+
+Mirando tanto la \href{URL}{esfera de Bloch} como las probabilidades vemos que tenemos la misma probabilidad de medir $0$ y $1$.
+
+\subsection{Generación de números aleatorios con un Computador Cuántico}
+
+TODO: añadir enunciado
+
+Sabemos que utilizando la puerta de Hadarmad $H$ explicada en el apartado anterior ponemos un qubit $|0\la$ en superposición:
+
+\[
+	H|0\la = \frac{1}{\sqrt 2} |0\la + \frac{1}{\sqrt 2} |1\la
+\]
+
+Si ahora medimos este qubit obtendremos $|0\la$ con probabilidad $|1/\sqrt 2|^2 = 1/2$, y $|1\ra$ con probabilidad $1/2$. Esto es, hemos creado un generador de bits aleatorios utilizando un único qubit. Para crear un generador de 3 bits utilizaremos un sistema de 3 qubits. Inicialmente en el estado $|000\ra$, aplicaremos una puerta Hadamard a cada qubit de forma independiente, poniendo así cada qubit en superposición:
+
+\[
+	\hat H_3|000\la = \frac{|000\la + |001\la + |010\la + |011\la + |100\la + |101\la + |110\la + |111\la}{\sqrt 8} |0\la
+\]
+
+Donde la puerta $H_3$ tranformación de Hadamard para tres qubits. Se puede definir recursivamente de la siguiente forma:
+
+\[
+	H_m = H_1 \times H_{m-1}, H_1 = \frac{1}{\sqrt 2}
+	\begin{pmatrix}
+		1 & 1 \\
+		1 & -1 
+	\end{pmatrix}
+\]
+
+Así obtenemos la puerta Hadamard para tres qubits:
+
+\[
+H_3 = \frac{1}{2^{3/2}}
+\begin{pmatrix}
+	1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+	1 & -1 & 1 & -1 & 1 & -1 & 1 & -1 \\
+	1 & 1 & -1 & -1 & 1 & 1 & -1 & -1 \\
+	1 & -1 & -1 & 1 & 1 & -1 & -1 & 1 \\
+	1 & 1 & 1 & 1 & -1 & -1 & -1 & -1 \\
+	1 & -1 & 1 & -1 & -1 & 1 & -1 & 1 \\
+	1 & 1 & -1 & -1 & -1 & -1 & 1 & 1 \\
+	1 & -1 & -1 & 1 & -1 & 1 & 1 & -1
+\end{pmatrix}
+\]
+
+Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos utilizando el Quantum Composer de IBM:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/barplot.pdf}
+	\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
+\end{figure}
+
+Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. Comprobamos los resultados ejecutando un trabajo con este circuito en el ordenador cuántico de IBM:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/barplot.pdf}
+	\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
+\end{figure}
+
+
+\subsection{Entrelazamiento}
+
+\subsection{Sumador de 2 qbits}
+
+\section{Ejercicios opcionales de la práctica 2}
+
+\end{document}
