@@ -62,9 +62,21 @@
 
 \tableofcontents
 
+Dividiremos esta práctica en 2 partes fundamentales. 
+
+\begin{enumerate}
+	
+	\item En la primera, se concentrará en realizar diversas pruebas con los elementos más básicos de la programación en CUDA.
+	\item En la segunda, TODO!!!!!!!!!!!
+\end{enumerate}
+
 \section{Parte 1: Programación GPGPU}
 
 \subsection{Recursos de la GPU}
+
+Para programar en GPU, el primer paso que debemos dar es conocer las características (y por tanto, los recursos) que el dispositivo del que disponemos nos ofrece. En este caso práctico, vamos a realizar las pruebas utilizando \href{https://colab.research.google.com/}{Google Colaboratory}. Google pone a disposición del usuario tanto GPUs como TPUs que son más que suficientes para realizar algunas pruebas. 
+
+Lo primero que haremos es estudiar qué recursos tiene la GPU que nos ofrecen
 \subsection{Suma de 2 vectores}
 \subsection{Suma de 2 matrices}
 \subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
@@ -106,7 +118,7 @@ Vemos la implementación de esta puerta en el Quantum Composer de IBM:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/gate-x.png}
+	\includegraphics[scale=0.4]{figures/gate-x.png}
 	\caption{Circuito con puerta de Hadamard}
 \end{figure}
 
@@ -146,7 +158,7 @@ Podemos estudiar el comportamiento de esta puerta utilizando el Quantum Composer
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/gate-hadamard.png}
+	\includegraphics[scale=0.4]{figures/gate-hadamard.png}
 	\caption{Circuito con puerta de Hadamard}
 \end{figure}
 
@@ -196,19 +208,15 @@ H_3 = \frac{1}{2^{3/2}}
 
 Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos utilizando el Quantum Composer de IBM:
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.8]{figures/barplot.pdf}
-	\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
-\end{figure}
+%\begin{figure}[H]
+%	\centering
+%	\includegraphics[scale=0.8]{figures/barplot.pdf}
+%	\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
+%\end{figure}
 
 Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. Comprobamos los resultados ejecutando un trabajo con este circuito en el ordenador cuántico de IBM:
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.8]{figures/barplot.pdf}
-	\caption{Comparación de número de veces que aparece cada palabra con y sin preprocesamiento.}
-\end{figure}
+
 
 
 \subsection{Entrelazamiento}
