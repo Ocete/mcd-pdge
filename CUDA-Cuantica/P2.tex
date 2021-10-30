@@ -43,17 +43,18 @@
 \usepackage{minted}
 \usepackage{pdfpages}
 
-\def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
 
+
+\def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
+\newtheorem{theorem}{Theorem}
 \titlespacing*{\subsection}{0pt}{5.5ex}{3.3ex}
 \titlespacing*{\section}{0pt}{5.5ex}{1ex}
 \author{José Antonio Álvarez Ocete\\ Francisco Javier Sáez Maldonado}
 \date{\today}
-\title{Introducción a Hadoop y Spark\\\medskip
-\rarge Procesamiento de Datos a Gran Escala}
+\title{Introducción a Hadoop y Spark\\ Procesamiento de Datos a Gran Escala}
 
 \newcommand{\I}{\mathbb{I}}
-\newcommand{\ra}{\rangle}
+\newcommand{\la}{\langle}
 \newcommand{\ra}{\rangle}
 
 \begin{document}
@@ -83,8 +84,11 @@ Mem:            12G        571M        9.9G        1.2M        2.2G         11G
 Swap:            0B          0B          0B
 \end{minted}
 
-Como vemos, tenemos 12Gb de memoria prácticamente disponibles. Ahora, queremos comprobar también los recursos GPU que tenemos disponibles, sabiendo que hemos activado el entorno de Colaboratory para que tenga GPU. Verificamos las tarjetas gráficas que tenemos utilizando la orden \inline{nvidia-smi}. Obtenemos el resultado siguiente:
-\begin{minted}{bash}
+Como vemos, tenemos 12Gb de memoria prácticamente disponibles. Ahora, queremos comprobar también los recursos GPU que tenemos disponibles, sabiendo que hemos activado el entorno de Colaboratory para que tenga GPU. Verificamos las tarjetas gráficas que tenemos utilizando la orden \inline{nvidia-smi}. Obtenemos el resultado siguiente:\\
+
+\begin{minipage}{0.7\textwidth}
+
+\begin{minted}[fontsize=\footnotesize]{bash}
 	Fri Oct 29 14:57:32 2021       
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 495.29.05    Driver Version: 460.32.03    CUDA Version: 11.2     |
@@ -106,6 +110,7 @@ Como vemos, tenemos 12Gb de memoria prácticamente disponibles. Ahora, queremos 
 |  No running processes found                                                 |
 +-----------------------------------------------------------------------------+
 \end{minted}
+\end{minipage}\\
 Como vemos, en \textbf{esta conexión al servidor} se nos ha proporcionado una \emph{Nvidia Tesla K80}. Hacemos hincapié en que es en esta conexión porque en Google Colaboratory se asigna una GPU que esté disponible en ese momento, por lo que en otra ejecución podríamos obtener otra de capacidades de computación similares.
 
 Además de eso, se nos indica que tenemos como driver instalado la versión \inline{11.2} de CUDA. Sin embargo, hemos comprobado que la versión de ejecución de CUDA no es la misma de dos maneras distintas. Primeramente, si hacemos \lstinline{!nvcc --version} ya se nos indica por primera vez lo siguiente:
@@ -114,7 +119,7 @@ Cuda compilation tools, release 11.1, V11.1.105
 Build cuda_11.1.TC455_06.29190527_0
 \end{minted}
 
-Además de eso, podemos compilar el ejemplo que tenemos en \lstinline{/usr/local/cuda/samples/1_Utilities/deviceQuery/} usando el \inline{makefile} proporcionado y, al ejecutar el ejemplo, obtenemos la siguiente salida (mostramos un resumen de la misma debido a su extensión):
+Además de eso, podemos compilar el ejemplo que tenemos en \\ \lstinline{/usr/local/cuda/samples/1_Utilities/deviceQuery/} usando el \inline{makefile} proporcionado y, al ejecutar el ejemplo, obtenemos la siguiente salida (mostramos un resumen de la misma debido a su extensión):
 \begin{minted}[]{bash}
 Device 0: "Tesla K80"
   CUDA Driver Version / Runtime Version          11.2 / 11.1
@@ -200,7 +205,7 @@ result is 8
 
 Si comprobamos el perfil de ejecución, vemos el siguiente resultado:
 
-\begin{minted}[]{bash}
+\begin{minted}[fontsize=\footnotesize]{bash}
 	==229== NVPROF is profiling process 229, command: ./suma1d
 ==229== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
 result is 8
@@ -286,7 +291,7 @@ printf("Todos los valores de c valen lo mismo (1 true, 0 false):%d\n",res);
 Todos los valores de c valen lo mismo (1 true, 0 false): 1
 \end{minted}
 Como vemos, el resultado es correcto. Vemos el perfil de ejecución en este caso:
-\begin{minted}[]{bash}
+\begin{minted}[fontsize=\footnotesize]{bash}
 ==1891== NVPROF is profiling process 1891, command: ./suma2dvector
 ==1891== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
  valor a[0] es 0
@@ -298,24 +303,48 @@ resultado c[2] es 512
 Todos los valores de c valen lo mismo (1 true, 0 false): 1
 ==1891== Profiling application: ./suma2dvector
 ==1891== Profiling result:
-			Type  Time(%)      Time     Calls       Avg       Min       Max  Name
- GPU activities:   40.98%  5.0880us         1  5.0880us  5.0880us  5.0880us  add(int*, int*, int*)
-				   37.63%  4.6720us         2  2.3360us  2.0160us  2.6560us  [CUDA memcpy HtoD]
-				   21.39%  2.6560us         1  2.6560us  2.6560us  2.6560us  [CUDA memcpy DtoH]
-	  API calls:   99.49%  190.44ms         3  63.479ms  2.2440us  190.43ms  cudaMalloc
-					0.28%  529.05us         1  529.05us  529.05us  529.05us  cuDeviceTotalMem
-					0.10%  199.48us       101  1.9750us     145ns  87.079us  cuDeviceGetAttribute
-					0.07%  134.29us         3  44.764us  3.2210us  115.10us  cudaFree
-					0.03%  56.462us         3  18.820us  11.545us  25.237us  cudaMemcpy
-					0.01%  26.486us         1  26.486us  26.486us  26.486us  cuDeviceGetName
-					0.01%  25.925us         1  25.925us  25.925us  25.925us  cudaLaunchKernel
-					0.00%  5.9010us         1  5.9010us  5.9010us  5.9010us  cuDeviceGetPCIBusId
-					0.00%  1.7020us         3     567ns     162ns     876ns  cuDeviceGetCount
-					0.00%  1.2500us         2     625ns     233ns  1.0170us  cuDeviceGet
-					0.00%     385ns         1     385ns     385ns     385ns  cuDeviceGetUuid
+	Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+GPU:    40.98%  5.0880us         1  5.0880us  5.0880us  5.0880us  add(int*, int*, int*)
+        37.63%  4.6720us         2  2.3360us  2.0160us  2.6560us  [CUDA memcpy HtoD]
+        21.39%  2.6560us         1  2.6560us  2.6560us  2.6560us  [CUDA memcpy DtoH]
+API calls:  99.49%  190.44ms         3  63.479ms  2.2440us  190.43ms  cudaMalloc
+		0.28%  529.05us         1  529.05us  529.05us  529.05us  cuDeviceTotalMem
+		0.10%  199.48us       101  1.9750us     145ns  87.079us  cuDeviceGetAttribute
+		0.07%  134.29us         3  44.764us  3.2210us  115.10us  cudaFree
+		0.03%  56.462us         3  18.820us  11.545us  25.237us  cudaMemcpy
+		0.01%  26.486us         1  26.486us  26.486us  26.486us  cuDeviceGetName
+		0.01%  25.925us         1  25.925us  25.925us  25.925us  cudaLaunchKernel
+		0.00%  5.9010us         1  5.9010us  5.9010us  5.9010us  cuDeviceGetPCIBusId
+		0.00%  1.7020us         3     567ns     162ns     876ns  cuDeviceGetCount
+		0.00%  1.2500us         2     625ns     233ns  1.0170us  cuDeviceGet
+		0.00%     385ns         1     385ns     385ns     385ns  cuDeviceGetUuid
 \end{minted}
 
-Como vemos, de nuevo tenemos una única llamada a la función \inline{add}. Lo que tenemos ahora más relevante son $101$ llamadas a la función \inline{cuDeviceGetAttribute}. Esta función proporciona al programa información sobre la GPU. En particular, devuelve en un puntero el entero que existe en una cierta posición de memoria.
+Como vemos, de nuevo tenemos una única llamada a la función \inline{add}. No se observa una diferencia apreciable entre el tiempo de ejecución de esta llamada en este caso y en el anterior.
+
+\subsection{Paralelizando}
+El objetivo ahora será modificar el código actual para que la suma de vectores se realice según los bloques y las hebras que se le indiquen. En particular, querremos modificar el número de hebras para que se puedan paralelizar las operaciones. Comenzamos cambiando el número de hebras a $512$. Podemos apreciar en el código de la suma un cambio:
+\begin{minted}{CUDA}
+__global__ void add(int *a, int *b, int *c) {
+    //*c = *a + *b;
+    c[blockIdx.x] = a[blockIdx.x] + b[blockIdx.x];
+}
+\end{minted}
+
+Ahora, accedemos al valor \inline{blockIdx.x} de cada uno de los punteros para realizar la suma. Esto es importante pues ahora las operaciones se hacen en hebras diferentes y cada una de las operaciones se hace en una hebra diferente y debe guardarse
+
+
+\subsubsection{Preguntas}
+
+\begin{enumerate}
+
+\item Pruebe a lanzar diferente número de Threads ( con un solo 1 bloque)
+  ¿Cual son los valores máximos y mínimos de número de theads por bloque en esta GPU?\\
+
+  Estos valores mínimos ya se podían observar cuando ejecutábamos el programa \inline{deviceQuery}. En él, aparecía que el número máximo de threads por bloque era $1024$.
+
+\item Pruebe a lanzar diferente número de bloques ( con un solo thread) ¿Cual son los valores máximos y mínimos de número de bloques en esta GPU?
+\end{enumerate}
 
 \subsection{Suma de 2 matrices}
 \subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
@@ -494,7 +523,7 @@ Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/3bit_rand.png}
+	%\includegraphics[scale=0.8]{figures/3bit_rand.png}
 	\caption{Circuito de generación de números aleatorios con 3 bits}
 \end{figure}
 
@@ -502,7 +531,7 @@ Este simple circuito cuántico pone todos los qubits en superposición y despué
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/3bit_rand_result.png}
+%	\includegraphics[scale=0.8]{figures/3bit_rand_result.png}
 	\caption{Resultados de la simulación con 1024 ejecuciones}
 \end{figure}
 
@@ -514,14 +543,14 @@ En este apartado explicaremos en detalle el siguiente circuito cuántico:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/entanglement_statement.png}
+%	\includegraphics[scale=0.8]{figures/entanglement_statement.png}
 \end{figure}
 
 Comenzaremos estudiando un circuito ligeramente más sencillo que también produce entrelazamiento cuántico:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/entanglement.png}
+%	\includegraphics[scale=0.8]{figures/entanglement.png}
 \end{figure}
 
 Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicación de dicha puerta al estado $|0\ra$ será $|+\ra$. Utilizando a continuación de la puerta CNOT, como el estado de control tiene la misma probabilidad de ser $|0\ra$ que $|1\ra$, el segundo qubit tendrá la misma probabilidad de tener dichos valores. Analíticamente:
@@ -530,7 +559,6 @@ Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicació
 	|+\ra|0\ra CNOT = \frac{|000\ra + |001\ra + |010\ra + |011\ra + |100\ra + |101\ra + |110\ra + |111\ra}{\sqrt 8} |0\ra
 \]
 
-\Phi
 
 
 
