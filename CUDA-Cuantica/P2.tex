@@ -76,8 +76,247 @@ Dividiremos esta práctica en 2 partes fundamentales.
 
 Para programar en GPU, el primer paso que debemos dar es conocer las características (y por tanto, los recursos) que el dispositivo del que disponemos nos ofrece. En este caso práctico, vamos a realizar las pruebas utilizando \href{https://colab.research.google.com/}{Google Colaboratory}. Google pone a disposición del usuario tanto GPUs como TPUs que son más que suficientes para realizar algunas pruebas. 
 
-Lo primero que haremos es estudiar qué recursos tiene la GPU que nos ofrecen
+Lo primero que haremos es estudiar qué recursos tiene el equipo que nos ofrece Google. la GPU que nos ofrecen desde Google. Podemos ejecutar el comando \inline{!lscpu} para obtener información sobre el modelo de CPU que tenemos. El resultado nos muestra que tenemos un procesador \emph{Intel(R) Xeon(R) CPU @ 2.30GHz} de 64 bits. Además, si ejecutamos \inline{!free -kh} vemos que tenemos los siguientes recursos disponibles:
+\begin{minted}{bash}
+	total        used        free      shared  buff/cache   available
+Mem:            12G        571M        9.9G        1.2M        2.2G         11G
+Swap:            0B          0B          0B
+\end{minted}
+
+Como vemos, tenemos 12Gb de memoria prácticamente disponibles. Ahora, queremos comprobar también los recursos GPU que tenemos disponibles, sabiendo que hemos activado el entorno de Colaboratory para que tenga GPU. Verificamos las tarjetas gráficas que tenemos utilizando la orden \inline{nvidia-smi}. Obtenemos el resultado siguiente:
+\begin{minted}{bash}
+	Fri Oct 29 14:57:32 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 495.29.05    Driver Version: 460.32.03    CUDA Version: 11.2     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla K80           Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   48C    P8    30W / 149W |      0MiB / 11441MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+\end{minted}
+Como vemos, en \textbf{esta conexión al servidor} se nos ha proporcionado una \emph{Nvidia Tesla K80}. Hacemos hincapié en que es en esta conexión porque en Google Colaboratory se asigna una GPU que esté disponible en ese momento, por lo que en otra ejecución podríamos obtener otra de capacidades de computación similares.
+
+Además de eso, se nos indica que tenemos como driver instalado la versión \inline{11.2} de CUDA. Sin embargo, hemos comprobado que la versión de ejecución de CUDA no es la misma de dos maneras distintas. Primeramente, si hacemos \lstinline{!nvcc --version} ya se nos indica por primera vez lo siguiente:
+\begin{minted}[]{bash}
+Cuda compilation tools, release 11.1, V11.1.105
+Build cuda_11.1.TC455_06.29190527_0
+\end{minted}
+
+Además de eso, podemos compilar el ejemplo que tenemos en \lstinline{/usr/local/cuda/samples/1_Utilities/deviceQuery/} usando el \inline{makefile} proporcionado y, al ejecutar el ejemplo, obtenemos la siguiente salida (mostramos un resumen de la misma debido a su extensión):
+\begin{minted}[]{bash}
+Device 0: "Tesla K80"
+  CUDA Driver Version / Runtime Version          11.2 / 11.1
+  ... 
+  Total amount of constant memory:               65536 bytes
+  Total amount of shared memory per block:       49152 bytes
+  Total shared memory per multiprocessor:        114688 bytes
+  Total number of registers available per block: 65536
+  Warp size:                                     32
+  Maximum number of threads per multiprocessor:  2048
+  Maximum number of threads per block:           1024
+  ... 
+\end{minted}
+
+
+Como datos a destacar, vemos que tenemos 65536 registros disponibles por bloque, con un tamaño de Warp de $32$ y con un máximo número de hilos por bloque de $1024$. Estos datos tendrán implicaciones a la hora de hacer ejecuciones. 
+
+
 \subsection{Suma de 2 vectores}
+
+Construiremos en varias etapas un programa en CUDA que realiza la suma de dos vectores.
+
+\subsubsection{Suma de dos enteros}
+
+Comenzamos con un ejemplo sencillo de cálculo de una suma de enteros usando CUDA. El código está proporcionado en el cuaderno de enunciado de la práctica. Explicamos brevemente el código para entender mejor las preguntas:
+
+\begin{minted}[]{CUDA}
+__global__ void add(int *a, int *b, int *c) {
+	*c = *a + *b;
+}
+\end{minted}
+Este bloque implementa la función suma de dos enteros que se pasan como un puntero. Se almacena el valor de la suma en un tercer puntero que se pasa a la función.
+
+\begin{minted}[]{CUDA}
+// host copies of variables a, b & c
+int a, b, c;
+
+// device copies of variables a, b & c  
+int *d_a, *d_b, *d_c;
+
+int size = sizeof(int);
+// Allocate space for device copies of a, b, c
+cudaMalloc((void **)&d_a, size);
+cudaMalloc((void **)&d_b, size);
+cudaMalloc((void **)&d_c, size);
+// Setup input values  
+c = 0;
+a = 3;
+b = 5;
+\end{minted}
+En este bloque se hace la declaración de variables. Se hacen tres variables, luego se declaran punteros a tres variables y se declara un entero \inline{size} que tiene como valor el tamaño de un entero. A continuación, se declaran en CUDA punteros (usando los tres punteros declarados anteriormente) de tamaño \inline{size}. Por último, se le da valor a los enteros para poder sumarlos.
+
+\begin{minted}[]{CUDA}
+// Copy inputs to device
+cudaMemcpy(d_a, &a, size, cudaMemcpyHostToDevice);
+cudaMemcpy(d_b, &b, size, cudaMemcpyHostToDevice);
+
+// Launch add() kernel on GPU
+add<<<1,1>>>(d_a, d_b, d_c);  
+\end{minted}
+En este fragmento, primero se copia a la memoria de la GPU las referencias a los enteros que hemos inicializado anteriormente, es decir, ahora en la memoria de CUDA los punteros inicializados en cuda apuntan a la misma posición de memoria que tiene en el disco los valores que se quieren sumar. Se usa el valor \inline{cudaMemcpyHostToDevice} del enumerado \inline{cudaMemcpyKind} que indica que el valor irá desde el Host (el equipo) al Device (la GPU). A continuación, se realiza la operación suma \inline{add<<<1,1>>>} indicándole que se haga con 1 bloque y 1 hebra. 
+
+\begin{minted}[]{CUDA}
+// Copy result back to host
+cudaError err = cudaMemcpy(&c, d_c, size, cudaMemcpyDeviceToHost);
+if(err!=cudaSuccess) 
+	printf("CUDA error copying to Host: %s\n", cudaGetErrorString(err));
+
+printf("result is %d\n",c);
+// Cleanup
+cudaFree(d_a);
+cudaFree(d_b);
+cudaFree(d_c);
+\end{minted}
+
+En este último código, se hace apuntar el puntero que tiene el resultado en la GPU al puntero que tiene la memoria del dispositivo, guardando si ha habido algún error. Ahora, se usa otro valor del enumerado: \inline{cudaMemcpyDeviceToHost}, que indica que el valor vaya desde la GPU al equipo. Finalmente, se liberan de la GPU los espacios reservados para los punteros. El resultado de la ejecución es el esperado.
+
+\begin{minted}[]{bash}
+!./suma1d
+
+result is 8
+\end{minted}
+
+Si comprobamos el perfil de ejecución, vemos el siguiente resultado:
+
+\begin{minted}[]{bash}
+	==229== NVPROF is profiling process 229, command: ./suma1d
+==229== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
+result is 8
+==229== Profiling application: ./suma1d
+==229== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   37.50%  3.7440us         2  1.8720us  1.5040us  2.2400us  [CUDA memcpy HtoD]
+                   36.54%  3.6480us         1  3.6480us  3.6480us  3.6480us  add(int*, int*, int*)
+                   25.96%  2.5920us         1  2.5920us  2.5920us  2.5920us  [CUDA memcpy DtoH]
+      API calls:   99.56%  270.53ms         3  90.177ms  2.6620us  270.52ms  cudaMalloc
+                    0.21%  565.39us         1  565.39us  565.39us  565.39us  cuDeviceTotalMem
+                    0.12%  321.01us       101  3.1780us     210ns  140.66us  cuDeviceGetAttribute
+                    0.06%  171.37us         3  57.124us  5.6250us  152.77us  cudaFree
+                    0.02%  60.590us         3  20.196us  11.684us  25.788us  cudaMemcpy
+                    0.01%  32.193us         1  32.193us  32.193us  32.193us  cuDeviceGetName
+                    0.01%  24.277us         1  24.277us  24.277us  24.277us  cudaLaunchKernel
+                    0.00%  5.0420us         1  5.0420us  5.0420us  5.0420us  cuDeviceGetPCIBusId
+                    0.00%  1.9970us         3     665ns     186ns  1.0810us  cuDeviceGetCount
+                    0.00%  1.5280us         2     764ns     401ns  1.1270us  cuDeviceGet
+                    0.00%     420ns         1     420ns     420ns     420ns  cuDeviceGetUuid
+\end{minted}
+
+Como vemos, tenemos una única llamada a la función \inline{add}, $3$ llamadas a la función \inline{cudaMalloc} y otras tres para copiar las referencias usando \inline{cudaMemcpy}. 
+
+
+\subsubsection{Sumando vectores}
+
+Generalizamos el programa anterior para que sume vectores del mismo tamaño, elemento a elemento.
+
+\begin{minted}[]{CUDA}
+int *a, *b, *c;        // host copies of variables a, b & c
+int *d_a, *d_b, *d_c;  // device copies of variables a, b & c
+int size = N * sizeof(int);
+// Allocate space for host copies of a, b, c   Setup inputvalues  
+a =  (int *) malloc(size); 
+b =  (int *) malloc(size); 
+c =  (int *) malloc(size); 
+//   Setup input values  
+for( int i = 0; i < N; i++ ){
+	a[i] = i;
+  	b[i] = N-i;
+	c[i] = 0;
+}	
+\end{minted}
+
+Como vemos, la inicialización de los valores es diferente. Ahora necesitamos dejar espacio en el disco que tenga tamaño: el tamaño del vector por lo que ocupa un entero. Entonces, la inicialización se hace en un bucle \inline{for}.
+\begin{minted}[]{CUDA}
+cudaMalloc((void **)&d_a, size);
+cudaMalloc((void **)&d_b, size);
+cudaMalloc((void **)&d_c, size);
+// Copy inputs to device
+cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
+cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
+\end{minted}
+
+Se reservan en memoria espacio para los vectores y se copian a la GPU usando la misma función, solo que asignando más espacio mediante el parámetro \inline{size}.
+
+\begin{minted}[]{CUDA}
+// Launch add() kernel on GPU  Se lanzan N bloques de 1 Thread.
+add<<<N,1>>>(d_a, d_b, d_c);
+\end{minted}
+Se realiza la operación suma entre los dos vectores. Llamándola de la forma \inline{add<<<N,M>>>} estamos indicando que queremos realizar la operación usando $N$ bloques y $M$ hebras. En este caso concreto, estaríamos diciendo que se haga la operación con $N = 512$ (definido como variable del programa) bloques y $1$ hebra.
+
+El resultado final del programa es el siguiente:
+\begin{minted}[]{bash}
+valor a[0] es 0
+valor b[0] es 512
+resultado c[0] es 512
+valor a[2] es 2
+valor b[2] es 510
+resultado c[2] es 512	
+\end{minted}
+
+Como podemos ver, todo parece estar ocurriendo en orden. Añadimos un bucle for que comprueba si todos los valores del vector \inline{c} valen lo mismo, y lo imprime por pantalla:
+\begin{minted}[]{CUDA}
+bool res = 1;
+for(int i  = 0; i < N; i++)
+  if(c[i] != N)
+	res = 0;
+
+printf("Todos los valores de c valen lo mismo (1 true, 0 false):%d\n",res);
+... 
+Todos los valores de c valen lo mismo (1 true, 0 false): 1
+\end{minted}
+Como vemos, el resultado es correcto. Vemos el perfil de ejecución en este caso:
+\begin{minted}[]{bash}
+==1891== NVPROF is profiling process 1891, command: ./suma2dvector
+==1891== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
+ valor a[0] es 0
+ valor b[0] es 512
+resultado c[0] es 512
+ valor a[2] es 2
+ valor b[2] es 510
+resultado c[2] es 512
+Todos los valores de c valen lo mismo (1 true, 0 false): 1
+==1891== Profiling application: ./suma2dvector
+==1891== Profiling result:
+			Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   40.98%  5.0880us         1  5.0880us  5.0880us  5.0880us  add(int*, int*, int*)
+				   37.63%  4.6720us         2  2.3360us  2.0160us  2.6560us  [CUDA memcpy HtoD]
+				   21.39%  2.6560us         1  2.6560us  2.6560us  2.6560us  [CUDA memcpy DtoH]
+	  API calls:   99.49%  190.44ms         3  63.479ms  2.2440us  190.43ms  cudaMalloc
+					0.28%  529.05us         1  529.05us  529.05us  529.05us  cuDeviceTotalMem
+					0.10%  199.48us       101  1.9750us     145ns  87.079us  cuDeviceGetAttribute
+					0.07%  134.29us         3  44.764us  3.2210us  115.10us  cudaFree
+					0.03%  56.462us         3  18.820us  11.545us  25.237us  cudaMemcpy
+					0.01%  26.486us         1  26.486us  26.486us  26.486us  cuDeviceGetName
+					0.01%  25.925us         1  25.925us  25.925us  25.925us  cudaLaunchKernel
+					0.00%  5.9010us         1  5.9010us  5.9010us  5.9010us  cuDeviceGetPCIBusId
+					0.00%  1.7020us         3     567ns     162ns     876ns  cuDeviceGetCount
+					0.00%  1.2500us         2     625ns     233ns  1.0170us  cuDeviceGet
+					0.00%     385ns         1     385ns     385ns     385ns  cuDeviceGetUuid
+\end{minted}
+
+Como vemos, de nuevo tenemos una única llamada a la función \inline{add}. Lo que tenemos ahora más relevante son $101$ llamadas a la función \inline{cuDeviceGetAttribute}. Esta función proporciona al programa información sobre la GPU. En particular, devuelve en un puntero el entero que existe en una cierta posición de memoria.
+
 \subsection{Suma de 2 matrices}
 \subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
 
