@@ -477,7 +477,9 @@ En computación clásica, uno de los resultados básicos más relevante es que c
 
 Esto es, todo circuito cuántico puede describirse utilizando únicamente dichas puertas.
 
+
 \subsection{Generación de números aleatorios con un Computador Cuántico}
+
 
 TODO: añadir enunciado
 
@@ -490,10 +492,10 @@ Sabemos que utilizando la puerta de Hadarmad $H$ explicada en el apartado anteri
 Si ahora medimos este qubit obtendremos $|0\ra$ con probabilidad $|1/\sqrt 2|^2 = 1/2$, y $|1\ra$ con probabilidad $1/2$. Esto es, hemos creado un generador de bits aleatorios utilizando un único qubit. Para crear un generador de 3 bits utilizaremos un sistema de 3 qubits. Inicialmente en el estado $|000\ra$, aplicaremos una puerta Hadamard a cada qubit de forma independiente, poniendo así cada qubit en superposición:
 
 \[
-	\hat H_3|000\ra = \frac{|000\ra + |001\ra + |010\ra + |011\ra + |100\ra + |101\ra + |110\ra + |111\ra}{\sqrt 8} |0\ra
+	\hat H_8|00000000\ra = \frac{1}{\sqrt{2^8}}(|0000000\ra + |00000001\ra + \ldots + |11111111\ra)
 \]
 
-Donde la puerta $H_3$ tranformación de Hadamard para tres qubits. Se puede definir recursivamente de la siguiente forma:
+Donde la puerta $H_8$ tranformación de Hadamard para ocho qubits. Se puede definir recursivamente de la siguiente forma:
 
 \[
 	H_m = H_1 \times H_{m-1}, H_1 = \frac{1}{\sqrt 2}
@@ -503,23 +505,14 @@ Donde la puerta $H_3$ tranformación de Hadamard para tres qubits. Se puede defi
 	\end{pmatrix}
 \]
 
-Así obtenemos la puerta Hadamard para tres qubits:
-
-\[
-	H_3 = \frac{1}{2^{3/2}}
-	\begin{pmatrix}
-		1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
-		1 & -1 & 1 & -1 & 1 & -1 & 1 & -1 \\
-		1 & 1 & -1 & -1 & 1 & 1 & -1 & -1 \\
-		1 & -1 & -1 & 1 & 1 & -1 & -1 & 1 \\
-		1 & 1 & 1 & 1 & -1 & -1 & -1 & -1 \\
-		1 & -1 & 1 & -1 & -1 & 1 & -1 & 1 \\
-		1 & 1 & -1 & -1 & -1 & -1 & 1 & 1 \\
-		1 & -1 & -1 & 1 & -1 & 1 & 1 & -1
-	\end{pmatrix}
-\]
-
 Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos utilizando el Quantum Composer de IBM:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/3bit_rand_result.png}
+\end{figure}
+
+Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. Ejecutamos el experimento en el simulador del ordenador cuántico de IBM, obteniendo los siguientes resultados:
 
 \begin{figure}[H]
 	\centering
@@ -527,7 +520,7 @@ Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos
 	\caption{Circuito de generación de números aleatorios con 3 bits}
 \end{figure}
 
-Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. En la parte inferior de la imagen vemos como tenemos la misma probabilidad de obtener cualquiera de los posibles resultados. Esto es, cualquiera de los números del $0$ al $7$, tomando así un número aleatorio de 3 bits. Añadimos tres medidas, una para cada qubit, y ejecutamos el circuito resultante utilizando un simulador de 
+Estas mediciones han de aproximarse a una uniforme de parámetro $1/256$. Podemos apreciar en la gráfica como los resultados son cercanos a este valor pero distan mucho de definir claramente una uniforme. Podemos comparar estos resultados con la generación de números aleatorios utilizando \emph{scipy} en nuestra propia máquina:
 
 \begin{figure}[H]
 	\centering
@@ -535,9 +528,11 @@ Este simple circuito cuántico pone todos los qubits en superposición y despué
 	\caption{Resultados de la simulación con 1024 ejecuciones}
 \end{figure}
 
-Como podemos ver en la gráfica, obtenemos una probabilidad similar de medir cada uno de los posibles resultados.
+Comparando ambas gráficas podemos apreciar como la generación de números se acerca a la distribución uniforme mencionada pero en ambas estamos relativamente lejos del modelo teórico. Tras ver los resultados de esta generación utilizando \emph{scipy} podemos asegurar que el generador utilizando el Quantum Composer de IBM obtiene números aleatorios razonablemente aleatorizados.
+
 
 \subsection{Entrelazamiento}
+
 
 En este apartado explicaremos en detalle el siguiente circuito cuántico:
 
@@ -553,17 +548,42 @@ Comenzaremos estudiando un circuito ligeramente más sencillo que también produ
 %	\includegraphics[scale=0.8]{figures/entanglement.png}
 \end{figure}
 
-Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicación de dicha puerta al estado $|0\ra$ será $|+\ra$. Utilizando a continuación de la puerta CNOT, como el estado de control tiene la misma probabilidad de ser $|0\ra$ que $|1\ra$, el segundo qubit tendrá la misma probabilidad de tener dichos valores. Analíticamente:
+Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicación de dicha puerta al estado $|0\ra$ será $|+\ra$. Utilizando a continuación la puerta CNOT, como el estado de control tiene la misma probabilidad de ser $|0\ra$ que $|1\ra$, el segundo qubit tendrá la misma probabilidad de tener dichos valores. Analíticamente:
 
 \[
-	|+\ra|0\ra CNOT = \frac{|000\ra + |001\ra + |010\ra + |011\ra + |100\ra + |101\ra + |110\ra + |111\ra}{\sqrt 8} |0\ra
+	|+\ra|0\ra CNOT = \frac{|00\ra + |11\ra}{\sqrt 2} = |\Phi^+\ra
 \]
 
 
+Obteniéndo así el famoso estado EPR (Einstein, Podolsky y Rosen) o estado de Bell $|\Phi^+\ra$. En este aparentemente sencillo estado puede apreciarse el entrelezamiento cuántico, lo que dió lugar a dicha paradoja. Estudiémos este estado en detalle.
 
+Para empezar, al medir ambos qubits únicamente podremos obtener los resultados $00$ y $11$. Si únicamente medimos uno de los dos qubits y obtenemos, por ejemplo, un $0$, entonces cuando midamos el otro estado obtendremos otro $0$ con toda probabilidad, pues los únicos resultados finales válidos son los anteriormente descritos $00$ y $11$. Lo mismo ocurre si medimos $1$: el valor del segundo qubit ha de ser también un $1$.
+
+De esta forma, hemos hecho que el segundo qubit colapse a un estado al medir otro qubit distinto. Estas son las implicaciones del entrelazamiento cuántico.
+
+Estudiémos ahora el circuito del enunciado:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/entanglement2.png}
+\end{figure}
+
+Esto es, aplicarle una puerta NOT al primer qubit del estado de Bell, obteniendo:
+
+\[
+	\frac{|00\ra + |11\ra}{\sqrt 2} (NOT \times \I) = \frac{|10\ra + |01\ra}{\sqrt 2}
+\]
+
+Este estado se comporta como el anterior pero con valores de medida opuestos: si medimos un $0$ en el primer qubit, el segundo colapsará automáticamente al estado $1$, y viceversa.
 
 \subsection{Sumador de 2 qbits}
 
+TODO: enunciado
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/sumator_statement.png}
+\end{figure}
 
 
 \section{Ejercicios opcionales de la práctica 2}
