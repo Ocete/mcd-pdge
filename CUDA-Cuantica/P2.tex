@@ -43,9 +43,9 @@
 \usepackage{minted}
 \usepackage{pdfpages}
 \usepackage[framemethod=TikZ]{mdframed} % Para entorno enunciado
+\usepackage{amsthm}
 
 \def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
-\newtheorem{theorem}{Theorem}
 \titlespacing*{\subsection}{0pt}{5.5ex}{3.3ex}
 \titlespacing*{\section}{0pt}{5.5ex}{1ex}
 \author{José Antonio Álvarez Ocete\\ Francisco Javier Sáez Maldonado}
@@ -59,6 +59,11 @@
 \newcommand{\la}{\langle}
 \newcommand{\ra}{\rangle}
 \newcommand{\myparagraph}[1]{\paragraph*{#1}\mbox{}\\}
+
+\theoremstyle{plain}
+\newtheorem*{theorem*}{Teorema}
+\newtheorem{theorem}{Teorema}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Entorno para enunciados
 %https://texblog.org/2015/09/30/fancy-boxes-for-theorem-lemma-and-proof-with-mdframed/
@@ -655,9 +660,9 @@ La puerta $\pi/8$, normalmente descrita por la letra $T$, es una \emph{puerta de
 
 En computación clásica, uno de los resultados básicos más relevante es que cualquier función booleana puede describirse utilizando únicamente las puertas clásicas AND, OR y NOT. De la misma forma, en computación cuántica se obtiene siguiente resultado
 
-\begin{theorem}
+\begin{theorem*}
 	Toda matriz unitaria puede aproximarse con una combinación de puertas Hadamard, CNOT y $\pi/8$.
-\end{theorem}
+\end{theorem*}
 
 Esto es, todo circuito cuántico puede describirse utilizando únicamente dichas puertas.
 
@@ -773,7 +778,6 @@ Este estado se comporta como el anterior pero con valores de medida opuestos: si
 
 \subsection{Sumador de 2 qbits}
 
-
 \begin{enunciado}
 	
 	Realice el circuito cuántico que equivale a un sumador de dos bits equivalente al siguiente circuito clásico:
@@ -786,12 +790,53 @@ Este estado se comporta como el anterior pero con valores de medida opuestos: si
 	Tenga en cuenta que las puertas XOR y AND clásicas no reversibles y por tanto es necesario buscar puertas cuánticas equivalentes pero que sean reversibles. Puede seguir las indicaciones de \href{https://qiskit.org/textbook/ch-states/atoms-computation.html}{este enlace}.
 \end{enunciado}
 
+El circuito cuántico que implementa el sumador de 2 qubits es el siguiente, donde los qubits de entrada son $q_0, q_1$ y $q_2, q_3$ son los qubits de salida: 
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.8]{figures/sumator_statement2.png}
 \end{figure}
 
+Entendámoslo paso a paso. Puesto que los qubits $q_0, q_1$ son de entrada, los valores que aparecen antes de la primera línea puntea ($q_0, q_1 = |1\ra$) son un ejemplo en este caso. \\
+
+Como vimos en ejercicios anteriores, la primera puerta $X$ mapea $|q_0\ra|q_2\ra \mapsto |q_0\ra|q_1 \oplus q_2\ra$. Puesto que inicialmente $|q_2\ra = |0\ra$, tras aplicar la primera puerta obtenemos $|q_0\ra|0\ra \mapsto |q_0\ra|q_0 \oplus 0\ra = |q_0\ra|q_0\ra$. \\
+
+Al aplicar la segunda puerta $X$ obtenemos en el tercer qubit $|q_0 \oplus q_1\ra$. Esto completa la primera parte de nuestro sumador de dos qubits. \\
+
+De cara al acarreo acumulado en $q_3$, este unicamente es $1$ si ambos qubits son $1$. Por lo tanto, utilizamos la puerta de Toffoli para mapear $|q_0\ra|q_1\ra|0\ra \mapsto |q_0\ra|q_1\ra|0 \oplus (q_0 \wedge q_1)\ra$. \\
+
+Comprobemos el resultado de este circuito utilizando el Quantum Composer de IBM para distintas entradas. En primer lugar utilizamos $|11\ra$ para los qubits de entrada como en el circuito proporcionado:
+
+\begin{figure}[H]
+	\centering
+	%\includegraphics[scale=0.8]{figures/sumator_statement2.png}
+\end{figure}
+
+Podemos ver en las probabilidades de las salidas como $1011$ es el único resultado posible (a nivel teórico) de nuestro circuito. Recordemos que esto representa las medidas de $q_3 q_2 q_1 q_0$, en ese orden. Es decir, tras sumar dos estados $|1\ra$ obtenemos $|10\ra$, como cabría esperar. Estudiémos ahora el resultado de nuestro circuito para dos entradas $|+\ra$:
+
+\begin{figure}[H]
+	\centering
+	%\includegraphics[scale=0.8]{figures/sumator_statement2.png}
+\end{figure}
+
+Obtenemos las siguientes salidas, con igual probabilidad:
+
+\begin{itemize}
+	\item P$(q_3q_2q_1q_0 = 0000) = 0.25$.
+	\item P$(q_3q_2q_1q_0 = 0101) = 0.25$.
+	\item P$(q_3q_2q_1q_0 = 0110) = 0.25$.
+	\item P$(q_3q_2q_1q_0 = 1011) = 0.25$.
+\end{itemize}
+
+Sin embargo, si miramos unicamente los qubits de salida obtenemos la siguiente distribución:
+
+\begin{itemize}
+	\item P$(q_3q_2 = 00) = 0.25$.
+	\item P$(q_3q_2 = 01) = 0.50$.
+	\item P$(q_3q_2 = 10) = 0.25$.
+\end{itemize}
+
+Lo que concuerda con las predicciones teóricas: la probabilidad de que ambos qubits iniciales sean $0$ o $1$ es $0.25$, mientras que la probabilidad de que uno sea $0$ y el otro $1$ es de $0.5$.
 
 \section{Ejercicios opcionales de la práctica 2}
 
