@@ -497,7 +497,7 @@ add<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 
 
 \begin{enunciado}
-¿Qué ocurre cuando se aumenta $N$?
+	\textquestiondown Qué ocurre cuando se aumenta $N$?
 \end{enunciado}
 
 Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos algunos datos que no podremos procesar, los dejaremos fuera de la cuenta. Por ello, debemos actualizar el código para que se calcule bien el número de bloques que necesitamos según el número de hebras que hemos establecido:
