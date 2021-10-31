@@ -582,7 +582,7 @@ Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre e
 Finalmente presentamos la puerta de Hadamard para un único bit. Está descrita por la siguiente matriz unitaria:
 
 \[
-	H_1 = \frac{1}{\sqrt 2}
+	H = \frac{1}{\sqrt 2}
 	\begin{pmatrix}
 		1 & 1 \\
 		1 & -1 
@@ -667,7 +667,54 @@ En computación clásica, uno de los resultados básicos más relevante es que c
 Esto es, todo circuito cuántico puede describirse utilizando únicamente dichas puertas.
 
 
+\myparagraph{Puerta CNOT}
+
+
+Pasamos a estudiar la única puerta de dos qubits que comentaremos en este apartado y que ya ha aparecido en la explicación anterior: la puerta Controlled-NOT, o simplemente CNOT. Esta transformación queda descrita por la siguiente matriz unitaria:
+
+\[
+	CNOT =
+	\begin{pmatrix}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 1 \\
+	0 & 0 & 1 & 0
+	\end{pmatrix}
+\]
+
+Esta puerta mapea $|q_1\ra|q_0\ra \mapsto |q_1 \oplus q_0\ra|q_0\ra$. Vemos su funcionamiento.
+
+\begin{figure}[H]
+	\centering
+	%\includegraphics[scale=0.7]{figures/gate_CNOT.png}
+	\caption{Circuito con puerta CNOT}
+\end{figure}
+
+Si le aplicamos la puerta CNOT a $|+\ra|0\ra$ obtenemos el estado $(|00\ra + |11\ra)/\sqrt 2$. Esto es: si el estado $q_0$ era inicialmente un $0$, no cambiará el estado $q_1$. Por otro lado, si el estado $q_0$ era inicialmente un $1$, el qubit $q_1$ cambiará a $1$. Explicaremos este circuito en profundidad en la sección \ref{sec-entrelazamiento}.
+
+
+\myparagraph{Puerta Toffoli}
+
+
+Finalmente, explicamos una única puerta de más de dos qubits: la puerta de Toffoli o puerta CCNOT. Esta puerta será necesaria para el sumador de dos qubits de la sección \ref{sec-sumator} y será sencilla de entender una vez comprendida la puerta anterior. Queda descrita por la siguiente matriz unitaria:
+
+\[
+	CCNOT =
+	\begin{pmatrix}
+	1 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 1 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 1 \\
+	0 & 0 & 0 & 0 & 1 & 0
+	\end{pmatrix}
+\]
+
+Y mapea $|q_2\ra|q_1\ra|q_0\ra \mapsto |q_2 \oplus (q_0 \wedge q_1)\ra|q_1\ra|q_0\ra$. Es decir, altera el último qubit si y sólo si los dos primeros son $1$. Veremos un ejemplo de uso de esta puerta en la sección \ref{sec-sumator}.
+
+
 \subsection{Generación de números aleatorios con un Computador Cuántico}
+
 
 \begin{enunciado}
 	
@@ -725,10 +772,8 @@ Estas mediciones han de aproximarse a una uniforme de parámetro $1/256$. Podemo
 
 Comparando ambas gráficas podemos apreciar como la generación de números se acerca a la distribución uniforme mencionada pero en ambas estamos relativamente lejos del modelo teórico. Tras ver los resultados de esta generación utilizando \emph{scipy} podemos asegurar que el generador utilizando el Quantum Composer de IBM obtiene números aleatorios razonablemente aleatorizados.
 
-TODO: explicar la puerta CNOT
-
 \subsection{Entrelazamiento}
-
+\label{sec-entrelazamiento}
 
 \begin{enunciado}
 	
@@ -777,6 +822,8 @@ Este estado se comporta como el anterior pero con valores de medida opuestos: si
 
 
 \subsection{Sumador de 2 qbits}
+\label{sec-sumator}
+
 
 \begin{enunciado}
 	
@@ -799,24 +846,24 @@ El circuito cuántico que implementa el sumador de 2 qubits es el siguiente, don
 
 Entendámoslo paso a paso. Puesto que los qubits $q_0, q_1$ son de entrada, los valores que aparecen antes de la primera línea puntea ($q_0, q_1 = |1\ra$) son un ejemplo en este caso. \\
 
-Como vimos en ejercicios anteriores, la primera puerta $X$ mapea $|q_0\ra|q_2\ra \mapsto |q_0\ra|q_1 \oplus q_2\ra$. Puesto que inicialmente $|q_2\ra = |0\ra$, tras aplicar la primera puerta obtenemos $|q_0\ra|0\ra \mapsto |q_0\ra|q_0 \oplus 0\ra = |q_0\ra|q_0\ra$. \\
+Como vimos en ejercicios anteriores, la primera puerta CNOT mapea $|q_2\ra|q_0\ra \mapsto |q_2\ra|q_0 \oplus q_2\ra$. Puesto que inicialmente $|q_2\ra = |0\ra$, tras aplicar la primera puerta obtenemos $|0\ra|q_0\ra \mapsto |0 \oplus q_0\ra|q_0\ra = |q_0\ra|q_0\ra$. \\
 
 Al aplicar la segunda puerta $X$ obtenemos en el tercer qubit $|q_0 \oplus q_1\ra$. Esto completa la primera parte de nuestro sumador de dos qubits. \\
 
-De cara al acarreo acumulado en $q_3$, este unicamente es $1$ si ambos qubits son $1$. Por lo tanto, utilizamos la puerta de Toffoli para mapear $|q_0\ra|q_1\ra|0\ra \mapsto |q_0\ra|q_1\ra|0 \oplus (q_0 \wedge q_1)\ra$. \\
+De cara al acarreo acumulado en $q_3$, este unicamente es $1$ si ambos qubits son $1$. Por lo tanto, utilizamos la puerta de Toffoli para mapear $|0\ra|q_1\ra|q_0\ra \mapsto |0 \oplus (q_0 \wedge q_1)\ra|q_1\ra|q_0\ra = |q_0 \wedge q_1\ra|q_1\ra|q_0\ra $. \\
 
 Comprobemos el resultado de este circuito utilizando el Quantum Composer de IBM para distintas entradas. En primer lugar utilizamos $|11\ra$ para los qubits de entrada como en el circuito proporcionado:
 
 \begin{figure}[H]
 	\centering
-	%\includegraphics[scale=0.8]{figures/sumator_statement2.png}
+	\includegraphics[scale=0.7]{figures/sumator_11.png}
 \end{figure}
 
 Podemos ver en las probabilidades de las salidas como $1011$ es el único resultado posible (a nivel teórico) de nuestro circuito. Recordemos que esto representa las medidas de $q_3 q_2 q_1 q_0$, en ese orden. Es decir, tras sumar dos estados $|1\ra$ obtenemos $|10\ra$, como cabría esperar. Estudiémos ahora el resultado de nuestro circuito para dos entradas $|+\ra$:
 
 \begin{figure}[H]
 	\centering
-	%\includegraphics[scale=0.8]{figures/sumator_statement2.png}
+	\includegraphics[scale=0.7]{figures/sumator_++.png}
 \end{figure}
 
 Obtenemos las siguientes salidas, con igual probabilidad:
