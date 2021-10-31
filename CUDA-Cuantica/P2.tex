@@ -42,8 +42,7 @@
 \usepackage{amsmath}
 \usepackage{minted}
 \usepackage{pdfpages}
-
-
+\usepackage[framemethod=TikZ]{mdframed} % Para entorno enunciado
 
 \def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
 \newtheorem{theorem}{Theorem}
@@ -53,20 +52,58 @@
 \date{\today}
 \title{Introducción a Hadoop y Spark\\ Procesamiento de Datos a Gran Escala}
 
+% Comandos propios
+
+\definecolor{myBlue}{rgb}{1, 0.733, 0.612}
 \newcommand{\I}{\mathbb{I}}
 \newcommand{\la}{\langle}
 \newcommand{\ra}{\rangle}
+\newcommand{\myparagraph}[1]{\paragraph*{#1}\mbox{}\\}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Entorno para enunciados
+%https://texblog.org/2015/09/30/fancy-boxes-for-theorem-lemma-and-proof-with-mdframed/
+%\newcounter{enunciado}[section] - para resetear el counter por secciones
+\newcounter{enunciado}
+\setcounter{enunciado}{0}
+
+% Esta línea pone la numeración de los ejercicios como {seccion}.{ejercicio}
+%\renewcommand{\thetheo}{\arabic{section}.\arabic{enunciado}}
+\newcommand{\thetheo}{\arabic{enunciado}}
+
+\newenvironment{enunciado}[2][]{%
+	\refstepcounter{enunciado}%
+	\ifstrempty{#1}%
+	{\mdfsetup{%
+			frametitle={%
+				\tikz[rounded corners, baseline=(current bounding box.east),outer sep=0pt]
+				\node[anchor=east,rectangle,fill=myBlue]
+				{\strut Ejercicio~\thetheo};}}
+	}%
+	{\mdfsetup{%
+			frametitle={%
+				\tikz[rounded corners, baseline=(current bounding box.east),outer sep=0pt]
+				\node[anchor=east,rectangle,fill=myBlue]
+				{\strut Ejercicio~\thetheo:~#1};}}%
+	}%
+	\mdfsetup{roundcorner=5pt, innertopmargin=10pt,linecolor=myBlue,%
+		linewidth=2pt,topline=true,%
+		frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+	}
+	\begin{mdframed}[rounded corners]\relax%
+		\label{#2}}{\end{mdframed}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
 \maketitle
-
 \tableofcontents
+\newpage
+
+TODO: completar intro
 
 Dividiremos esta práctica en 2 partes fundamentales. 
 
 \begin{enumerate}
-	
 	\item En la primera, se concentrará en realizar diversas pruebas con los elementos más básicos de la programación en CUDA.
 	\item En la segunda, TODO!!!!!!!!!!!
 \end{enumerate}
@@ -75,9 +112,16 @@ Dividiremos esta práctica en 2 partes fundamentales.
 
 \subsection{Recursos de la GPU}
 
+\begin{enunciado}
+	
+	TODO: Completar
+	
+\end{enunciado}
+
 Para programar en GPU, el primer paso que debemos dar es conocer las características (y por tanto, los recursos) que el dispositivo del que disponemos nos ofrece. En este caso práctico, vamos a realizar las pruebas utilizando \href{https://colab.research.google.com/}{Google Colaboratory}. Google pone a disposición del usuario tanto GPUs como TPUs que son más que suficientes para realizar algunas pruebas. 
 
 Lo primero que haremos es estudiar qué recursos tiene el equipo que nos ofrece Google. la GPU que nos ofrecen desde Google. Podemos ejecutar el comando \inline{!lscpu} para obtener información sobre el modelo de CPU que tenemos. El resultado nos muestra que tenemos un procesador \emph{Intel(R) Xeon(R) CPU @ 2.30GHz} de 64 bits. Además, si ejecutamos \inline{!free -kh} vemos que tenemos los siguientes recursos disponibles:
+
 \begin{minted}{bash}
 	total        used        free      shared  buff/cache   available
 Mem:            12G        571M        9.9G        1.2M        2.2G         11G
@@ -111,15 +155,18 @@ Como vemos, tenemos 12Gb de memoria prácticamente disponibles. Ahora, queremos 
 +-----------------------------------------------------------------------------+
 \end{minted}
 \end{minipage}\\
+
 Como vemos, en \textbf{esta conexión al servidor} se nos ha proporcionado una \emph{Nvidia Tesla K80}. Hacemos hincapié en que es en esta conexión porque en Google Colaboratory se asigna una GPU que esté disponible en ese momento, por lo que en otra ejecución podríamos obtener otra de capacidades de computación similares.
 
 Además de eso, se nos indica que tenemos como driver instalado la versión \inline{11.2} de CUDA. Sin embargo, hemos comprobado que la versión de ejecución de CUDA no es la misma de dos maneras distintas. Primeramente, si hacemos \lstinline{!nvcc --version} ya se nos indica por primera vez lo siguiente:
+
 \begin{minted}[]{bash}
 Cuda compilation tools, release 11.1, V11.1.105
 Build cuda_11.1.TC455_06.29190527_0
 \end{minted}
 
 Además de eso, podemos compilar el ejemplo que tenemos en \\ \lstinline{/usr/local/cuda/samples/1_Utilities/deviceQuery/} usando el \inline{makefile} proporcionado y, al ejecutar el ejemplo, obtenemos la siguiente salida (mostramos un resumen de la misma debido a su extensión):
+
 \begin{minted}[]{bash}
 Device 0: "Tesla K80"
   CUDA Driver Version / Runtime Version          11.2 / 11.1
@@ -134,11 +181,16 @@ Device 0: "Tesla K80"
   ... 
 \end{minted}
 
-
 Como datos a destacar, vemos que tenemos 65536 registros disponibles por bloque, con un tamaño de Warp de $32$ y con un máximo número de hilos por bloque de $1024$. Estos datos tendrán implicaciones a la hora de hacer ejecuciones. 
 
 
 \subsection{Suma de 2 vectores}
+
+\begin{enunciado}
+	
+	TODO: Completar
+	
+\end{enunciado}
 
 Construiremos en varias etapas un programa en CUDA que realiza la suma de dos vectores.
 
@@ -170,6 +222,7 @@ c = 0;
 a = 3;
 b = 5;
 \end{minted}
+
 En este bloque se hace la declaración de variables. Se hacen tres variables, luego se declaran punteros a tres variables y se declara un entero \inline{size} que tiene como valor el tamaño de un entero. A continuación, se declaran en CUDA punteros (usando los tres punteros declarados anteriormente) de tamaño \inline{size}. Por último, se le da valor a los enteros para poder sumarlos.
 
 \begin{minted}[]{CUDA}
@@ -180,6 +233,7 @@ cudaMemcpy(d_b, &b, size, cudaMemcpyHostToDevice);
 // Launch add() kernel on GPU
 add<<<1,1>>>(d_a, d_b, d_c);  
 \end{minted}
+
 En este fragmento, primero se copia a la memoria de la GPU las referencias a los enteros que hemos inicializado anteriormente, es decir, ahora en la memoria de CUDA los punteros inicializados en cuda apuntan a la misma posición de memoria que tiene en el disco los valores que se quieren sumar. Se usa el valor \inline{cudaMemcpyHostToDevice} del enumerado \inline{cudaMemcpyKind} que indica que el valor irá desde el Host (el equipo) al Device (la GPU). A continuación, se realiza la operación suma \inline{add<<<1,1>>>} indicándole que se haga con 1 bloque y 1 hebra. 
 
 \begin{minted}[]{CUDA}
@@ -252,6 +306,7 @@ for( int i = 0; i < N; i++ ){
 \end{minted}
 
 Como vemos, la inicialización de los valores es diferente. Ahora necesitamos dejar espacio en el disco que tenga tamaño: el tamaño del vector por lo que ocupa un entero. Entonces, la inicialización se hace en un bucle \inline{for}.
+
 \begin{minted}[]{CUDA}
 cudaMalloc((void **)&d_a, size);
 cudaMalloc((void **)&d_b, size);
@@ -267,9 +322,11 @@ Se reservan en memoria espacio para los vectores y se copian a la GPU usando la 
 // Launch add() kernel on GPU  Se lanzan N bloques de 1 Thread.
 add<<<N,1>>>(d_a, d_b, d_c);
 \end{minted}
+
 Se realiza la operación suma entre los dos vectores. Llamándola de la forma \inline{add<<<N,M>>>} estamos indicando que queremos realizar la operación usando $N$ bloques y $M$ hebras. En este caso concreto, estaríamos diciendo que se haga la operación con $N = 512$ (definido como variable del programa) bloques y $1$ hebra.
 
 El resultado final del programa es el siguiente:
+
 \begin{minted}[]{bash}
 valor a[0] es 0
 valor b[0] es 512
@@ -280,6 +337,7 @@ resultado c[2] es 512
 \end{minted}
 
 Como podemos ver, todo parece estar ocurriendo en orden. Añadimos un bucle for que comprueba si todos los valores del vector \inline{c} valen lo mismo, y lo imprime por pantalla:
+
 \begin{minted}[]{CUDA}
 bool res = 1;
 for(int i  = 0; i < N; i++)
@@ -290,7 +348,9 @@ printf("Todos los valores de c valen lo mismo (1 true, 0 false):%d\n",res);
 ... 
 Todos los valores de c valen lo mismo (1 true, 0 false): 1
 \end{minted}
+
 Como vemos, el resultado es correcto. Vemos el perfil de ejecución en este caso:
+
 \begin{minted}[fontsize=\footnotesize]{bash}
 ==1891== NVPROF is profiling process 1891, command: ./suma2dvector
 ==1891== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
@@ -322,8 +382,12 @@ API calls:  99.49%  190.44ms         3  63.479ms  2.2440us  190.43ms  cudaMalloc
 
 Como vemos, de nuevo tenemos una única llamada a la función \inline{add}. No se observa una diferencia apreciable entre el tiempo de ejecución de esta llamada en este caso y en el anterior.
 
+
 \subsection{Paralelizando}
+
+
 El objetivo ahora será modificar el código actual para que la suma de vectores se realice según los bloques y las hebras que se le indiquen. En particular, querremos modificar el número de hebras para que se puedan paralelizar las operaciones. Comenzamos cambiando el número de hebras a $512$. Podemos apreciar en el código de la suma un cambio:
+
 \begin{minted}{CUDA}
 __global__ void add(int *a, int *b, int *c) {
     //*c = *a + *b;
@@ -336,6 +400,7 @@ Ahora, accedemos al valor \inline{blockIdx.x} de cada uno de los punteros para r
 
 \subsubsection{Preguntas}
 
+
 \begin{enumerate}
 
 \item Pruebe a lanzar diferente número de Threads ( con un solo 1 bloque)
@@ -347,7 +412,20 @@ Ahora, accedemos al valor \inline{blockIdx.x} de cada uno de los punteros para r
 \end{enumerate}
 
 \subsection{Suma de 2 matrices}
+
+\begin{enunciado}
+	
+	TODO: Completar
+	
+\end{enunciado}
+
 \subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
+
+\begin{enunciado}
+	
+	TODO: Completar
+	
+\end{enunciado}
 
 \section{Parte 2: Programación con QisKit: (Computación cuántica)}
 
@@ -355,10 +433,14 @@ Para esta parte de la práctica utilizaremos el \href{https://quantum-computing.
 
 \subsection{Puertas Cuánticas}
 
-TODO: Añadir enunciado
+\begin{enunciado}
+	
+	Compruebe el funcionamiento de diferentes puertas cuánticas de 1 y 2
+	qubits.
 
+\end{enunciado}
 
-\paragraph*{Puerta CNOT}
+\myparagraph{Puerta CNOT}
 
 La única operación no trivial aplicable sobre un único bit es la negación: la puerta NOT. De la misma forma, es natural preguntarse cuál es el equivalente a la puerta NOT en el mundo cuántico. Dado que un qubit está descrito por dos amplitudes $\alpha$ y $\beta$:
 
@@ -390,9 +472,11 @@ Vemos la implementación de esta puerta en el Quantum Composer de IBM:
 	\caption{Circuito con puerta de Hadamard}
 \end{figure}
 
-Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre en el estado $|0\ra$. Tras aplicarlo a nuestro qubit una puerta $X$ obtendremos $|1\ra$.
+Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre en el estado $|0\ra$. Tras aplicarlo a nuestro qubit una puerta $X$ obtendremos $|1\ra$. \\
 
-\paragraph*{Puerta Hadamard}
+
+\myparagraph{Puerta Hadamard}
+
 
 Finalmente presentamos la puerta de Hadamard para un único bit. Está descrita por la siguiente matriz unitaria:
 
@@ -426,9 +510,11 @@ Podemos estudiar el comportamiento de esta puerta utilizando el Quantum Composer
 	\caption{Circuito con puerta de Hadamard}
 \end{figure}
 
-Mirando tanto la \href{URL}{esfera de Bloch} como las probabilidades vemos que tenemos la misma probabilidad de medir $0$ y $1$.
+Mirando tanto la \href{URL}{esfera de Bloch} como las probabilidades vemos que tenemos la misma probabilidad de medir $0$ y $1$. \\
 
-\paragraph*{Puertas de Pauli}
+
+\myparagraph{Puertas de Pauli}
+
 
 Un conjunto particularmente relevante de puertas son las descritas por las \text{matrices de Pauli}:
 
@@ -450,9 +536,11 @@ X =
 	\end{pmatrix}
 \]
 
-Ya conocemos la matriz $X$, descrita también como la puerta NOT quántica.
+Ya conocemos la matriz $X$, descrita también como la puerta NOT quántica. \\
 
-\paragraph*{Puertas $T$}
+
+\myparagraph{Puertas de fase}
+
 
 La puerta $\pi/8$, normalmente descrita por la letra $T$, es una \emph{puerta de fase}. Las puertas de fase son un tipo especial de puertas cuánticas que llevan $|0\ra \mapsto |0\ra$ y $|1\ra \mapsto e^{i\phi}|1\ra$, donde $\phi$ es un ángulo de giro. El término $e^{i\phi}$ se denomina \emph{fase} y no afecta a los resultados de las mediciones $0$ y $1$. En particular, la puerta $T$ cumple $\phi = \pi/4$, y la puerta $Z$ de Pauli es una puerta fase con $\phi = \pi/2$:
 
@@ -480,8 +568,13 @@ Esto es, todo circuito cuántico puede describirse utilizando únicamente dichas
 
 \subsection{Generación de números aleatorios con un Computador Cuántico}
 
-
-TODO: añadir enunciado
+\begin{enunciado}
+	
+	Utilizando las puertas Hadamard que sean necesarias, implemente un generador de números aleatorios de 8bit.
+	
+	Analice los resultados y represente su comportamiento para comprobar si los números son realmente aleatorios.
+	
+\end{enunciado}
 
 Sabemos que utilizando la puerta de Hadarmad $H$ explicada en el apartado anterior ponemos un qubit $|0\ra$ en superposición:
 
@@ -492,13 +585,13 @@ Sabemos que utilizando la puerta de Hadarmad $H$ explicada en el apartado anteri
 Si ahora medimos este qubit obtendremos $|0\ra$ con probabilidad $|1/\sqrt 2|^2 = 1/2$, y $|1\ra$ con probabilidad $1/2$. Esto es, hemos creado un generador de bits aleatorios utilizando un único qubit. Para crear un generador de 3 bits utilizaremos un sistema de 3 qubits. Inicialmente en el estado $|000\ra$, aplicaremos una puerta Hadamard a cada qubit de forma independiente, poniendo así cada qubit en superposición:
 
 \[
-	\hat H_8|00000000\ra = \frac{1}{\sqrt{2^8}}(|0000000\ra + |00000001\ra + \ldots + |11111111\ra)
+	\hat H_8|00000000\ra = \frac{1}{\sqrt{2^8}}\big(|0000000\ra + |00000001\ra + \ldots + |11111111\ra\big)
 \]
 
 Donde la puerta $H_8$ tranformación de Hadamard para ocho qubits. Se puede definir recursivamente de la siguiente forma:
 
 \[
-	H_m = H_1 \times H_{m-1}, H_1 = \frac{1}{\sqrt 2}
+	H_m = H_1 \otimes H_{m-1}; \quad H_1 = \frac{1}{\sqrt 2}
 	\begin{pmatrix}
 		1 & 1 \\
 		1 & -1 
@@ -509,23 +602,23 @@ Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/3bit_rand_result.png}
+	\includegraphics[scale=0.8]{figures/8bits_rand.png}
 \end{figure}
 
 Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. Ejecutamos el experimento en el simulador del ordenador cuántico de IBM, obteniendo los siguientes resultados:
 
 \begin{figure}[H]
 	\centering
-	%\includegraphics[scale=0.8]{figures/3bit_rand.png}
-	\caption{Circuito de generación de números aleatorios con 3 bits}
+	\includegraphics[scale=0.8]{figures/barplot_quantum.png}
+	\caption{Resultados de la simulación con 8000 ejecuciones}
 \end{figure}
 
 Estas mediciones han de aproximarse a una uniforme de parámetro $1/256$. Podemos apreciar en la gráfica como los resultados son cercanos a este valor pero distan mucho de definir claramente una uniforme. Podemos comparar estos resultados con la generación de números aleatorios utilizando \emph{scipy} en nuestra propia máquina:
 
 \begin{figure}[H]
 	\centering
-%	\includegraphics[scale=0.8]{figures/3bit_rand_result.png}
-	\caption{Resultados de la simulación con 1024 ejecuciones}
+	\includegraphics[scale=0.8]{figures/barplot_scipy.png}
+	\caption{Resultados de la simulación con 8000 ejecuciones}
 \end{figure}
 
 Comparando ambas gráficas podemos apreciar como la generación de números se acerca a la distribución uniforme mencionada pero en ambas estamos relativamente lejos del modelo teórico. Tras ver los resultados de esta generación utilizando \emph{scipy} podemos asegurar que el generador utilizando el Quantum Composer de IBM obtiene números aleatorios razonablemente aleatorizados.
@@ -534,18 +627,22 @@ Comparando ambas gráficas podemos apreciar como la generación de números se a
 \subsection{Entrelazamiento}
 
 
-En este apartado explicaremos en detalle el siguiente circuito cuántico:
-
-\begin{figure}[H]
-	\centering
-%	\includegraphics[scale=0.8]{figures/entanglement_statement.png}
-\end{figure}
+\begin{enunciado}
+	
+	Explica el funcionamiento del siguiente circuito cuántico:
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.8]{figures/entanglement_statement.png}
+	\end{figure}
+	
+\end{enunciado}
 
 Comenzaremos estudiando un circuito ligeramente más sencillo que también produce entrelazamiento cuántico:
 
 \begin{figure}[H]
 	\centering
-%	\includegraphics[scale=0.8]{figures/entanglement.png}
+	\includegraphics[scale=0.7]{figures/entanglement.png}
 \end{figure}
 
 Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicación de dicha puerta al estado $|0\ra$ será $|+\ra$. Utilizando a continuación la puerta CNOT, como el estado de control tiene la misma probabilidad de ser $|0\ra$ que $|1\ra$, el segundo qubit tendrá la misma probabilidad de tener dichos valores. Analíticamente:
@@ -565,27 +662,32 @@ Estudiémos ahora el circuito del enunciado:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/entanglement2.png}
+	\includegraphics[scale=0.7]{figures/entanglement2.png}
 \end{figure}
 
 Esto es, aplicarle una puerta NOT al primer qubit del estado de Bell, obteniendo:
 
 \[
-	\frac{|00\ra + |11\ra}{\sqrt 2} (NOT \times \I) = \frac{|10\ra + |01\ra}{\sqrt 2}
+	\frac{|00\ra + |11\ra}{\sqrt 2} (X \otimes \I) = \frac{|10\ra + |01\ra}{\sqrt 2}
 \]
 
 Este estado se comporta como el anterior pero con valores de medida opuestos: si medimos un $0$ en el primer qubit, el segundo colapsará automáticamente al estado $1$, y viceversa.
 
+
 \subsection{Sumador de 2 qbits}
 
-TODO: enunciado
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.8]{figures/sumator_statement.png}
-\end{figure}
+\begin{enunciado}
+	TODO: completar
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.8]{figures/sumator_statement.png}
+	\end{figure}
+\end{enunciado}
 
 
 \section{Ejercicios opcionales de la práctica 2}
 
 \end{document}
+
