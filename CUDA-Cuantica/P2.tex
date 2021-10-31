@@ -123,8 +123,7 @@ Dividiremos esta práctica en 2 partes fundamentales.
 Para programar en GPU, el primer paso que debemos dar es conocer las características (y por tanto, los recursos) que el dispositivo del que disponemos nos ofrece. En este caso práctico, vamos a realizar las pruebas utilizando \href{https://colab.research.google.com/}{Google Colaboratory}. Google pone a disposición del usuario tanto GPUs como TPUs que son más que suficientes para realizar algunas pruebas. 
 
 Lo primero que haremos es estudiar qué recursos tiene el equipo que nos ofrece Google. la GPU que nos ofrecen desde Google. Podemos ejecutar el comando \inline{!lscpu} para obtener información sobre el modelo de CPU que tenemos. El resultado nos muestra que tenemos un procesador \emph{Intel(R) Xeon(R) CPU @ 2.30GHz} de 64 bits. Además, si ejecutamos \inline{!free -kh} vemos que tenemos los siguientes recursos disponibles:
-
-\begin{minted}{bash}
+\begin{minted}[fontsize=\footnotesize]{bash}
 	total        used        free      shared  buff/cache   available
 Mem:            12G        571M        9.9G        1.2M        2.2G         11G
 Swap:            0B          0B          0B
@@ -180,10 +179,13 @@ Device 0: "Tesla K80"
   Warp size:                                     32
   Maximum number of threads per multiprocessor:  2048
   Maximum number of threads per block:           1024
+  Max dimension size of a thread block (x,y,z): (1024, 1024, 64)
+  Max dimension size of a grid size    (x,y,z): (2147483647, 65535, 65535)
   ... 
 \end{minted}
 
-Como datos a destacar, vemos que tenemos 65536 registros disponibles por bloque, con un tamaño de Warp de $32$ y con un máximo número de hilos por bloque de $1024$. Estos datos tendrán implicaciones a la hora de hacer ejecuciones. 
+
+Como datos a destacar, vemos que tenemos 65536 registros disponibles por bloque, con un tamaño de Warp de $32$ y con un máximo número de hilos por bloque de $1024$. Estos datos tendrán implicaciones a la hora de hacer ejecuciones.  Además, viendo la dimensión máxima de un grid en la tripla que se nos ofrece, obtenemos que el número máximo de bloque es $65535$.
 
 
 \subsection{Suma de 2 vectores}
@@ -284,12 +286,20 @@ result is 8
                     0.00%     420ns         1     420ns     420ns     420ns  cuDeviceGetUuid
 \end{minted}
 
-Como vemos, tenemos una única llamada a la función \inline{add}, $3$ llamadas a la función \inline{cudaMalloc} y otras tres para copiar las referencias usando \inline{cudaMemcpy}. 
+Como vemos, tenemos una única llamada a la función \inline{add}, $3$ llamadas a la función \inline{cudaMalloc} y otras tres para copiar las referencias usando \inline{cudaMemcpy}. Podemos observar en esta primera ejecución cómo se hacen $101$ llamadas a \inline{cuDeviceGetAttribute}, que nos devuelve un valor que se almacena en la memoria de la GPU.
 
+\subsubsection{Paralelizando}
+\subsubsection*{Sumando vectores}
 
-\subsubsection{Sumando vectores}
+El objetivo ahora será modificar el código actual para que la suma de vectores se realice según los bloques y las hebras que se le indiquen. En particular, querremos modificar el número de hebras para que se puedan paralelizar las operaciones. Comenzamos cambiando el número de hebras a $512$. Podemos apreciar en el código de la suma un cambio:
+\begin{minted}{CUDA}
+__global__ void add(int *a, int *b, int *c) {
+    //*c = *a + *b;
+    c[blockIdx.x] = a[blockIdx.x] + b[blockIdx.x];
+}
+\end{minted}
 
-Generalizamos el programa anterior para que sume vectores del mismo tamaño, elemento a elemento.
+Ahora, accedemos al valor \inline{blockIdx.x} de cada uno de los punteros para realizar la suma. Esto es importante pues ahora querremos que cada operación la realice un bloque. Generalizamos el programa anterior para que sume vectores del mismo tamaño, elemento a elemento.
 
 \begin{minted}[]{CUDA}
 int *a, *b, *c;        // host copies of variables a, b & c
@@ -382,23 +392,37 @@ API calls:  99.49%  190.44ms         3  63.479ms  2.2440us  190.43ms  cudaMalloc
 		0.00%     385ns         1     385ns     385ns     385ns  cuDeviceGetUuid
 \end{minted}
 
-Como vemos, de nuevo tenemos una única llamada a la función \inline{add}. No se observa una diferencia apreciable entre el tiempo de ejecución de esta llamada en este caso y en el anterior.
+Como vemos, de nuevo tenemos una única llamada a la función \inline{add}. No se observa una diferencia apreciable entre el tiempo de ejecución de esta llamada en este caso y en el anterior. Tampoco en el resto de operaciones que se hacen en la GPU.
 
+\subsubsection*{1 Bloque - N Threads}
 
-\subsection{Paralelizando}
+El objetivo será usar la modificación del programa que utiliza en un solo bloque $N$ hebras para paralelizar la ejecución. Habíamos definido antes $N=512$ para usar ese número de bloques. Ahora, se redefine como $N=1024$ para usar este número de hebras (que vimos en la descripción de la GPU que es el número máximo).
 
+Al igual que en el caso anterior, la función suma cambia:
 
-El objetivo ahora será modificar el código actual para que la suma de vectores se realice según los bloques y las hebras que se le indiquen. En particular, querremos modificar el número de hebras para que se puedan paralelizar las operaciones. Comenzamos cambiando el número de hebras a $512$. Podemos apreciar en el código de la suma un cambio:
-
-\begin{minted}{CUDA}
+\begin{minted}[]{CUDA}
 __global__ void add(int *a, int *b, int *c) {
-    //*c = *a + *b;
-    c[blockIdx.x] = a[blockIdx.x] + b[blockIdx.x];
+	c[threadIdx.x] = a[threadIdx.x] + b[threadIdx.x]; 
 }
 \end{minted}
 
-Ahora, accedemos al valor \inline{blockIdx.x} de cada uno de los punteros para realizar la suma. Esto es importante pues ahora las operaciones se hacen en hebras diferentes y cada una de las operaciones se hace en una hebra diferente y debe guardarse
+Como vemos, ahora se accede al índice de la hebra usando \inline{threadIdx.x}. Otro cambio que se debe hacer claramente es que la función add se llame de la forma:
+\begin{minted}[]{CUDA}
+// Launch add() kernel on GPU  Se lanzan 1 bloques de N Threads.
+add<<<1,N>>>(d_a, d_b, d_c);
+\end{minted}
+Volvemos a mostrar el resultado de la ejecución de este nuevo programa.
+\begin{minted}[]{bash}
+valor a[10] es 10
+valor b[10] es 1014
+resultado c[10] es 1024
+valor a[0] es 0
+valor b[0] es 1024
+resultado c[0] es 1024
+Todos los valores de c valen lo mismo (1 true, 0 false): 1	
+\end{minted}
 
+Se aprecia que todos los resultados son correctos. Se pide de nuevo que se compare el perfil de ejecución con los anteriores, pero no se aprecia ninguna diferencia significativa en los resultados.
 
 \subsubsection{Preguntas}
 
@@ -408,18 +432,88 @@ Ahora, accedemos al valor \inline{blockIdx.x} de cada uno de los punteros para r
 \item Pruebe a lanzar diferente número de Threads ( con un solo 1 bloque)
   ¿Cual son los valores máximos y mínimos de número de theads por bloque en esta GPU?\\
 
-  Estos valores mínimos ya se podían observar cuando ejecutábamos el programa \inline{deviceQuery}. En él, aparecía que el número máximo de threads por bloque era $1024$.
+  Estos valores mínimos ya se podían observar cuando ejecutábamos el programa \inline{deviceQuery}. En él, aparecía que el número máximo de threads por bloque era $1024$. Ya hemos mostrado que, en el caso de ejecutarlo con este número los resultados son correctos.
 
+  \begin{minted}[]{bash}
+	add<<<1,1025>>>(d_a, d_b, d_c);
+	... 
+	valor a[10] es 10
+ 	valor b[10] es 1014
+	resultado c[10] es 0
+ 	valor a[0] es 0
+ 	valor b[0] es 1024
+	resultado c[0] es 0
+	Todos los valores de c valen lo mismo (1 true, 0 false): 0
+  \end{minted}
+Como vemos, en este caso no se calculan bien los valores aunque estén bien inicializados y por tanto la operación falla. De hecho, hemos comprobado que para todo número diferente de $1024$, esta operación falla. Esto además tiene sentido pues recordamos que en la suma estamos accediendo al índice de la hebra, por lo que no tendremos suficientes índices de hebras para acceder a todos los elementos del vector. Además, hemos comprobado cuántos elementos se suman correctamente cambiando el bucle de comprobación de la siguiente forma:
+\begin{minted}[]{CUDA}
+bool res = 1;
+int well = 0;
+  for(int i  = 0; i < N; i++)
+    if(c[i] == N){
+      well +=1;
+    }
+res = well == N;
+printf("Todos los valores de c valen lo mismo (1 true, 0 false): %d\n",res);
+printf("Numero de elementos sumados correctamente: %d\n",well);
+\end{minted}
+Se comprueba que, para cualquier $n < N$, el número de elementos correctamente sumados es justamente $n$. Por ejemplo, en el caso $n=3$:
+\begin{minted}[]{CUDA}
+	add<<<1,3>>>(d_a, d_b, d_c);
+	... 
+   	Todos los valores de c valen lo mismo (1 true, 0 false): 0
+   	Numero de elementos sumados correctamente: 3
+\end{minted} 
 \item Pruebe a lanzar diferente número de bloques ( con un solo thread) ¿Cual son los valores máximos y mínimos de número de bloques en esta GPU?
 \end{enumerate}
 
-\subsection{Suma de 2 matrices}
+\subsection{$NUMBLOCK$ bloques y $NUMTHREADS$ hilos}
+
+Pretendemos ahora lanzar $NUMBLOCK \in \mathbb N$ bloques por $NUMTHREAD \in \mathbb N$ hilos. Lo primero que debemos ahcer es cambiar la función suma para que se pueda acceder en cada hebra al elemento correspondiente. Recordamos que una matriz $N\times M$ se puede representar como un vector de $NM$ posiciones. Si quisiésemos acceder a la posición $z$ de un vector utilizando bloques y hebras, debemos descomponer ese $z$ como
+\[
+z = n*i + j	
+\]
+donde $n$ será el tamaño de bloque, $i$ el número de bloque en el que está el elemento y $j$ la hebra que tendrá que manejarlo. Podemos realizar esto en la nueva funcion add que redefinimos, usando como $n=blockDim.x$, $i = blockIdx.x$ y $j = threadID.x$:
+\begin{minted}[]{CUDA}
+__global__ void add(int *a, int *b, int *c) {
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+	 c[index] = a[index] + b[index]; 
+}
+\end{minted}
+
+Ahora, debemos también definir los nuevos tamaños de bloque y de número de hebras. Debemos adecuar este tamaño al tamaño de nuestro vector. Llamemos $N$ al tamaño del vector (o matriz vectorizada) que queremos sumar. Sea $NT$ el número de hebras. Supongamos que queremos dividir este trabajo para que cada hebra realice (si es posible) una única operación. Se podría pensar a priori que el número de bloques que necesitamos para realizar nuestra operación es:
+\[
+NB = \frac{N}{NT}.
+\]
+
+Sin embargo, Esta división podría no ser entera al no ser $N$ múltiplo de $NT$. En esos casos, no podríamos acceder a todos los elementos de nuestro vector y no tendríamos por tanto un resultado correcto. Es por ello que debemos considerar entonces como número óptimo de bloques:
+\[
+NB = \frac{N + NT - 1}{NT} = \frac{N}{NT} + 1 - \frac{1}{NT}.
+\]
+Si aplicamos la función parte entera a este número, obtendríamos $K$ como valor. En el código proporcionado, tenemos el tamaño del vector fijo $N = 1024^2$ y el número de hebras por bloque $NT = 512$, resultando en una división exacta $NB = 2048$. Así, se puede llamar directamente a la función \inline{add} del siguiente modo:
+\begin{minted}[]{CUDA}
+add<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
+\end{minted}
+
 
 \begin{enunciado}
-	
-	TODO: Completar
-	
+¿Qué ocurre cuando se aumenta $N$?
 \end{enunciado}
+
+Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos algunos datos que no podremos procesar, los dejaremos fuera de la cuenta. Por ello, debemos actualizar el código para que se calcule bien el número de bloques que necesitamos según el número de hebras que hemos establecido:
+\begin{minted}[]{CUDA}
+add<<<(N + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
+\end{minted}
+
+\href{https://www.nvidia.com/docs/IO/116711/sc11-cuda-c-basics.pdf}{esta presentación de la documentación de CUDA}
+
+\begin{minted}[]{CUDA}
+#define N (1024*1024)
+#define THREADS_PER_BLOCK 512 
+\end{minted}
+
+\subsection{Suma de 2 matrices}
+
 
 \subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
 
