@@ -50,7 +50,7 @@
 \titlespacing*{\section}{0pt}{5.5ex}{1ex}
 \author{José Antonio Álvarez Ocete\\ Francisco Javier Sáez Maldonado}
 \date{\today}
-\title{Introducción a Hadoop y Spark\\ Procesamiento de Datos a Gran Escala}
+\title{Programación GPGPU y Computación Cuántica\\ Procesamiento de Datos a Gran Escala}
 
 % Comandos propios
 
@@ -468,8 +468,8 @@ Vemos la implementación de esta puerta en el Quantum Composer de IBM:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.4]{figures/gate-x.png}
-	\caption{Circuito con puerta de Hadamard}
+	\includegraphics[scale=0.5]{figures/gate-x.png}
+	\caption{Circuito con puerta de CNOT}
 \end{figure}
 
 Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre en el estado $|0\ra$. Tras aplicarlo a nuestro qubit una puerta $X$ obtendremos $|1\ra$. \\
@@ -506,7 +506,7 @@ Podemos estudiar el comportamiento de esta puerta utilizando el Quantum Composer
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.4]{figures/gate-hadamard.png}
+	\includegraphics[scale=0.5]{figures/gate-hadamard.png}
 	\caption{Circuito con puerta de Hadamard}
 \end{figure}
 
@@ -602,14 +602,15 @@ Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/8bits_rand.png}
+	\includegraphics[scale=0.7]{figures/8bits_rand.png}
+	\caption{Circuito randomizador de 8 bits.}
 \end{figure}
 
 Este simple circuito cuántico pone todos los qubits en superposición y después mide el resultado. Ejecutamos el experimento en el simulador del ordenador cuántico de IBM, obteniendo los siguientes resultados:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/barplot_quantum.png}
+	\includegraphics[scale=0.7]{figures/barplot_quantum.png}
 	\caption{Resultados de la simulación con 8000 ejecuciones}
 \end{figure}
 
@@ -617,12 +618,13 @@ Estas mediciones han de aproximarse a una uniforme de parámetro $1/256$. Podemo
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.8]{figures/barplot_scipy.png}
+	\includegraphics[scale=0.7]{figures/barplot_scipy.png}
 	\caption{Resultados de la simulación con 8000 ejecuciones}
 \end{figure}
 
 Comparando ambas gráficas podemos apreciar como la generación de números se acerca a la distribución uniforme mencionada pero en ambas estamos relativamente lejos del modelo teórico. Tras ver los resultados de esta generación utilizando \emph{scipy} podemos asegurar que el generador utilizando el Quantum Composer de IBM obtiene números aleatorios razonablemente aleatorizados.
 
+TODO: explicar la puerta CNOT
 
 \subsection{Entrelazamiento}
 
@@ -642,7 +644,7 @@ Comenzaremos estudiando un circuito ligeramente más sencillo que también produ
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{figures/entanglement.png}
+	\includegraphics[scale=0.6]{figures/entanglement.png}
 \end{figure}
 
 Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicación de dicha puerta al estado $|0\ra$ será $|+\ra$. Utilizando a continuación la puerta CNOT, como el estado de control tiene la misma probabilidad de ser $|0\ra$ que $|1\ra$, el segundo qubit tendrá la misma probabilidad de tener dichos valores. Analíticamente:
@@ -651,18 +653,17 @@ Conociendo ya la puerta de Hadamard, sabemos que el resultado tras la aplicació
 	|+\ra|0\ra CNOT = \frac{|00\ra + |11\ra}{\sqrt 2} = |\Phi^+\ra
 \]
 
+Obteniéndo así el famoso estado EPR (Einstein, Podolsky y Rosen) o estado de Bell $|\Phi^+\ra$. En este aparentemente sencillo estado puede apreciarse el entrelezamiento cuántico, lo que dió lugar a dicha paradoja. Estudiémos este estado en detalle. \\
 
-Obteniéndo así el famoso estado EPR (Einstein, Podolsky y Rosen) o estado de Bell $|\Phi^+\ra$. En este aparentemente sencillo estado puede apreciarse el entrelezamiento cuántico, lo que dió lugar a dicha paradoja. Estudiémos este estado en detalle.
+Para empezar, al medir ambos qubits únicamente podremos obtener los resultados $00$ y $11$. Si únicamente medimos uno de los dos qubits y obtenemos, por ejemplo, un $0$, entonces cuando midamos el otro estado obtendremos otro $0$ con toda probabilidad, pues los únicos resultados finales válidos son los anteriormente descritos $00$ y $11$. Lo mismo ocurre si medimos $1$: el valor del segundo qubit ha de ser también un $1$. \\
 
-Para empezar, al medir ambos qubits únicamente podremos obtener los resultados $00$ y $11$. Si únicamente medimos uno de los dos qubits y obtenemos, por ejemplo, un $0$, entonces cuando midamos el otro estado obtendremos otro $0$ con toda probabilidad, pues los únicos resultados finales válidos son los anteriormente descritos $00$ y $11$. Lo mismo ocurre si medimos $1$: el valor del segundo qubit ha de ser también un $1$.
-
-De esta forma, hemos hecho que el segundo qubit colapse a un estado al medir otro qubit distinto. Estas son las implicaciones del entrelazamiento cuántico.
+De esta forma, hemos hecho que el segundo qubit colapse a un estado al medir otro qubit distinto. Estas son las implicaciones del entrelazamiento cuántico. \\
 
 Estudiémos ahora el circuito del enunciado:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{figures/entanglement2.png}
+	\includegraphics[scale=0.6]{figures/entanglement2.png}
 \end{figure}
 
 Esto es, aplicarle una puerta NOT al primer qubit del estado de Bell, obteniendo:
@@ -678,16 +679,27 @@ Este estado se comporta como el anterior pero con valores de medida opuestos: si
 
 
 \begin{enunciado}
-	TODO: completar
+	
+	Realice el circuito cuántico que equivale a un sumador de dos bits equivalente al siguiente circuito clásico:
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[scale=0.8]{figures/sumator_statement.png}
+		\includegraphics[scale=0.4]{figures/sumator_statement.png}
 	\end{figure}
+
+	Tenga en cuenta que las puertas XOR y AND clásicas no reversibles y por tanto es necesario buscar puertas cuánticas equivalentes pero que sean reversibles. Puede seguir las indicaciones de \href{https://qiskit.org/textbook/ch-states/atoms-computation.html}{este enlace}.
 \end{enunciado}
 
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8]{figures/sumator_statement2.png}
+\end{figure}
+
+
 \section{Ejercicios opcionales de la práctica 2}
+
+
 
 \end{document}
 
