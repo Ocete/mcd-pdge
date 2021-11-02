@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{add}\PYG{o}{\PYGZlt{}\PYGZlt{}\PYGZlt{}}\PYG{p}{(}\PYG{n}{N} \PYG{o}{+} \PYG{n}{THREADS\PYGZus{}PER\PYGZus{}BLOCK} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{/}\PYG{n}{THREADS\PYGZus{}PER\PYGZus{}BLOCK}\PYG{p}{,}\PYG{n}{THREADS\PYGZus{}PER\PYGZus{}BLOCK}\PYG{o}{\PYGZgt{}\PYGZgt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{d\PYGZus{}a}\PYG{p}{,} \PYG{n}{d\PYGZus{}b}\PYG{p}{,} \PYG{n}{d\PYGZus{}c}\PYG{p}{);}
+\end{Verbatim}

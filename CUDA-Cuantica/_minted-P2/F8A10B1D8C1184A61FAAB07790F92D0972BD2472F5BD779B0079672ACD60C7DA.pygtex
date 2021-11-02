@@ -1,0 +1,17 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// host copies of variables a, b \PYGZam{} c}
+\PYG{k+kt}{int} \PYG{n}{a}\PYG{p}{,} \PYG{n}{b}\PYG{p}{,} \PYG{n}{c}\PYG{p}{;}
+
+\PYG{c+c1}{// device copies of variables a, b \PYGZam{} c}
+\PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{d\PYGZus{}a}\PYG{p}{,} \PYG{o}{*}\PYG{n}{d\PYGZus{}b}\PYG{p}{,} \PYG{o}{*}\PYG{n}{d\PYGZus{}c}\PYG{p}{;}
+
+\PYG{k+kt}{int} \PYG{n}{size} \PYG{o}{=} \PYG{k}{sizeof}\PYG{p}{(}\PYG{k+kt}{int}\PYG{p}{);}
+\PYG{c+c1}{// Allocate space for device copies of a, b, c}
+\PYG{n}{cudaMalloc}\PYG{p}{((}\PYG{k+kt}{void} \PYG{o}{**}\PYG{p}{)}\PYG{o}{\PYGZam{}}\PYG{n}{d\PYGZus{}a}\PYG{p}{,} \PYG{n}{size}\PYG{p}{);}
+\PYG{n}{cudaMalloc}\PYG{p}{((}\PYG{k+kt}{void} \PYG{o}{**}\PYG{p}{)}\PYG{o}{\PYGZam{}}\PYG{n}{d\PYGZus{}b}\PYG{p}{,} \PYG{n}{size}\PYG{p}{);}
+\PYG{n}{cudaMalloc}\PYG{p}{((}\PYG{k+kt}{void} \PYG{o}{**}\PYG{p}{)}\PYG{o}{\PYGZam{}}\PYG{n}{d\PYGZus{}c}\PYG{p}{,} \PYG{n}{size}\PYG{p}{);}
+\PYG{c+c1}{// Setup input values}
+\PYG{n}{c} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{n}{a} \PYG{o}{=} \PYG{l+m+mi}{3}\PYG{p}{;}
+\PYG{n}{b} \PYG{o}{=} \PYG{l+m+mi}{5}\PYG{p}{;}
+\end{Verbatim}

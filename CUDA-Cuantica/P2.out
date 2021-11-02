@@ -1,0 +1,17 @@
+\BOOKMARK [1][-]{section.1}{Parte 1: Programaci\363n GPGPU}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Recursos de la GPU}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Suma de 2 vectores}{section.1}% 3
+\BOOKMARK [3][-]{subsubsection.1.2.1}{Suma de dos enteros}{subsection.1.2}% 4
+\BOOKMARK [3][-]{subsubsection.1.2.2}{Paralelizando}{subsection.1.2}% 5
+\BOOKMARK [3][-]{subsubsection.1.2.3}{Preguntas}{subsection.1.2}% 6
+\BOOKMARK [2][-]{subsection.1.3}{NUMBLOCK bloques y NUMTHREADS hilos}{section.1}% 7
+\BOOKMARK [2][-]{subsection.1.4}{Suma de 2 matrices}{section.1}% 8
+\BOOKMARK [2][-]{subsection.1.5}{Stencil1d: Estudiar el efecto de la memoria compartida}{section.1}% 9
+\BOOKMARK [1][-]{section.2}{Parte 2: Programaci\363n con QisKit: \(Computaci\363n cu\341ntica\)}{}% 10
+\BOOKMARK [2][-]{subsection.2.1}{Puertas Cu\341nticas}{section.2}% 11
+\BOOKMARK [2][-]{subsection.2.2}{Generaci\363n de n\372meros aleatorios con un Computador Cu\341ntico}{section.2}% 12
+\BOOKMARK [2][-]{subsection.2.3}{Entrelazamiento}{section.2}% 13
+\BOOKMARK [2][-]{subsection.2.4}{Sumador de 2 qbits}{section.2}% 14
+\BOOKMARK [1][-]{section.3}{Ejercicios opcionales de la pr\341ctica 2}{}% 15
+\BOOKMARK [2][-]{subsection.3.1}{Teleportaci\363n cu\341ntica}{section.3}% 16
+\BOOKMARK [2][-]{subsection.3.2}{El algoritmo de Grover}{section.3}% 17

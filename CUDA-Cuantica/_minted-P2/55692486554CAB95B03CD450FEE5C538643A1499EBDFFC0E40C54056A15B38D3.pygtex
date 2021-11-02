@@ -1,0 +1,15 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+Device \PYG{l+m}{0}: \PYG{l+s+s2}{\PYGZdq{}Tesla K80\PYGZdq{}}
+  CUDA Driver Version / Runtime Version          \PYG{l+m}{11}.2 / \PYG{l+m}{11}.1
+  ...
+  Total amount of constant memory:               \PYG{l+m}{65536} bytes
+  Total amount of shared memory per block:       \PYG{l+m}{49152} bytes
+  Total shared memory per multiprocessor:        \PYG{l+m}{114688} bytes
+  Total number of registers available per block: \PYG{l+m}{65536}
+  Warp size:                                     \PYG{l+m}{32}
+  Maximum number of threads per multiprocessor:  \PYG{l+m}{2048}
+  Maximum number of threads per block:           \PYG{l+m}{1024}
+  Max dimension size of a thread block \PYG{o}{(}x,y,z\PYG{o}{)}: \PYG{o}{(}\PYG{l+m}{1024}, \PYG{l+m}{1024}, \PYG{l+m}{64}\PYG{o}{)}
+  Max dimension size of a grid size    \PYG{o}{(}x,y,z\PYG{o}{)}: \PYG{o}{(}\PYG{l+m}{2147483647}, \PYG{l+m}{65535}, \PYG{l+m}{65535}\PYG{o}{)}
+  ...
+\end{Verbatim}

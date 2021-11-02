@@ -1,0 +1,22 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+	\PYG{o}{==}\PYG{n+nv}{229}\PYG{o}{==} NVPROF is profiling process \PYG{l+m}{229}, command: ./suma1d
+\PYG{o}{==}\PYG{n+nv}{229}\PYG{o}{==} Warning: Auto boost enabled on device \PYG{l+m}{0}. Profiling results may be inconsistent.
+result is \PYG{n+nv}{8}
+\PYG{o}{==}\PYG{n+nv}{229}\PYG{o}{==} Profiling application: ./suma1d
+\PYG{o}{==}\PYG{n+nv}{229}\PYG{o}{==} Profiling result:
+            Type  Time\PYG{o}{(}\PYGZpc{}\PYG{o}{)}      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   \PYG{l+m}{37}.50\PYGZpc{}  \PYG{l+m}{3}.7440us         \PYG{l+m}{2}  \PYG{l+m}{1}.8720us  \PYG{l+m}{1}.5040us  \PYG{l+m}{2}.2400us  \PYG{o}{[}CUDA memcpy HtoD\PYG{o}{]}
+                   \PYG{l+m}{36}.54\PYGZpc{}  \PYG{l+m}{3}.6480us         \PYG{l+m}{1}  \PYG{l+m}{3}.6480us  \PYG{l+m}{3}.6480us  \PYG{l+m}{3}.6480us  add\PYG{o}{(}int*, int*, int*\PYG{o}{)}
+                   \PYG{l+m}{25}.96\PYGZpc{}  \PYG{l+m}{2}.5920us         \PYG{l+m}{1}  \PYG{l+m}{2}.5920us  \PYG{l+m}{2}.5920us  \PYG{l+m}{2}.5920us  \PYG{o}{[}CUDA memcpy DtoH\PYG{o}{]}
+      API calls:   \PYG{l+m}{99}.56\PYGZpc{}  \PYG{l+m}{270}.53ms         \PYG{l+m}{3}  \PYG{l+m}{90}.177ms  \PYG{l+m}{2}.6620us  \PYG{l+m}{270}.52ms  cudaMalloc
+                    \PYG{l+m}{0}.21\PYGZpc{}  \PYG{l+m}{565}.39us         \PYG{l+m}{1}  \PYG{l+m}{565}.39us  \PYG{l+m}{565}.39us  \PYG{l+m}{565}.39us  cuDeviceTotalMem
+                    \PYG{l+m}{0}.12\PYGZpc{}  \PYG{l+m}{321}.01us       \PYG{l+m}{101}  \PYG{l+m}{3}.1780us     210ns  \PYG{l+m}{140}.66us  cuDeviceGetAttribute
+                    \PYG{l+m}{0}.06\PYGZpc{}  \PYG{l+m}{171}.37us         \PYG{l+m}{3}  \PYG{l+m}{57}.124us  \PYG{l+m}{5}.6250us  \PYG{l+m}{152}.77us  cudaFree
+                    \PYG{l+m}{0}.02\PYGZpc{}  \PYG{l+m}{60}.590us         \PYG{l+m}{3}  \PYG{l+m}{20}.196us  \PYG{l+m}{11}.684us  \PYG{l+m}{25}.788us  cudaMemcpy
+                    \PYG{l+m}{0}.01\PYGZpc{}  \PYG{l+m}{32}.193us         \PYG{l+m}{1}  \PYG{l+m}{32}.193us  \PYG{l+m}{32}.193us  \PYG{l+m}{32}.193us  cuDeviceGetName
+                    \PYG{l+m}{0}.01\PYGZpc{}  \PYG{l+m}{24}.277us         \PYG{l+m}{1}  \PYG{l+m}{24}.277us  \PYG{l+m}{24}.277us  \PYG{l+m}{24}.277us  cudaLaunchKernel
+                    \PYG{l+m}{0}.00\PYGZpc{}  \PYG{l+m}{5}.0420us         \PYG{l+m}{1}  \PYG{l+m}{5}.0420us  \PYG{l+m}{5}.0420us  \PYG{l+m}{5}.0420us  cuDeviceGetPCIBusId
+                    \PYG{l+m}{0}.00\PYGZpc{}  \PYG{l+m}{1}.9970us         \PYG{l+m}{3}     665ns     186ns  \PYG{l+m}{1}.0810us  cuDeviceGetCount
+                    \PYG{l+m}{0}.00\PYGZpc{}  \PYG{l+m}{1}.5280us         \PYG{l+m}{2}     764ns     401ns  \PYG{l+m}{1}.1270us  cuDeviceGet
+                    \PYG{l+m}{0}.00\PYGZpc{}     420ns         \PYG{l+m}{1}     420ns     420ns     420ns  cuDeviceGetUuid
+\end{Verbatim}

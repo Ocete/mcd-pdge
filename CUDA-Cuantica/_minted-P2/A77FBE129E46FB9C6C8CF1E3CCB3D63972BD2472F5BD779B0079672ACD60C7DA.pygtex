@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+	\PYG{n}{add}\PYG{o}{\PYGZlt{}\PYGZlt{}\PYGZlt{}}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{3}\PYG{o}{\PYGZgt{}\PYGZgt{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{d\PYGZus{}a}\PYG{p}{,} \PYG{n}{d\PYGZus{}b}\PYG{p}{,} \PYG{n}{d\PYGZus{}c}\PYG{p}{);}
+	\PYG{p}{...}
+   	\PYG{n}{Todos} \PYG{n}{los} \PYG{n}{valores} \PYG{n}{de} \PYG{n}{c} \PYG{n}{valen} \PYG{n}{lo} \PYG{n}{mismo} \PYG{p}{(}\PYG{l+m+mi}{1} \PYG{n+nb}{true}\PYG{p}{,} \PYG{l+m+mi}{0} \PYG{n+nb}{false}\PYG{p}{)}\PYG{o}{:} \PYG{l+m+mi}{0}
+   	\PYG{n}{Numero} \PYG{n}{de} \PYG{n}{elementos} \PYG{n}{sumados} \PYG{n+nl}{correctamente}\PYG{p}{:} \PYG{l+m+mi}{3}
+\end{Verbatim}

@@ -1,0 +1,8 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{cudaMalloc}\PYG{p}{((}\PYG{k+kt}{void} \PYG{o}{**}\PYG{p}{)}\PYG{o}{\PYGZam{}}\PYG{n}{d\PYGZus{}a}\PYG{p}{,} \PYG{n}{size}\PYG{p}{);}
+\PYG{n}{cudaMalloc}\PYG{p}{((}\PYG{k+kt}{void} \PYG{o}{**}\PYG{p}{)}\PYG{o}{\PYGZam{}}\PYG{n}{d\PYGZus{}b}\PYG{p}{,} \PYG{n}{size}\PYG{p}{);}
+\PYG{n}{cudaMalloc}\PYG{p}{((}\PYG{k+kt}{void} \PYG{o}{**}\PYG{p}{)}\PYG{o}{\PYGZam{}}\PYG{n}{d\PYGZus{}c}\PYG{p}{,} \PYG{n}{size}\PYG{p}{);}
+\PYG{c+c1}{// Copy inputs to device}
+\PYG{n}{cudaMemcpy}\PYG{p}{(}\PYG{n}{d\PYGZus{}a}\PYG{p}{,} \PYG{n}{a}\PYG{p}{,} \PYG{n}{size}\PYG{p}{,} \PYG{n}{cudaMemcpyHostToDevice}\PYG{p}{);}
+\PYG{n}{cudaMemcpy}\PYG{p}{(}\PYG{n}{d\PYGZus{}b}\PYG{p}{,} \PYG{n}{b}\PYG{p}{,} \PYG{n}{size}\PYG{p}{,} \PYG{n}{cudaMemcpyHostToDevice}\PYG{p}{);}
+\end{Verbatim}

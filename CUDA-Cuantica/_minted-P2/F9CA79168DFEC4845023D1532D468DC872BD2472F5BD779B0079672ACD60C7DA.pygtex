@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kr}{\PYGZus{}\PYGZus{}global\PYGZus{}\PYGZus{}} \PYG{k+kt}{void} \PYG{n+nf}{add}\PYG{p}{(}\PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{a}\PYG{p}{,} \PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{b}\PYG{p}{,} \PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{c}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+	\PYG{o}{*}\PYG{n}{c} \PYG{o}{=} \PYG{o}{*}\PYG{n}{a} \PYG{o}{+} \PYG{o}{*}\PYG{n}{b}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

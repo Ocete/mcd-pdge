@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kr}{\PYGZus{}\PYGZus{}global\PYGZus{}\PYGZus{}} \PYG{k+kt}{void} \PYG{n+nf}{add}\PYG{p}{(}\PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{a}\PYG{p}{,} \PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{b}\PYG{p}{,} \PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{c}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+	\PYG{k+kt}{int} \PYG{n}{index} \PYG{o}{=} \PYG{n+nb}{threadIdx}\PYG{p}{.}\PYG{n}{x} \PYG{o}{+} \PYG{n+nb}{blockIdx}\PYG{p}{.}\PYG{n}{x} \PYG{o}{*} \PYG{n+nb}{blockDim}\PYG{p}{.}\PYG{n}{x}\PYG{p}{;}
+	 \PYG{n}{c}\PYG{p}{[}\PYG{n}{index}\PYG{p}{]} \PYG{o}{=} \PYG{n}{a}\PYG{p}{[}\PYG{n}{index}\PYG{p}{]} \PYG{o}{+} \PYG{n}{b}\PYG{p}{[}\PYG{n}{index}\PYG{p}{];}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

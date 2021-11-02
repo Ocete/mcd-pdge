@@ -58,7 +58,7 @@
 \newcommand{\I}{\mathbb{I}}
 \newcommand{\la}{\langle}
 \newcommand{\ra}{\rangle}
-\newcommand{\myparagraph}[1]{\paragraph*{#1}\mbox{}\\}
+\newcommand{\myparagraph}[1]{\paragraph*{ \\ #1}\mbox{}\\}
 
 \theoremstyle{plain}
 \newtheorem*{theorem*}{Teorema}
@@ -931,15 +931,17 @@ De esta forma únicamente habrá cambiado el segundo qubit de Alice en el sistem
 
 Aplicamos la puerta de Hadamard al qubit de Alice, obteniendo:
 
-\[
-	|\Psi_2\ra = (H \otimes \I \otimes \I)|\Psi_1\ra = \frac{\alpha|+\ra (|00\ra + |11\ra) + \beta|-\ra (|10\ra + |01\ra) }{\sqrt 2} = \frac{1}{\sqrt 2} \bigg( \frac{\alpha}{\sqrt 2}(|0\ra + |1\ra) | (|00\ra + |11\ra) + \frac{\beta}{\sqrt 2}(|0\ra - |1\ra) (|10\ra + |01\ra) \bigg)
-\]
+\begin{align*}
+	|\Psi_2\ra 	& = (H \otimes \I \otimes \I)|\Psi_1\ra = \frac{\alpha|+\ra (|00\ra + |11\ra) + \beta|-\ra (|10\ra + |01\ra) }{\sqrt 2} \\
+				& = \frac{1}{\sqrt 2} \bigg( \frac{\alpha}{\sqrt 2}(|0\ra + |1\ra) | (|00\ra + |11\ra) + \frac{\beta}{\sqrt 2}(|0\ra - |1\ra) (|10\ra + |01\ra) \bigg)
+\end{align*}
 
-Operamos en la expresión anterior para obtener agrupar los qubits de Alice:
+Operamos en la expresión anterior para agrupar los qubits de Alice:
 
-\[
-	|\Psi_2\ra =\frac{1}{2} \bigg( |00\ra_A (\alpha|0\ra_B + \beta|1\ra_B) + |01\ra_A (\alpha|1\ra_B + \beta|0\ra_B + |10\ra_A (\alpha|0\ra_B - \beta|1\ra_B + |11\ra_A (\alpha|1\ra_B - \beta|0\ra_B \bigg)
-\]
+\begin{align*}
+|\Psi_2\ra  = \frac{1}{2} \bigg( 	& |00\ra_A (\alpha|0\ra_B + \beta|1\ra_B) + |01\ra_A (\alpha|1\ra_B + \beta|0\ra_B) \\
+			 						& + |10\ra_A (\alpha|0\ra_B - \beta|1\ra_B + |11\ra_A (\alpha|1\ra_B - \beta|0\ra_B \bigg)
+\end{align*}
 
 \myparagraph{Último paso: Medida y transmisión}
 
@@ -970,7 +972,92 @@ En la figura \ref{fig-teleportation} podemos ver el circuito cuántico que imple
 
 Finalmente, merece la pena comentar la paradoja que surgió a partir de este circuito cuántico. Ya que Alice y Bob están tan separados físicamente como se quiera, al medir los qubits de Alice estamos haciendo el qubit de Bob (a distancia arbitrariamente grande) colapse a un estado de forma instantánea. ¿Estamos a caso transmitiendo información más rápido de lo que viaja la velocidad de la luz? \\
 
-Como cabe esperar, la respuesta es no. Aunque el qubit de Bob haya colapsado a un estado, sin Bob saber la información transmitida por Alice sobre su medida, no podrá recuperar el estado original. Y, naturalmente, la medida de Alice no puede ser transmitida a Bob más rápido que la velocidad de la luz.
+Como cabe esperar, la respuesta es no. Aunque el qubit de Bob haya colapsado a un estado, sin Bob saber la información transmitida por Alice sobre su medida, no podrá recuperar el estado original. Y, naturalmente, la medida de Alice no puede ser transmitida a Bob más 
+rápido que la velocidad de la luz.
+
+
+\subsection{El algoritmo de Grover}
+
+Este algoritmo consiste en la búsqueda de un elemento particular sobre una base de datos de $2^N$ elementos. Esta explicación se basará en \href{https://qiskit.org/textbook/ch-algorithms/grover.html}{el tutorial de Qiskit} y el \href{https://en.wikipedia.org/wiki/Grover\%27s_algorithm}{artículo de Wikipedia sobre el algoritmo de Grover}, en ingleś. \\
+
+\myparagraph{Definición del problema y oráculo}
+
+Supongamos que tenemos una función $f: \{0, 1, \ldots, N-1\} \longrightarrow \{0,1\}$ que representa nuestra base de datos. Dado un índice $x$ a un elemento, esta función evalúa $f(x) = 1$ si y solamente si $x$ es el índice del elemento buscado. Dicho índice suele denominarse por $\omega$ (de \emph{winer}).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover1.png}
+\end{figure}
+
+Habitualmente accederemos a la información de $f$ mediante un operador unitario denominado el \emph{oráculo}, definido de la siguiente forma:
+
+\[
+	U_\omega|x\ra = 
+	\begin{cases}
+		-|x\ra & \text{si } f(x) = 1 \\
+		|x\ra  & \text{si } f(x) = 0
+	\end{cases}
+\]
+
+O, equivalentemente:
+
+\[
+	U_\omega|x\ra = (-1)^{f(x)}|x\ra
+\]
+	
+Supongo que disponemos de un sistema con 3 qubits y el índice buscado es $\omega = 101$. El oráculo asociado será de la forma:
+
+\[
+	U_\omega = 
+	\begin{bmatrix}
+		1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 0 & -1 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+	\end{bmatrix}
+	\begin{aligned}
+		\\
+		\\
+		\\
+		\\
+		\\
+		\\
+		\leftarrow \omega = \text{101}\\
+		\\
+		\\
+		\\
+	\end{aligned}
+\]
+
+Podemos construir un oráculo genérico de la siguiente forma:
+
+\[
+	U_\omega = 
+	\begin{bmatrix}
+	(-1)^{f(0)} &   0         & \cdots &   0         \\
+	0           & (-1)^{f(1)} & \cdots &   0         \\
+	\vdots      &   0         & \ddots & \vdots      \\
+	0           &   0         & \cdots & (-1)^{f(2^n-1)} \\
+	\end{bmatrix}
+\]
+
+\myparagraph{Amplificación de amplitudes}
+
+Nuestro algoritmo comienza con una superposición equitativa de todos los estados. Este es el estado que denominaremos $|s\ra$:
+
+\[
+	|s\ra = \frac{1}{\sqrt N} \sum_{x = 0}^{N-1} |x\ra.
+\]
+
+Si en este instante midiésemos nuestro sistema tendríamos una probabilidad de $\frac{1}{N} = \frac{1}{2^n}$ de obtener el índice $\omega$. Aplicaremos una serie de transformaciones al sistema para aumentar la probabilidad de obtener $\omega$ al medir. Este proceso se denomina \emph{\textbf{amplitud de amplificación}}, amplificando la probabilidad de medir dicho valor. \\
+
+Explicaremos el proceso a través de su interpretación geométrica. Podemos generar el espacio de estados 
+
+
 
 \end{document}
 
