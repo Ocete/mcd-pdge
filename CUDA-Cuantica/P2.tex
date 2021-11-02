@@ -922,7 +922,7 @@ El primer paso de nuestro algoritmo es aplicar una puerta CNOT a los dos qubits 
 
 
 \[
-	|Psi_1\ra = (CNOT \otimes \I)|Psi_0\ra = \frac{\alpha|0\ra (|00\ra + |11\ra) + \beta|1\ra (|10\ra + |01\ra) }{\sqrt 2}
+	|\Psi_1\ra = (CNOT \otimes \I)|\Psi_0\ra = \frac{\alpha|0\ra (|00\ra + |11\ra) + \beta|1\ra (|10\ra + |01\ra) }{\sqrt 2}
 \]
 
 De esta forma únicamente habrá cambiado el segundo qubit de Alice en el sistema - correspondiente al qubit central de nuestro sistema completo.
@@ -932,18 +932,18 @@ De esta forma únicamente habrá cambiado el segundo qubit de Alice en el sistem
 Aplicamos la puerta de Hadamard al qubit de Alice, obteniendo:
 
 \[
-	|Psi_2\ra = (H \otimes \I \otimes \I)|Psi_1\ra = \frac{\alpha|+\ra (|00\ra + |11\ra) + \beta|-\ra (|10\ra + |01\ra) }{\sqrt 2} = \frac{1}{\sqrt 2} \big( \frac{\alpha}{\sqrt 2}(|0\ra + |1\ra) | (|00\ra + |11\ra) + \frac{\beta}{\sqrt 2}(|0\ra - |1\ra) (|10\ra + |01\ra) \big)
+	|\Psi_2\ra = (H \otimes \I \otimes \I)|\Psi_1\ra = \frac{\alpha|+\ra (|00\ra + |11\ra) + \beta|-\ra (|10\ra + |01\ra) }{\sqrt 2} = \frac{1}{\sqrt 2} \bigg( \frac{\alpha}{\sqrt 2}(|0\ra + |1\ra) | (|00\ra + |11\ra) + \frac{\beta}{\sqrt 2}(|0\ra - |1\ra) (|10\ra + |01\ra) \bigg)
 \]
 
 Operamos en la expresión anterior para obtener agrupar los qubits de Alice:
 
 \[
-	|Psi_2\ra =\frac{1}{2} \big( |00\ra_A (\alpha|0\ra_B + \beta|1\ra_B) + |01\ra_A (\alpha|1\ra_B + \beta|0\ra_B + |10\ra_A (\alpha|0\ra_B - \beta|1\ra_B + |11\ra_A (\alpha|1\ra_B - \beta|0\ra_B \big)
+	|\Psi_2\ra =\frac{1}{2} \bigg( |00\ra_A (\alpha|0\ra_B + \beta|1\ra_B) + |01\ra_A (\alpha|1\ra_B + \beta|0\ra_B + |10\ra_A (\alpha|0\ra_B - \beta|1\ra_B + |11\ra_A (\alpha|1\ra_B - \beta|0\ra_B \bigg)
 \]
 
 \myparagraph{Último paso: Medida y transmisión}
 
-Como podemos ver en la expresión anterior de $|Psi_2\ra$, para cada posible valor de los qubits de Alice tenemos un estado distinto para el qubits de Bob. El resto del proceso consiste en medir los estados de Alice y transmitir la medida a Bob. Por ejemplo, si Alice mide en sus dos qubits el valor $00$, el qubit de Bob estará en el estado $\alpha|0\ra_B + \beta|1\ra_B = |\Psi\ra$. \\
+Como podemos ver en la expresión anterior de $|\Psi_2\ra$, para cada posible valor de los qubits de Alice tenemos un estado distinto para el qubits de Bob. El resto del proceso consiste en medir los estados de Alice y transmitir la medida a Bob. Por ejemplo, si Alice mide en sus dos qubits el valor $00$, el qubit de Bob estará en el estado $\alpha|0\ra_B + \beta|1\ra_B = |\Psi\ra$. \\
 
 Si el resultado de la medida de Alice fuese distinto a $00$, Bob no tendría el estado $|\Psi\ra$ como tal, pero podría recuperarlo aplicando operaciones sencillas. Para saber qué puertas ha de aplicarle a su qubit necesita saber cúal es su contenido actual. Es por ello que necesita la información de la medida transmitida por Alice. \\
 
@@ -951,19 +951,19 @@ En la siguiente tabla podemos ver un desglose de las operaciones que ha de aplic
 
 \begin{table}[H]
 	\begin{tabular}{llll}
-		Medida de Alice $m$ & Estado de Bob tras la medida $|Psi _3\ra_m$ & Operación a aplicar  & Resultado\\
-		00	& \alpha|0\ra + \beta|1\ra & $\I$	& $\I |Psi _3\ra_{00} = \alpha|0\ra + \beta|1\ra$ \\
-		01	& \alpha|1\ra + \beta|0\ra & $X$	& $X |Psi _3\ra_{01} = \alpha|0\ra + \beta|1\ra$  \\
-		10	& \alpha|0\ra - \beta|1\ra & $Z$	& $Z |Psi _3\ra_{10} = \alpha|0\ra + \beta|1\ra$  \\
-		11	& \alpha|1\ra - \beta|0\ra & $ZX$	& $ZX |Psi _3\ra_{11} = \alpha|0\ra + \beta|1\ra$
+		\textbf{Medida de Alice $m$} & \textbf{Estado de Bob $|\Psi_3\ra_m$} & \textbf{Operación a aplicar} & \textbf{Resultado}                               \\ \hline
+		00                           & $\alpha|0\ra + \beta|1\ra$                            & $\I$                         & $\I |\Psi _3\ra_{00} = |\Psi\ra$ \\
+		01                           & $\alpha|1\ra + \beta|0\ra$                            & $X$                          & $X |\Psi _3\ra_{01} = |\Psi\ra$  \\
+		10                           & $\alpha|0\ra - \beta|1\ra$                            & $Z$                          & $Z |\Psi _3\ra_{10} = |\Psi\ra$  \\
+		11                           & $\alpha|1\ra - \beta|0\ra$                            & $XZ$                         & $XZ |\Psi _3\ra_{11} = |\Psi\ra$
 	\end{tabular}
 \end{table}
 
-En la figura \ref{fig-teleportation} podemos ver el circuito cuántico que implementa este algoritmo, donde $\beta_{00}$ denota el primer estado de la base de Bell $|\Phi^+\ra$, y $b_1,b_2$ son los resultados de la medida de los qubits de Alice.
+En la figura \ref{fig-teleportation} podemos ver el circuito cuántico que implementa este algoritmo, donde la puerta morada es la $\emph{Controlled-Z}$, que aplica la puerta Z al tercer qubit si y sólo si el estado del primer qubit es $1$.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{figures/teleportation-circuit.jpg}
+	\includegraphics[scale=0.7]{figures/teleportation-circuit.pdf}
 	\caption{Circuito cuántico que implementa la teleportación cuántica.}
 	\label{fig-teleportation}
 \end{figure}
