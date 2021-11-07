@@ -43,9 +43,9 @@
 \usepackage{minted}
 \usepackage{pdfpages}
 \usepackage[framemethod=TikZ]{mdframed} % Para entorno enunciado
+\usepackage{amsthm}
 
 \def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
-\newtheorem{theorem}{Theorem}
 \titlespacing*{\subsection}{0pt}{5.5ex}{3.3ex}
 \titlespacing*{\section}{0pt}{5.5ex}{1ex}
 \author{José Antonio Álvarez Ocete\\ Francisco Javier Sáez Maldonado}
@@ -58,7 +58,12 @@
 \newcommand{\I}{\mathbb{I}}
 \newcommand{\la}{\langle}
 \newcommand{\ra}{\rangle}
-\newcommand{\myparagraph}[1]{\paragraph*{#1}\mbox{}\\}
+\newcommand{\myparagraph}[1]{\paragraph*{ \\ #1}\mbox{}\\}
+
+\theoremstyle{plain}
+\newtheorem*{theorem*}{Teorema}
+\newtheorem{theorem}{Teorema}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Entorno para enunciados
 %https://texblog.org/2015/09/30/fancy-boxes-for-theorem-lemma-and-proof-with-mdframed/
@@ -71,26 +76,28 @@
 \newcommand{\thetheo}{\arabic{enunciado}}
 
 \newenvironment{enunciado}[2][]{%
-	\refstepcounter{enunciado}%
-	\ifstrempty{#1}%
-	{\mdfsetup{%
-			frametitle={%
-				\tikz[rounded corners, baseline=(current bounding box.east),outer sep=0pt]
-				\node[anchor=east,rectangle,fill=myBlue]
-				{\strut Ejercicio~\thetheo};}}
-	}%
-	{\mdfsetup{%
-			frametitle={%
-				\tikz[rounded corners, baseline=(current bounding box.east),outer sep=0pt]
-				\node[anchor=east,rectangle,fill=myBlue]
-				{\strut Ejercicio~\thetheo:~#1};}}%
-	}%
-	\mdfsetup{roundcorner=5pt, innertopmargin=10pt,linecolor=myBlue,%
-		linewidth=2pt,topline=true,%
-		frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+		\refstepcounter{enunciado}%
+		\ifstrempty{#1}%
+		{\mdfsetup{%
+				frametitle={%
+					\tikz[rounded corners, baseline=(current bounding box.east),outer sep=0pt]
+					\node[anchor=east,rectangle,fill=myBlue]
+					{\strut Ejercicio~\thetheo};}}
+		}%
+		{\mdfsetup{%
+				frametitle={%
+					\tikz[rounded corners, baseline=(current bounding box.east),outer sep=0pt]
+					\node[anchor=east,rectangle,fill=myBlue]
+					{\strut Ejercicio~\thetheo:~#1};}}%
+		}%
+		\mdfsetup{roundcorner=5pt, innertopmargin=10pt,linecolor=myBlue,%
+			linewidth=2pt,topline=true,%
+			frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+		}
+		\begin{mdframed}[]\relax%
+			%\label{#2}
 	}
-	\begin{mdframed}[rounded corners]\relax%
-		\label{#2}}{\end{mdframed}}
+	{\end{mdframed}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
@@ -495,7 +502,7 @@ add<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 
 
 \begin{enunciado}
-¿Qué ocurre cuando se aumenta $N$?
+	\textquestiondown Qué ocurre cuando se aumenta $N$?
 \end{enunciado}
 
 Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos que habrá datos que queden sin calcular. Por ejemplo, si ponemos $N=1025^2$ obtenemos la siguiente salida:
@@ -557,7 +564,7 @@ Para esta parte de la práctica utilizaremos el \href{https://quantum-computing.
 
 \end{enunciado}
 
-\myparagraph{Puerta CNOT}
+\myparagraph{Puerta NOT}
 
 La única operación no trivial aplicable sobre un único bit es la negación: la puerta NOT. De la misma forma, es natural preguntarse cuál es el equivalente a la puerta NOT en el mundo cuántico. Dado que un qubit está descrito por dos amplitudes $\alpha$ y $\beta$:
 
@@ -586,7 +593,7 @@ Vemos la implementación de esta puerta en el Quantum Composer de IBM:
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{figures/gate-x.png}
-	\caption{Circuito con puerta de CNOT}
+	\caption{Circuito con puerta de NOT}
 \end{figure}
 
 Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre en el estado $|0\ra$. Tras aplicarlo a nuestro qubit una puerta $X$ obtendremos $|1\ra$. \\
@@ -598,7 +605,7 @@ Recordemos que en el Quantum Composer de IBM todos los qubits empiezan siempre e
 Finalmente presentamos la puerta de Hadamard para un único bit. Está descrita por la siguiente matriz unitaria:
 
 \[
-	H_1 = \frac{1}{\sqrt 2}
+	H = \frac{1}{\sqrt 2}
 	\begin{pmatrix}
 		1 & 1 \\
 		1 & -1 
@@ -676,14 +683,61 @@ La puerta $\pi/8$, normalmente descrita por la letra $T$, es una \emph{puerta de
 
 En computación clásica, uno de los resultados básicos más relevante es que cualquier función booleana puede describirse utilizando únicamente las puertas clásicas AND, OR y NOT. De la misma forma, en computación cuántica se obtiene siguiente resultado
 
-\begin{theorem}
+\begin{theorem*}
 	Toda matriz unitaria puede aproximarse con una combinación de puertas Hadamard, CNOT y $\pi/8$.
-\end{theorem}
+\end{theorem*}
 
 Esto es, todo circuito cuántico puede describirse utilizando únicamente dichas puertas.
 
 
+\myparagraph{Puerta CNOT}
+
+
+Pasamos a estudiar la única puerta de dos qubits que comentaremos en este apartado y que ya ha aparecido en la explicación anterior: la puerta Controlled-NOT, o simplemente CNOT. Esta transformación queda descrita por la siguiente matriz unitaria:
+
+\[
+	CNOT =
+	\begin{pmatrix}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 1 \\
+	0 & 0 & 1 & 0
+	\end{pmatrix}
+\]
+
+Esta puerta mapea $|q_1\ra|q_0\ra \mapsto |q_1 \oplus q_0\ra|q_0\ra$. Vemos su funcionamiento.
+
+\begin{figure}[H]
+	\centering
+	%\includegraphics[scale=0.7]{figures/gate_CNOT.png}
+	\caption{Circuito con puerta CNOT}
+\end{figure}
+
+Si le aplicamos la puerta CNOT a $|+\ra|0\ra$ obtenemos el estado $(|00\ra + |11\ra)/\sqrt 2$. Esto es: si el estado $q_0$ era inicialmente un $0$, no cambiará el estado $q_1$. Por otro lado, si el estado $q_0$ era inicialmente un $1$, el qubit $q_1$ cambiará a $1$. Explicaremos este circuito en profundidad en la sección \ref{sec-entrelazamiento}.
+
+
+\myparagraph{Puerta Toffoli}
+
+
+Finalmente, explicamos una única puerta de más de dos qubits: la puerta de Toffoli o puerta CCNOT. Esta puerta será necesaria para el sumador de dos qubits de la sección \ref{sec-sumator} y será sencilla de entender una vez comprendida la puerta anterior. Queda descrita por la siguiente matriz unitaria:
+
+\[
+	CCNOT =
+	\begin{pmatrix}
+	1 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 1 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 1 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 1 \\
+	0 & 0 & 0 & 0 & 1 & 0
+	\end{pmatrix}
+\]
+
+Y mapea $|q_2\ra|q_1\ra|q_0\ra \mapsto |q_2 \oplus (q_0 \wedge q_1)\ra|q_1\ra|q_0\ra$. Es decir, altera el último qubit si y sólo si los dos primeros son $1$. Veremos un ejemplo de uso de esta puerta en la sección \ref{sec-sumator}.
+
+
 \subsection{Generación de números aleatorios con un Computador Cuántico}
+
 
 \begin{enunciado}
 	
@@ -741,10 +795,8 @@ Estas mediciones han de aproximarse a una uniforme de parámetro $1/256$. Podemo
 
 Comparando ambas gráficas podemos apreciar como la generación de números se acerca a la distribución uniforme mencionada pero en ambas estamos relativamente lejos del modelo teórico. Tras ver los resultados de esta generación utilizando \emph{scipy} podemos asegurar que el generador utilizando el Quantum Composer de IBM obtiene números aleatorios razonablemente aleatorizados.
 
-TODO: explicar la puerta CNOT
-
 \subsection{Entrelazamiento}
-
+\label{sec-entrelazamiento}
 
 \begin{enunciado}
 	
@@ -793,6 +845,7 @@ Este estado se comporta como el anterior pero con valores de medida opuestos: si
 
 
 \subsection{Sumador de 2 qbits}
+\label{sec-sumator}
 
 
 \begin{enunciado}
@@ -807,14 +860,225 @@ Este estado se comporta como el anterior pero con valores de medida opuestos: si
 	Tenga en cuenta que las puertas XOR y AND clásicas no reversibles y por tanto es necesario buscar puertas cuánticas equivalentes pero que sean reversibles. Puede seguir las indicaciones de \href{https://qiskit.org/textbook/ch-states/atoms-computation.html}{este enlace}.
 \end{enunciado}
 
+El circuito cuántico que implementa el sumador de 2 qubits es el siguiente, donde los qubits de entrada son $q_0, q_1$ y $q_2, q_3$ son los qubits de salida: 
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.8]{figures/sumator_statement2.png}
 \end{figure}
 
+Entendámoslo paso a paso. Puesto que los qubits $q_0, q_1$ son de entrada, los valores que aparecen antes de la primera línea puntea ($q_0, q_1 = |1\ra$) son un ejemplo en este caso. \\
+
+Como vimos en ejercicios anteriores, la primera puerta CNOT mapea $|q_2\ra|q_0\ra \mapsto |q_2\ra|q_0 \oplus q_2\ra$. Puesto que inicialmente $|q_2\ra = |0\ra$, tras aplicar la primera puerta obtenemos $|0\ra|q_0\ra \mapsto |0 \oplus q_0\ra|q_0\ra = |q_0\ra|q_0\ra$. \\
+
+Al aplicar la segunda puerta $X$ obtenemos en el tercer qubit $|q_0 \oplus q_1\ra$. Esto completa la primera parte de nuestro sumador de dos qubits. \\
+
+De cara al acarreo acumulado en $q_3$, este unicamente es $1$ si ambos qubits son $1$. Por lo tanto, utilizamos la puerta de Toffoli para mapear $|0\ra|q_1\ra|q_0\ra \mapsto |0 \oplus (q_0 \wedge q_1)\ra|q_1\ra|q_0\ra = |q_0 \wedge q_1\ra|q_1\ra|q_0\ra $. \\
+
+Comprobemos el resultado de este circuito utilizando el Quantum Composer de IBM para distintas entradas. En primer lugar utilizamos $|11\ra$ para los qubits de entrada como en el circuito proporcionado:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{figures/sumator_11.png}
+\end{figure}
+
+Podemos ver en las probabilidades de las salidas como $1011$ es el único resultado posible (a nivel teórico) de nuestro circuito. Recordemos que esto representa las medidas de $q_3 q_2 q_1 q_0$, en ese orden. Es decir, tras sumar dos estados $|1\ra$ obtenemos $|10\ra$, como cabría esperar. Estudiémos ahora el resultado de nuestro circuito para dos entradas $|+\ra$:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{figures/sumator_++.png}
+\end{figure}
+
+Obtenemos las siguientes salidas, con igual probabilidad:
+
+\begin{itemize}
+	\item P$(q_3q_2q_1q_0 = 0000) = 0.25$.
+	\item P$(q_3q_2q_1q_0 = 0101) = 0.25$.
+	\item P$(q_3q_2q_1q_0 = 0110) = 0.25$.
+	\item P$(q_3q_2q_1q_0 = 1011) = 0.25$.
+\end{itemize}
+
+Sin embargo, si miramos unicamente los qubits de salida obtenemos la siguiente distribución:
+
+\begin{itemize}
+	\item P$(q_3q_2 = 00) = 0.25$.
+	\item P$(q_3q_2 = 01) = 0.50$.
+	\item P$(q_3q_2 = 10) = 0.25$.
+\end{itemize}
+
+Lo que concuerda con las predicciones teóricas: la probabilidad de que ambos qubits iniciales sean $0$ o $1$ es $0.25$, mientras que la probabilidad de que uno sea $0$ y el otro $1$ es de $0.5$.
+
 
 \section{Ejercicios opcionales de la práctica 2}
+
+Para la parte opcional de esta práctica explicaremos en detalle el funcionamiento de algunos algoritmos cuánticos.
+
+
+\subsection{Teleportación cuántica}
+
+
+El objetivo de este algoritmo es el de transmitir un qubit entre dos personas llamadas Alice y Bob. Antes de realizar el experimento, Bob y Alice comparten un qubit entrelazado. Aunque este proceso es equivalente para cualquier otro estado de \href{https://es.wikipedia.org/wiki/Base_de_Bell}{la base de Bell}, tomaremos el estado de Bell presentado en la sección \ref{sec-entrelazamiento}:
+
+\[
+	|\Phi^+\ra = \frac{|00\ra + |11\ra}{\sqrt 2} = \frac{|0_A\ra \otimes |0_B\ra + |1_A\ra \otimes |1_B\ra}{\sqrt 2}
+\]
+
+Donde utilizamos la notación convencional de la física cuántica:
+
+\[
+	|0_A\ra \otimes |1_B\ra \equiv |0_A\ra|1_B\ra  \equiv |01\ra 
+\]
+
+Una vez el estado entrelazado ha sido correctamente creado, Alice y Bob toman cada uno de los qubits entrelazados y se separan una distancia suficiente para que ambos sistemas no interfieran entre ellos. La distancia entre Alice y Bob peude ser tan grande como se quiera mientras los qubits permanezcan entrelazados (no haya ninguna alteración a los qubits en su transporte). \\
+
+El objetivo será transmitir un nuevo qubit $|\Psi\ra = \alpha|0\ra + \beta|1\ra$ de Alice a Bob. Para ello asumimos que las amplitudes $\alpha$ y $\beta$ son desconocidas para ambos. De esta forma, nuestro sistema inicial consta de tres qubits: el primero pertenece a Alice y procede del estado $|\Psi\ra$, el segundo también pertenece a Alice y procede del estado compartido y entrelazado $|\Phi^+\ra$, y el tercero que pertenece a Bob y también procede del estado compartido $|\Phi^+\ra$. Podemos escribir el estado inicial de nuestro sistema completo de la siguiente forma:
+
+\[
+	|\Psi_0\ra = |\Psi\ra|\Phi^+\ra = |00\ra + |11\ra = (\alpha|0\ra + \beta|1\ra) \frac{1}{\sqrt 2}(|00\ra + |11\ra) = \frac{\alpha|0\ra (|00\ra + |11\ra) + \beta|1\ra (|00\ra + |11\ra) }{\sqrt 2}
+\]
+
+De nuevo, recordemos que el objetivo es enviar el estado $|\Psi\ra$ de Alice a Bob. Para ello tendremos que, además de aplicar nuestro circuito cuántico al sistema, enviar dos únicos bits clásicos de Alice a Bob. Estudiémos el circuito paso a paso:
+
+\myparagraph{Primer paso: Puerta CNOT}
+
+El primer paso de nuestro algoritmo es aplicar una puerta CNOT a los dos qubits de Alice. Esto es, aplicar al sistema completo la transformación $CNOT \otimes \I$:
+
+
+\[
+	|\Psi_1\ra = (CNOT \otimes \I)|\Psi_0\ra = \frac{\alpha|0\ra (|00\ra + |11\ra) + \beta|1\ra (|10\ra + |01\ra) }{\sqrt 2}
+\]
+
+De esta forma únicamente habrá cambiado el segundo qubit de Alice en el sistema - correspondiente al qubit central de nuestro sistema completo.
+
+\myparagraph{Segundo paso: Puerta de Hadamard}
+
+Aplicamos la puerta de Hadamard al qubit de Alice, obteniendo:
+
+\begin{align*}
+	|\Psi_2\ra 	& = (H \otimes \I \otimes \I)|\Psi_1\ra = \frac{\alpha|+\ra (|00\ra + |11\ra) + \beta|-\ra (|10\ra + |01\ra) }{\sqrt 2} \\
+				& = \frac{1}{\sqrt 2} \bigg( \frac{\alpha}{\sqrt 2}(|0\ra + |1\ra) | (|00\ra + |11\ra) + \frac{\beta}{\sqrt 2}(|0\ra - |1\ra) (|10\ra + |01\ra) \bigg)
+\end{align*}
+
+Operamos en la expresión anterior para agrupar los qubits de Alice:
+
+\begin{align*}
+|\Psi_2\ra  = \frac{1}{2} \bigg( 	& |00\ra_A (\alpha|0\ra_B + \beta|1\ra_B) + |01\ra_A (\alpha|1\ra_B + \beta|0\ra_B) \\
+			 						& + |10\ra_A (\alpha|0\ra_B - \beta|1\ra_B + |11\ra_A (\alpha|1\ra_B - \beta|0\ra_B \bigg)
+\end{align*}
+
+\myparagraph{Último paso: Medida y transmisión}
+
+Como podemos ver en la expresión anterior de $|\Psi_2\ra$, para cada posible valor de los qubits de Alice tenemos un estado distinto para el qubits de Bob. El resto del proceso consiste en medir los estados de Alice y transmitir la medida a Bob. Por ejemplo, si Alice mide en sus dos qubits el valor $00$, el qubit de Bob estará en el estado $\alpha|0\ra_B + \beta|1\ra_B = |\Psi\ra$. \\
+
+Si el resultado de la medida de Alice fuese distinto a $00$, Bob no tendría el estado $|\Psi\ra$ como tal, pero podría recuperarlo aplicando operaciones sencillas. Para saber qué puertas ha de aplicarle a su qubit necesita saber cúal es su contenido actual. Es por ello que necesita la información de la medida transmitida por Alice. \\
+
+En la siguiente tabla podemos ver un desglose de las operaciones que ha de aplicar Bob según la medida de Alice para recuperar el qubit original.
+
+\begin{table}[H]
+	\begin{tabular}{llll}
+		\textbf{Medida de Alice $m$} & \textbf{Estado de Bob $|\Psi_3\ra_m$} & \textbf{Operación a aplicar} & \textbf{Resultado}                               \\ \hline
+		00                           & $\alpha|0\ra + \beta|1\ra$                            & $\I$                         & $\I |\Psi _3\ra_{00} = |\Psi\ra$ \\
+		01                           & $\alpha|1\ra + \beta|0\ra$                            & $X$                          & $X |\Psi _3\ra_{01} = |\Psi\ra$  \\
+		10                           & $\alpha|0\ra - \beta|1\ra$                            & $Z$                          & $Z |\Psi _3\ra_{10} = |\Psi\ra$  \\
+		11                           & $\alpha|1\ra - \beta|0\ra$                            & $XZ$                         & $XZ |\Psi _3\ra_{11} = |\Psi\ra$
+	\end{tabular}
+\end{table}
+
+En la figura \ref{fig-teleportation} podemos ver el circuito cuántico que implementa este algoritmo, donde la puerta morada es la $\emph{Controlled-Z}$, que aplica la puerta Z al tercer qubit si y sólo si el estado del primer qubit es $1$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{figures/teleportation-circuit.pdf}
+	\caption{Circuito cuántico que implementa la teleportación cuántica.}
+	\label{fig-teleportation}
+\end{figure}
+
+Finalmente, merece la pena comentar la paradoja que surgió a partir de este circuito cuántico. Ya que Alice y Bob están tan separados físicamente como se quiera, al medir los qubits de Alice estamos haciendo el qubit de Bob (a distancia arbitrariamente grande) colapse a un estado de forma instantánea. ¿Estamos a caso transmitiendo información más rápido de lo que viaja la velocidad de la luz? \\
+
+Como cabe esperar, la respuesta es no. Aunque el qubit de Bob haya colapsado a un estado, sin Bob saber la información transmitida por Alice sobre su medida, no podrá recuperar el estado original. Y, naturalmente, la medida de Alice no puede ser transmitida a Bob más 
+rápido que la velocidad de la luz.
+
+
+\subsection{El algoritmo de Grover}
+
+Este algoritmo consiste en la búsqueda de un elemento particular sobre una base de datos de $ n \equiv 2^N$ elementos. Esta explicación se basará en \href{https://qiskit.org/textbook/ch-algorithms/grover.html}{el tutorial de Qiskit} y el \href{https://en.wikipedia.org/wiki/Grover\%27s_algorithm}{artículo de Wikipedia sobre el algoritmo de Grover}, en ingleś. \\
+
+\myparagraph{Definición del problema y oráculo}
+
+Supongamos que tenemos una función $f: \{0, 1, \ldots, N-1\} \longrightarrow \{0,1\}$ que representa nuestra base de datos. Dado un índice $x$ a un elemento, esta función evalúa $f(x) = 1$ si y solamente si $x$ es el índice del elemento buscado. Dicho índice suele denominarse por $\omega$ (de \emph{winer}).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover1.png}
+\end{figure}
+
+Habitualmente accederemos a la información de $f$ mediante un operador unitario denominado el \emph{oráculo}, definido de la siguiente forma:
+
+\[
+	U_\omega|x\ra = 
+	\begin{cases}
+		-|x\ra & \text{si } f(x) = 1 \\
+		|x\ra  & \text{si } f(x) = 0
+	\end{cases}
+\]
+
+O, equivalentemente:
+
+\[
+	U_\omega|x\ra = (-1)^{f(x)}|x\ra
+\]
+	
+Supongo que disponemos de un sistema con 3 qubits y el índice buscado es $\omega = 101$. El oráculo asociado será de la forma:
+
+\[
+	U_\omega = 
+	\begin{bmatrix}
+		1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 0 & -1 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+	\end{bmatrix}
+	\begin{aligned}
+		\\
+		\\
+		\\
+		\\
+		\\
+		\\
+		\leftarrow \omega = \text{101}\\
+		\\
+		\\
+		\\
+	\end{aligned}
+\]
+
+Podemos construir un oráculo genérico de la siguiente forma:
+	
+\[
+	U_\omega = 
+	\begin{bmatrix}
+	(-1)^{f(0)} &   0         & \cdots &   0         \\
+	0           & (-1)^{f(1)} & \cdots &   0         \\
+	\vdots      &   0         & \ddots & \vdots      \\
+	0           &   0         & \cdots & (-1)^{f(2^n-1)} \\
+	\end{bmatrix}
+\]
+
+\myparagraph{Amplificación de amplitudes}
+
+Nuestro algoritmo comienza con una superposición equitativa de todos los estados. Este es el estado que denominaremos $|s\ra$:
+
+\[
+	|s\ra = \frac{1}{\sqrt N} \sum_{x = 0}^{N-1} |x\ra.
+\]
+
+Si en este instante midiésemos nuestro sistema tendríamos una probabilidad de $\frac{1}{N} = \frac{1}{2^n}$ de obtener el índice $\omega$. Aplicaremos una serie de transformaciones al sistema para aumentar la probabilidad de obtener $\omega$ al medir. Este proceso se denomina \emph{\textbf{amplitud de amplificación}}, amplificando la probabilidad de medir dicho valor. \\
+
+Explicaremos el proceso a través de su interpretación geométrica. El algoritmo se describe a partir de dos reflexiones (es decir, una rotación), en un plano 2-dimensional. Los unos estados que necesitamos considerar son el estado objetivo $|\omega\ra$ y el estado de superposición uniforme $|s\ra$ descrito con anterioridad
 
 
 
