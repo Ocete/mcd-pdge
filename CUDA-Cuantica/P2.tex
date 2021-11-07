@@ -106,7 +106,7 @@
 \tableofcontents
 \newpage
 
-\section{Introducción}
+\section*{Introducción}
 
 Esta práctica está dividida en tres partes:
 
@@ -126,7 +126,7 @@ Esta práctica está dividida en tres partes:
 	
 \end{enunciado}
 
-Para programar en GPU, el primer paso que debemos dar es conocer las características (y por tanto, los recursos) que el dispositivo del que disponemos nos ofrece. En este caso práctico, vamos a realizar las pruebas utilizando \href{https://colab.research.google.com/}{Google Colaboratory}. Google pone a disposición del usuario tanto GPUs como TPUs que son más que suficientes para realizar algunas pruebas. 
+Para programar en GPU, el primer paso que debemos dar es conocer las características (y por tanto, los recursos) que el dispositivo del que disponemos nos ofrece. En este caso práctico, vamos a realizar las pruebas utilizando \href{https://colab.research.google.com/}{Google Colaboratory}. Google pone a disposición del usuario tanto GPUs como TPUs que son más que suficientes para realizar algunas pruebas.\\
 
 Lo primero que haremos es estudiar qué recursos tiene el equipo que nos ofrece Google. la GPU que nos ofrecen desde Google. Podemos ejecutar el comando \inline{!lscpu} para obtener información sobre el modelo de CPU que tenemos. El resultado nos muestra que tenemos un procesador \emph{Intel(R) Xeon(R) CPU @ 2.30GHz} de 64 bits. Además, si ejecutamos \inline{!free -kh} vemos que tenemos los siguientes recursos disponibles:
 \begin{minted}[fontsize=\footnotesize]{bash}
@@ -504,7 +504,8 @@ add<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 
 
 \begin{enunciado}
- Qué ocurre cuando se aumenta $N$?
+
+   Qué ocurre cuando se aumenta $N$?
 \end{enunciado}
 
 Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos que habrá datos que queden sin calcular. Por ejemplo, si ponemos $N=1025^2$ obtenemos la siguiente salida:
@@ -534,7 +535,6 @@ Para calcular el número de bloques, lo que haremos será usar la fórmula anter
 bloques. Escribimos entonces nuestra función del kérnel como sigue:
 
 \begin{minted}{CUDA}
-
 __global__ void add(int *a, int *b, int *c, int r, int col) {
     int i = (blockIdx.x * blockDim.x) + threadIdx.x;
     int j = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -630,7 +630,6 @@ Como vemos, no tenemos errores en la ejecución. Podemos probar a cambiar las di
 La salida mostrada por el profiler es la siguiente:
 
 \begin{minted}[fontsize=\footnotesize]{bash}
-nvcc warning : The 'compute_35', 'compute_37', 'compute_50', 'sm_35', 'sm_37' and 'sm_50' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
 ==708== NVPROF is profiling process 708, command: ./sumaMatrices_changedim
 ==708== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
 Número de errores: 0
@@ -659,13 +658,13 @@ De nuevo, nos muestra que no ha habido ningún error. Por último, podemos proba
 \begin{minted}{bash}
 !sed -i '/#define R/c\#define R 111' sumaMatrices.cu
 !sed -i '/#define C/c\#define C 333' sumaMatrices.cu
-!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true sumaMatrices.cu -o sumaMatrices_changedim_2 -lcudadevrt
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true
+            sumaMatrices.cu -o sumaMatrices_changedim_2 -lcudadevrt
 !nvprof ./sumaMatrices_changedim_2
 \end{minted}
 
 Que nos da como resultado:
 \begin{minted}[fontsize=\footnotesize]{bash}
-nvcc warning : The 'compute_35', 'compute_37', 'compute_50', 'sm_35', 'sm_37' and 'sm_50' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
 ==792== NVPROF is profiling process 792, command: ./sumaMatrices_changedim_2
 ==792== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
 Número de errores: 0
@@ -696,7 +695,7 @@ Nuevo resultado sin errores. Vemos como en este caso al ser las dimensiones más
 
 \begin{enunciado}
 	
-Compile el siguiente código, explique su funcionamiento y compruebe si la salida es correcta. En caso de que sea necesario realice las modificaciones oportunas.
+ Compile el siguiente código, explique su funcionamiento y compruebe si la salida es correcta. En caso de que sea necesario realice las modificaciones oportunas.
 	
 \end{enunciado}
 
@@ -812,7 +811,8 @@ SUCCESS!
 Vemos que tenemos un $43.6\%$ del tiempo empleado en copiar de CPU a GPU, y un $33\%$ del tiempo empleado en copiar de GPU a CPU, lo que suma un $76\%$ del tiempo solo en copiar datos mientras que solo un $23.5\%$ del tiempo se emplea en realizar la operación.
 
 \begin{enunciado}
- Use el generador de perfiles para determinar cuál es el problema.
+
+  Use el generador de perfiles para determinar cuál es el problema.
 
 \end{enunciado}
 
@@ -821,7 +821,8 @@ Como acabamos de mencionar en el comentario anterior, usando el profiler hemos v
 Por ello, la modificación que debemos hacer a nuestro programa es tratar de introducir la memoria compartida en nuestro kernel para que este proceso sea más eficiente.
 
 \begin{enunciado}
- Introduzca la modificación en el código para hacer uso de la memoria compartida.
+
+  Introduzca la modificación en el código para hacer uso de la memoria compartida.
 \end{enunciado}
 
 Debemos ahora tomar el código explicado inicialmente, pues es en el que declaramos la variable compartida (que tiene \inline{__shared__} delante del tipo) que utilizaremos para hacer uso de esta memoria compartida. Primero, \textbf{NO} descomentamos la línea que tiene el \inline{syncthreads}, para ver cómo se comporta nuestor programa cuando no realizamos esta sincronización.
@@ -829,7 +830,8 @@ Debemos ahora tomar el código explicado inicialmente, pues es en el que declara
 Lo que hacemos es de nuevo compilar el programa y ejecutarlo $100$ veces, mostrando cuántas veces obtenemos un resultado erróneo usando el mismo código en python que en el caso anterior:
 
 \begin{minted}{bash}
-!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true stencilshared.cu -o ./stencilshared -lcudadevrt
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true stencilshared.cu -o
+                    ./stencilshared -lcudadevrt
 !for run in {1..1000}; do ./stencilshared ; done > outputs_shared.txt
 \end{minted}
 
@@ -853,7 +855,8 @@ Además, sabemos que esto ocurre por los accesos a las posiciones del vector, po
 \end{minted}
 Entonces, volvemos a compilar y ejecutar $1000$ veces el código.
 \begin{minted}{bash}
-!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true stencilshared.cu -o ./stencilshared -lcudadevrt
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true stencilshared.cu -o
+            ./stencilshared -lcudadevrt
 !for run in {1..1000}; do ./stencilshared ; done > outputs_shared.txt
 
 with open("outputs_shared.txt",'rb') as text:
@@ -891,7 +894,8 @@ Además, podemos ver utilizando el profiler el siguiente resultado:
 Como vemos, hemos conseguido reducir el tiempo de copia de datos de CPU a GPU en aproximadamente $1us$. Esto era una de las partes que queríamos obtener. Nos faltaría añadir la sincronización de las hebras que hemos comentado para que además de reducir el cuello de botella no tengamos ningún fallo de cálculo.
 
 \begin{enunciado}
- Añadiendo \inline{__syncthreads ()} evalue después de las diferentes modificaciones la aceleración obtenida.
+
+  Añadiendo \inline{__syncthreads ()} evalue después de las diferentes modificaciones la aceleración obtenida.
 \end{enunciado}
 
 Para esta última parte, bastaría con descomentar la línea que tiene esta función para obtener la sincronización en ese punto del código de todas las hebras. Vamos a añadir también al código un bucle \inline{for} que ejecute el mismo código $100$ veces desde dentro del programa, para ver si mantenemos la mejora en tiempo y además obtenemos los resultados correctos en nuestro programa. Ejecutamos el profiler y obtenemos el siguiente resultado
@@ -920,7 +924,7 @@ Número de errores: 0
 
 Los resultados son exitosos. Se consigue mantener la reducción de tiempo en media respecto a la versión que no tenía memoria compartida, además de obtener ahora un código sin errores. Podríamos decir por tanto que hemos obtenido una aceleración de $4.7/5.7 \approx 20\%$.
 
-\section{Parte 2: Programación con QisKit: (Computación cuántica)}
+\section{Parte 2: Programación con QisKit: Computación cuántica}
 
 Para esta parte de la práctica utilizaremos el \href{https://quantum-computing.ibm.com/composer}{Quantum Composer de IBM}. Puesto que el tenemos un número limitado de procesos a ejecutar (únicamente 5) veremos los resultados en el simulador sin llegar a medirlo en muchos casos.
 
@@ -1078,7 +1082,7 @@ Esta puerta mapea $|q_1\ra|q_0\ra \mapsto |q_1 \oplus q_0\ra|q_0\ra$. Vemos su f
 
 \begin{figure}[H]
 	\centering
-	%\includegraphics[scale=0.7]{figures/gate_CNOT.png}
+	\includegraphics[scale=0.5]{figures/gate-CNOT}
 	\caption{Circuito con puerta CNOT}
 \end{figure}
 
@@ -1142,7 +1146,7 @@ Pasamos a realizar un estudio empírico del circuito diseñado. Lo implementamos
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{figures/8bits_rand.png}
+	\includegraphics[scale=0.7]{figures/8bits_rand}
 	\caption{Circuito randomizador de 8 bits.}
 \end{figure}
 
@@ -1150,7 +1154,7 @@ Este simple circuito cuántico pone todos los qubits en superposición y despué
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{figures/barplot_quantum.png}
+	\includegraphics[scale=0.7]{figures/barplot_quantum}
 	\caption{Resultados de la simulación con 8000 ejecuciones}
 \end{figure}
 
@@ -1248,7 +1252,7 @@ Comprobemos el resultado de este circuito utilizando el Quantum Composer de IBM 
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{figures/sumator_11.png}
+	\includegraphics[scale=0.7]{figures/sumator_11}
 \end{figure}
 
 Podemos ver en las probabilidades de las salidas como $1011$ es el único resultado posible (a nivel teórico) de nuestro circuito. Recordemos que esto representa las medidas de $q_3 q_2 q_1 q_0$, en ese orden. Es decir, tras sumar dos estados $|1\ra$ obtenemos $|10\ra$, como cabría esperar. Estudiémos ahora el resultado de nuestro circuito para dos entradas $|+\ra$:
@@ -1378,7 +1382,7 @@ Supongamos que tenemos una función $f: \{0, 1, \ldots, N-1\} \longrightarrow \{
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{figures/grover1.png}
+	\includegraphics[scale=0.5]{figures/grover1}
 \end{figure}
 
 Habitualmente accederemos a la información de $f$ mediante un operador unitario denominado el \emph{oráculo}, definido de la siguiente forma:
@@ -1451,7 +1455,7 @@ Explicaremos el proceso a través de su interpretación geométrica. El algoritm
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{figures/grover_step1}
+	\includegraphics[scale=0.15]{figures/grover_step1}
 	\caption{\textbf{Paso 1:} El proceso de amplificación de amplitud comienzo en el estado de superposición uniforme $|s\ra$.}
 \end{figure}
 
