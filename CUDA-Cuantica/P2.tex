@@ -1261,9 +1261,9 @@ Nuestro algoritmo comienza con una superposición equitativa de todos los estado
 	|s\ra = \frac{1}{\sqrt N} \sum_{x = 0}^{N-1} |x\ra.
 \]
 
-Si en este instante midiésemos nuestro sistema tendríamos una probabilidad de $\frac{1}{N} = \frac{1}{2^n}$ de obtener el índice $\omega$. Aplicaremos una serie de transformaciones al sistema para aumentar la probabilidad de obtener $\omega$ al medir. Este proceso se denomina \emph{\textbf{amplitud de amplificación}}, amplificando la probabilidad de medir dicho valor. \\
+Si en este instante midiésemos nuestro sistema tendríamos una probabilidad de $\frac{1}{N}$ de obtener el índice $\omega$. Aplicaremos una serie de transformaciones al sistema para aumentar la probabilidad de obtener $\omega$ al medir. Este proceso se denomina \emph{\textbf{amplitud de amplificación}}, amplificando la probabilidad de medir dicho valor. \\
 
-Explicaremos el proceso a través de su interpretación geométrica. El algoritmo se describe a partir de dos reflexiones (es decir, una rotación), en un plano 2-dimensional. Los únicos estados que necesitamos considerar son el estado objetivo $|\omega\ra$ y el estado de superposición uniforme $|s\ra$ descrito con anterioridad. Estos dos vectores generan un plano 2-dimensional en el espacio de estados $\mathbb{C}^{n}$. Dado que $|\omega\ra$ no tiene por qué ser perpendicular, podemos introducir el estado $|s'\ra$ generado a partir de $|\omega\ra$ y $|s\ra$ que sí sea perpendicular a $|\omega\ra$. Este nuevo estado puede ser generado, por ejemplo, con el  \href{https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process}{algoritmo de Gram–Schmidt}.
+Explicaremos el proceso a través de su interpretación geométrica. El algoritmo se describe a partir de dos reflexiones (es decir, una rotación), en un plano 2-dimensional. Los únicos estados que necesitamos considerar son el estado objetivo $|\omega\ra$ y el estado de superposición uniforme $|s\ra$ descrito con anterioridad. Estos dos vectores generan un plano 2-dimensional en el espacio de estados $\mathbb{C}^{N}$. Dado que $|\omega\ra$ no tiene por qué ser perpendicular, podemos introducir el estado $|s'\ra$ generado a partir de $|\omega\ra$ y $|s\ra$ que sí sea perpendicular a $|\omega\ra$. Este nuevo estado puede ser generado, por ejemplo, con el  \href{https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process}{algoritmo de Gram–Schmidt}.
 
 \begin{figure}[H]
 	\centering
@@ -1272,6 +1272,39 @@ Explicaremos el proceso a través de su interpretación geométrica. El algoritm
 \end{figure}
 
 
+La imagen izquierda muestra el plano 2-dimensionale generado por $|s'\ra$ y $|\omega\ra$ anteriormente comentado. Esto nos permite expresar el estado inicial de la siguiente forma:
+
+\[
+	|s\ra = \sin \theta | w \ra + \cos \theta | s' \ra; \quad \text{ donde } \theta = \arcsin \la s | w \ra = \arcsin \frac{1}{\sqrt{N}}
+\]
+
+Por otro lado, el gráfico derecho muestra las amplitudes del estado $|s\ra$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover_step2}
+	\caption{\textbf{Paso 2:} Aplicamos la reflexión del oráculo $U_f$ al estado $|s\ra$.}
+\end{figure}
+
+Geométricamente, la aplicación del oráculo $U_f$ es una reflexión sobre el eje generado por $|s'\ra$. Como tanto $|s\ra$ como $|s'\ra$ están en el plano 2-dimensional descrito, el resultado de la reflexión también estará en dicho plano. Esta reflexión se traduce en las diagrama de amplitudes en un cambio de signo para la amplitud del estado objetivo, lo que naturalmente reduce la amplitud media (representada por una línea discotínua en la gráfica.).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover_step3}
+	\caption{\textbf{Paso 3:} Aplicamos la reflexión del oráculo $U_s$ centrada en el estado $|s\ra$: $|U_s\ra = 2|s\ra\la s| - \mathbb{1}$.}
+\end{figure}
+
+El resultado de esta nueva reflexión permanece en el plano 2-dimensional originalmente descrito. De hecho, estas dos rotaciones componen una rotación centrada en el origen. Esta tranformación corresponde a la aplicación del operador $U_s U_f$ a nuestro vector original $|s\ra$. En el diagrama de amplitudes podemos entender este operador como una reflexión de la amplitud de $|\omega\ra$ sobre la amplitud media. Puesto que la amplitud media habia sido reducido con anterioridad, este se traduce en una ampliación de la amplitud de $|\omega\ra$ a aproximadamente tres veces su valor original, disminuyendo el resto de amplitudes. \\
+
+Repitiendo este proceso $t$ veces obtenemos el estado $|\psi_t\ra = (U_s U_f)^t  |s\ra$. Debemos de aplicar un esta rotación durante aproximadamente $\sqrt N$ veces, puesto que la amplitud de $|\omega\ra$ crece linealmente con el número de aplicaciones $\sim t N^{- \frac{1}{2}}$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover2}
+	\caption{Circuito que implementa el algoritmo de Grover.}
+\end{figure}
+
+Como nota final, si nuestro espacio de búsqueda alberga $M$ posible soluciones, bastará con la aplicación de dicha rotación $\sqrt{N / M}$ veces.
 
 \end{document}
 
