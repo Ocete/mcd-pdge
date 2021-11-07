@@ -978,7 +978,7 @@ rápido que la velocidad de la luz.
 
 \subsection{El algoritmo de Grover}
 
-Este algoritmo consiste en la búsqueda de un elemento particular sobre una base de datos de $2^N$ elementos. Esta explicación se basará en \href{https://qiskit.org/textbook/ch-algorithms/grover.html}{el tutorial de Qiskit} y el \href{https://en.wikipedia.org/wiki/Grover\%27s_algorithm}{artículo de Wikipedia sobre el algoritmo de Grover}, en ingleś. \\
+Este algoritmo consiste en la búsqueda de un elemento particular sobre una base de datos de $ n \equiv 2^N$ elementos. Esta explicación se basará en \href{https://qiskit.org/textbook/ch-algorithms/grover.html}{el tutorial de Qiskit} y el \href{https://en.wikipedia.org/wiki/Grover\%27s_algorithm}{artículo de Wikipedia sobre el algoritmo de Grover}, en ingleś. \\
 
 \myparagraph{Definición del problema y oráculo}
 
@@ -1034,7 +1034,7 @@ Supongo que disponemos de un sistema con 3 qubits y el índice buscado es $\omeg
 \]
 
 Podemos construir un oráculo genérico de la siguiente forma:
-
+	
 \[
 	U_\omega = 
 	\begin{bmatrix}
@@ -1055,7 +1055,7 @@ Nuestro algoritmo comienza con una superposición equitativa de todos los estado
 
 Si en este instante midiésemos nuestro sistema tendríamos una probabilidad de $\frac{1}{N} = \frac{1}{2^n}$ de obtener el índice $\omega$. Aplicaremos una serie de transformaciones al sistema para aumentar la probabilidad de obtener $\omega$ al medir. Este proceso se denomina \emph{\textbf{amplitud de amplificación}}, amplificando la probabilidad de medir dicho valor. \\
 
-Explicaremos el proceso a través de su interpretación geométrica. Podemos generar el espacio de estados 
+Explicaremos el proceso a través de su interpretación geométrica. El algoritmo se describe a partir de dos reflexiones (es decir, una rotación), en un plano 2-dimensional. Los unos estados que necesitamos considerar son el estado objetivo $|\omega\ra$ y el estado de superposición uniforme $|s\ra$ descrito con anterioridad
 
 
 

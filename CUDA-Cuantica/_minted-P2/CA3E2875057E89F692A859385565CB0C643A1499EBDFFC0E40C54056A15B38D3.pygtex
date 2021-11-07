@@ -1,9 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-valor a\PYG{o}{[}\PYG{l+m}{10}\PYG{o}{]} es \PYG{l+m}{10}
-valor b\PYG{o}{[}\PYG{l+m}{10}\PYG{o}{]} es \PYG{l+m}{1014}
-resultado c\PYG{o}{[}\PYG{l+m}{10}\PYG{o}{]} es \PYG{l+m}{1024}
-valor a\PYG{o}{[}\PYG{l+m}{0}\PYG{o}{]} es \PYG{l+m}{0}
-valor b\PYG{o}{[}\PYG{l+m}{0}\PYG{o}{]} es \PYG{l+m}{1024}
-resultado c\PYG{o}{[}\PYG{l+m}{0}\PYG{o}{]} es \PYG{l+m}{1024}
-Todos los valores de c valen lo mismo \PYG{o}{(}\PYG{l+m}{1} true, \PYG{l+m}{0} \PYG{n+nb}{false}\PYG{o}{)}: \PYG{l+m}{1}
-\end{Verbatim}

@@ -1,4 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{c+cp}{\PYGZsh{}define N (1024*1024)}
-\PYG{c+cp}{\PYGZsh{}define THREADS\PYGZus{}PER\PYGZus{}BLOCK 512}
-\end{Verbatim}
