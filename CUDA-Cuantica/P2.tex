@@ -468,7 +468,9 @@ Se comprueba que, para cualquier $n < N$, el número de elementos correctamente 
    	Todos los valores de c valen lo mismo (1 true, 0 false): 0
    	Numero de elementos sumados correctamente: 3
 \end{minted} 
-\item Pruebe a lanzar diferente número de bloques ( con un solo thread) ¿Cual son los valores máximos y mínimos de número de bloques en esta GPU?
+  \item Pruebe a lanzar diferente número de bloques ( con un solo thread) ¿Cual son los valores máximos y mínimos de número de bloques en esta GPU?
+
+		El número máximo de bloques ya lo habíamos visto en la información inicial. Desde las capacidades computacionales $3.0$, la dimensión $x$ de un grid de bloques de hebras puede ser $2^{31-1}$.
 \end{enumerate}
 
 \subsection{$NUMBLOCK$ bloques y $NUMTHREADS$ hilos}
@@ -501,7 +503,7 @@ add<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 
 
 \begin{enunciado}
-	Qué ocurre cuando se aumenta $N$?
+ Qué ocurre cuando se aumenta $N$?
 \end{enunciado}
 
 Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos que habrá datos que queden sin calcular. Por ejemplo, si ponemos $N=1025^2$ obtenemos la siguiente salida:
@@ -556,8 +558,6 @@ int size = R*C*sizeof(int);
 a =  (int *) malloc(size);
 b =  (int *) malloc(size);
 c =  (int *) malloc(size);
-
-
 // Setup input values
 
 for( int i = 0; i < R; i++ ){
@@ -566,13 +566,10 @@ for( int i = 0; i < R; i++ ){
         b[i*C + j] = 3;
     }
 }
-
-
 // Allocate space for device copies of a, b, c
 cudaMalloc((void **) &d_a, size);
 cudaMalloc((void **) &d_b, size);
 cudaMalloc((void **) &d_c, size);
-
 
 // Copy inputs to device
 cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
@@ -582,11 +579,10 @@ cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
 En este bloque hemos inicializado la memoria en el host, inicializado las variables y luego las hemos copiado a la memoria de la GPU.
 
 \begin{minted}{CUDA}
-dim3 dimGrid((R + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK, (C + THREADS_PER_BLOCK -1)/THREADS_PER_BLOCK, 1);
+dim3 dimGrid((R + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK,
+ 			(C + THREADS_PER_BLOCK -1)/THREADS_PER_BLOCK, 1);
 
 dim3 dimBlock(THREADS_PER_BLOCK, THREADS_PER_BLOCK, 1);
-
-
 
 add<<<dimGrid,dimBlock>>>(d_a, d_b, d_c,R,C);
 
@@ -595,7 +591,7 @@ cudaDeviceSynchronize();
 
 En este bloque, declaramos las dimensiones del grid y de los bloques y ejecutamos el kernel. Tras la ejecución, el profiler nos muestra lo siguiente:
 
-\begin{minted}{bash}
+\begin{minted}[fontsize=\footnotesize]{bash}
 ==1114== NVPROF is profiling process 1114, command: ./sumaMatrices
 ==1114== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
 Número de errores: 0
@@ -632,7 +628,7 @@ Como vemos, no tenemos errores en la ejecución. Podemos probar a cambiar las di
 
 La salida mostrada por el profiler es la siguiente:
 
-\begin{minted}{bash}
+\begin{minted}[fontsize=\footnotesize]{bash}
 nvcc warning : The 'compute_35', 'compute_37', 'compute_50', 'sm_35', 'sm_37' and 'sm_50' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
 ==708== NVPROF is profiling process 708, command: ./sumaMatrices_changedim
 ==708== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
@@ -667,7 +663,7 @@ De nuevo, nos muestra que no ha habido ningún error. Por último, podemos proba
 \end{minted}
 
 Que nos da como resultado:
-\begin{minted}{bash}
+\begin{minted}[fontsize=\footnotesize]{bash}
 nvcc warning : The 'compute_35', 'compute_37', 'compute_50', 'sm_35', 'sm_37' and 'sm_50' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
 ==792== NVPROF is profiling process 792, command: ./sumaMatrices_changedim_2
 ==792== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
@@ -703,7 +699,8 @@ Compile el siguiente código, explique su funcionamiento y compruebe si la salid
 	
 \end{enunciado}
 
-Analizamos primero el código por partes. Comenzamos con el kernel \inline{void stenci_1d(int* i, int *out)}:
+Analizamos primero el código por partes. Comenzamos con el kernel \\
+\inline{void stenci_1d(int* i, int *out)}:
 
 \begin{minted}{CUDA}
 __shared__ int temp[BLOCK_SIZE + 2 * RADIUS];
@@ -734,7 +731,193 @@ Aquí, se actualizan los valores de la variable compartida que habíamos declara
     out[gindex-RADIUS] = result;
 \end{minted}
 
-En este último trozo de la función se realiza la operación requerida: \textbf{en la posición i de la salida, estará la suma de los elementos desde $i-RADIUS$ hasta $i+RADIUS$}.
+En este último trozo de la función se realiza la operación requerida: \textbf{en la posición i de la salida, estará la suma de los elementos desde $i-RADIUS$ hasta $i+RADIUS$}. En general, debemos tener cuidado en este programa, pues estamos viendo que habrá posiciones del vector que sean consultadas por varias hebras. Queremos hacer nuestro programa para que cada hebra calcule una posición del vector de salida así que podría haber accesos al vector original en múltiples ocasiones. Para este programa, hay que tener cuidado en la inicialización del vector de entrada:
+
+\begin{minted}{CUDA}
+unsigned int i;
+int h_in[NUM_ELEMENTS + 2 * RADIUS], h_out[NUM_ELEMENTS];
+int *d_in, *d_out;
+
+// Initialize host data
+for( i = 0; i < (NUM_ELEMENTS + 2*RADIUS); ++i )
+  h_in[i] = 1; // With a value of 1 and RADIUS of 3,
+ 				all output values should be 7
+\end{minted}
+Como vemos, es importante reservar e inicializar $2*RADIUS$ posiciones más de la cuenta para el vector, pues accederemos a ellas para el cálculo de la posición $0$ y $NUM\_ELEMENTS$ de nuestro vector de salida.
+
+\subsubsection{Ejecuciones}
+
+
+
+Ahora, vamos al ejercicio. Se nos pide que estudiemos primero una versión sin memoria compartida. Para ello, reescribimos la función de kernel del siguiente modo para que quede más claro:
+\begin{minted}{CUDA}
+__global__ void stencil_1d(int *in, int *out)
+{
+    int index = threadIdx.x + (blockIdx.x * blockDim.x) + RADIUS;
+
+    //__syncthreads();
+
+    // Apply the stencil
+    int result = 0;
+    for (int offset = -RADIUS ; offset <= RADIUS ; offset++)
+        result += in[index + offset];
+
+    // Store the result
+    out[index-RADIUS] = result;
+}
+\end{minted}
+
+Entonces, compilamos y ejecutamos nuestro programa $1000$ veces, guardando la salida para ver cuántas veces fallamos. A priori, estamos haciendo mucho acceso a memoria pero no deberíamos tener fallos:
+\begin{minted}{bash}
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true stenciltest.cu -o ./stenciltest -lcudadevrt
+!for run in {1..1000}; do ./stenciltest ; done > outputs.txt
+\end{minted}
+
+Escribimos este código en python que nos imprimirá el número de veces que el programa ha fallado, si ha habido algún fallo en la ejecución:
+\begin{minted}{python}
+with open("outputs.txt",'rb') as text:
+  info = text.readlines()
+  success = [0 if a == b'SUCCESS!\n' else 1 for a in info]
+  s = sum(success)
+  print(s)
+
+0
+\end{minted}
+
+Comprobamos que efectivamente no ha habido ningún error. Imprimamos el profiler del programa:
+\begin{minted}[fontsize=\footnotesize]{bash}
+==6355== NVPROF is profiling process 6355, command: ./stenciltest
+==6355== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
+SUCCESS!
+==6355== Profiling application: ./stenciltest
+==2876== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   43.63%  5.6960us         1  5.6960us  5.6960us  5.6960us  [CUDA memcpy DtoH]
+                   32.84%  4.2880us         1  4.2880us  4.2880us  4.2880us  [CUDA memcpy HtoD]
+                   23.53%  3.0720us         1  3.0720us  3.0720us  3.0720us  stencil_1d(int*, int*)
+      API calls:   99.59%  187.03ms         2  93.513ms  7.0080us  187.02ms  cudaMalloc
+                    0.19%  350.98us         1  350.98us  350.98us  350.98us  cuDeviceTotalMem
+                    0.09%  163.67us        97  1.6870us     131ns  78.963us  cuDeviceGetAttribute
+                    0.06%  109.61us         2  54.804us  14.246us  95.362us  cudaFree
+                    0.04%  81.565us         2  40.782us  35.223us  46.342us  cudaMemcpy
+                    0.02%  30.194us         1  30.194us  30.194us  30.194us  cuDeviceGetName
+                    0.02%  29.932us         1  29.932us  29.932us  29.932us  cudaLaunchKernel
+                    0.00%  3.0750us         1  3.0750us  3.0750us  3.0750us  cuDeviceGetPCIBusId
+                    0.00%  1.8080us         3     602ns     148ns  1.2980us  cuDeviceGetCount
+                    0.00%  1.0740us         2     537ns     269ns     805ns  cuDeviceGet
+                    0.00%     251ns         1     251ns     251ns     251ns  cuDeviceGetUuid
+\end{minted}
+
+Vemos que tenemos un $43.6\%$ del tiempo empleado en copiar de CPU a GPU, y un $33\%$ del tiempo empleado en copiar de GPU a CPU, lo que suma un $76\%$ del tiempo solo en copiar datos mientras que solo un $23.5\%$ del tiempo se emplea en realizar la operación.
+
+\begin{enunciado}
+ Use el generador de perfiles para determinar cuál es el problema.
+
+\end{enunciado}
+
+Como acabamos de mencionar en el comentario anterior, usando el profiler hemos visto que la mayoría del tiempo se ha pasado copiando datos a GPU, pues teníamos que copiarlos en múltiples ocasiones para evitar accesos simultáneos. Por tanto, es en la \textbf{copia de datos desde host a GPU} donde tenemos el \textbf{cuello de botella}.
+
+Por ello, la modificación que debemos hacer a nuestro programa es tratar de introducir la memoria compartida en nuestro kernel para que este proceso sea más eficiente.
+
+\begin{enunciado}
+ Introduzca la modificación en el código para hacer uso de la memoria compartida.
+\end{enunciado}
+
+Debemos ahora tomar el código explicado inicialmente, pues es en el que declaramos la variable compartida (que tiene \inline{__shared__} delante del tipo) que utilizaremos para hacer uso de esta memoria compartida. Primero, \textbf{NO} descomentamos la línea que tiene el \inline{syncthreads}, para ver cómo se comporta nuestor programa cuando no realizamos esta sincronización.
+
+Lo que hacemos es de nuevo compilar el programa y ejecutarlo $100$ veces, mostrando cuántas veces obtenemos un resultado erróneo usando el mismo código en python que en el caso anterior:
+
+\begin{minted}{bash}
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true stencilshared.cu -o ./stencilshared -lcudadevrt
+!for run in {1..1000}; do ./stencilshared ; done > outputs_shared.txt
+\end{minted}
+
+\begin{minted}{python}
+with open("outputs_shared.txt",'rb') as text:
+  info = text.readlines()
+  success = [0 if a == b'SUCCESS!\n' else 1 for a in info]
+  s = sum( success)
+  print(s)
+
+1
+\end{minted}
+
+Lo que está ocurriendo aquí es el fenómeno conocido como \textbf{data race}. Este fenómeno ocurre cuando que dos hebras intentan acceder a una de las posiciones a la vez y una intenta escribir sobre la misma y otra leerla, por lo que podría haber valores diferentes a los esperados y por tanto se pueden dar situaciones en las que no obtuviésemos el resultado esperado.
+
+Sabemos que este fallo es aleatorio (pues se produce cuando las hebras no actúan en el orden correcto) y, de hecho, si seguimos ejecutando en la misma sesión del cuaderno de Google Colaboratory puede que no obtengamos más fallos de este estilo. Hemos detectado que este error es más fácilmente reproducible cuando reiniciamos la sesión de ejecución del cuaderno de Colaboratory y ejecutamos todo de nuevo.
+
+Además, sabemos que esto ocurre por los accesos a las posiciones del vector, por lo que si aumentamos el tamaño del vector estamos aumentando la probabilidad de obtener fallos. Hacemos una prueba para comprobar esto. Lo primero que cambiamos es el número de elementos del vector, haciendo que sea $4096 * 8$ (antes, era $4096*2$):
+\begin{minted}{CUDA}
+#define NUM_ELEMENTS  (4096*8)
+\end{minted}
+Entonces, volvemos a compilar y ejecutar $1000$ veces el código.
+\begin{minted}{bash}
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true stencilshared.cu -o ./stencilshared -lcudadevrt
+!for run in {1..1000}; do ./stencilshared ; done > outputs_shared.txt
+
+with open("outputs_shared.txt",'rb') as text:
+  info = text.readlines()
+  success = [0 if a == b'SUCCESS!\n' else 1 for a in info]
+  s = sum( success)
+  print(s)
+
+7
+\end{minted}
+
+Podemos ver que el número de errores ahora ha aumentado, como (aunque no seguro porque recordamos que es un proceso aleatorio) podía esperarse.
+
+
+Además, podemos ver utilizando el profiler el siguiente resultado:
+\begin{minted}[fontsize=\footnotesize]{bash}
+==2926== Profiling application: ./stencilshared
+==2926== Profiling result:
+          Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   37.69%  469.57us       1  4.6950us  4.6950us  4.6950us  [CUDA memcpy DtoH]
+                   37.18%  463.27us       2  4.2560us  4.2560us  4.2560us  [CUDA memcpy HtoD]
+                   25.13%  313.18us       1  3.2000us  3.2000us  3.2000us  stencil_1d(int*, int*)
+      API calls:   99.46%  197.26ms       2  98.628ms  4.7020us  197.25ms  cudaMalloc
+                    0.28%  559.56us       1  559.56us  559.56us  559.56us  cuDeviceTotalMem
+                    0.10%  197.31us     101  1.9530us     165ns  82.106us  cuDeviceGetAttribute
+                    0.08%  159.95us       2  79.975us  8.3610us  151.59us  cudaFree
+                    0.05%  89.868us       3  29.956us  26.482us  34.831us  cudaMemcpy
+                    0.01%  28.654us       1  28.654us  28.654us  28.654us  cuDeviceGetName
+                    0.01%  24.893us       1  24.893us  24.893us  24.893us  cudaLaunchKernel
+                    0.00%  7.7680us       1  7.7680us  7.7680us  7.7680us  cuDeviceGetPCIBusId
+                    0.00%  2.1350us       3     711ns     221ns  1.0340us  cuDeviceGetCount
+                    0.00%  1.6970us       2     848ns     302ns  1.3950us  cuDeviceGet
+                    0.00%     306ns       1     306ns     306ns     306ns  cuDeviceGetUuid
+\end{minted}
+Como vemos, hemos conseguido reducir el tiempo de copia de datos de CPU a GPU en aproximadamente $1us$. Esto era una de las partes que queríamos obtener. Nos faltaría añadir la sincronización de las hebras que hemos comentado para que además de reducir el cuello de botella no tengamos ningún fallo de cálculo.
+
+\begin{enunciado}
+ Añadiendo \inline{__syncthreads ()} evalue después de las diferentes modificaciones la aceleración obtenida.
+\end{enunciado}
+
+Para esta última parte, bastaría con descomentar la línea que tiene esta función para obtener la sincronización en ese punto del código de todas las hebras. Vamos a añadir también al código un bucle \inline{for} que ejecute el mismo código $100$ veces desde dentro del programa, para ver si mantenemos la mejora en tiempo y además obtenemos los resultados correctos en nuestro programa. Ejecutamos el profiler y obtenemos el siguiente resultado
+\begin{minted}[fontsize=\footnotesize]{bash}
+==3079== NVPROF is profiling process 3079, command: ./stencilshared_sync
+Número de errores: 0
+==3079== Profiling application: ./stencilshared_sync
+==3079== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   37.58%  470.82us       100  4.7080us  4.4160us  6.0480us  [CUDA memcpy DtoH]
+                   36.93%  462.63us       100  4.6260us  4.2880us  6.1760us  [CUDA memcpy HtoD]
+                   25.49%  319.27us       100  3.1920us  3.1360us  3.2960us  stencil_1d(int*, int*)
+      API calls:   73.46%  15.0458s       200  75.229ms  6.2800us  187.42ms  cudaMalloc
+                   26.45%  5.41661s       100  54.166ms  52.283ms  58.709ms  cudaDeviceReset
+                    0.05%  9.5939ms       200  47.969us  8.9190us  127.93us  cudaFree
+                    0.03%  6.1591ms       200  30.795us  24.055us  52.484us  cudaMemcpy
+                    0.01%  2.8672ms       100  28.671us  24.738us  50.801us  cudaLaunchKernel
+                    0.00%  372.52us         1  372.52us  372.52us  372.52us  cuDeviceTotalMem
+                    0.00%  155.56us       101  1.6030us     135ns  65.806us  cuDeviceGetAttribute
+                    0.00%  29.607us         1  29.607us  29.607us  29.607us  cuDeviceGetName
+                    0.00%  3.7980us         1  3.7980us  3.7980us  3.7980us  cuDeviceGetPCIBusId
+                    0.00%  2.1450us         3     715ns     139ns  1.4620us  cuDeviceGetCount
+                    0.00%  1.2110us         2     605ns     259ns     952ns  cuDeviceGet
+                    0.00%     367ns         1     367ns     367ns     367ns  cuDeviceGetUuid
+\end{minted}
+
+Los resultados son exitosos. Se consigue mantener la reducción de tiempo en media respecto a la versión que no tenía memoria compartida, además de obtener ahora un código sin errores. Podríamos decir por tanto que hemos obtenido una aceleración de $4.7/5.7 \approx 20\%$.
 
 \section{Parte 2: Programación con QisKit: (Computación cuántica)}
 
