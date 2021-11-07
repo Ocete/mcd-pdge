@@ -1082,9 +1082,35 @@ Explicaremos el proceso a través de su interpretación geométrica. El algoritm
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{figures/grover_step1.png}
+	\includegraphics[scale=0.5]{figures/grover_step1}
 	\caption{\textbf{Paso 1:} El proceso de amplificación de amplitud comienzo en el estado de superposición uniforme $|s\ra$.}
 \end{figure}
+
+
+La imagen izquierda muestra el plano 2-dimensionale generado por $|s'\ra$ y $|\omega\ra$ anteriormente comentado. Esto nos permite expresar el estado inicial de la siguiente forma:
+
+\[
+|s\ra = \sin \theta | w \ra + \cos \theta | s' \ra; \qquad \text{ donde } \theta = \arcsin \la s | w \ra = \arcsin \frac{1}{\sqrt{N}}
+\]
+
+Por otro lado, el gráfico derecho muestra las amplitudes del estado $|s\ra$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover_step2}
+	\caption{\textbf{Paso 2:} Aplicamos la reflexión del oráculo $U_f$ al estado $|s\ra$.}
+\end{figure}
+
+Geométricamente, la aplicación del oráculo $U_f$ es una reflexión sobre el eje generado por $|s'\ra$. Como tanto $|s\ra$ como $|s'\ra$ están en el plano 2-dimensional descrito, el resultado de la reflexión también estará en dicho plano. Esta reflexión se traduce en las diagrama de amplitudes en un cambio de signo para la amplitud del estado objetivo, lo que naturalmente reduce la amplitud media (representada por una línea discotínua en la gráfica.).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover_step3}
+	\caption{\textbf{Paso 3:} Aplicamos la reflexión del oráculo $U_s$ centrada en el estado $|s\ra$: $|U_s\ra = 2|s\ra\la s| - \mathbb{1}$.}
+\end{figure}
+
+
+
 
 
 
