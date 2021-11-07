@@ -2,7 +2,7 @@ file=P2 # Valor por defecto
 
 all: clean $(file) clean
 
-$(file):
+$(file): clean
 	pdflatex --shell-escape $(file).tex
 	pdflatex --shell-escape $(file).tex
 
