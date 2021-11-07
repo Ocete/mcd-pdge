@@ -121,7 +121,7 @@ Dividiremos esta práctica en 2 partes fundamentales.
 
 \begin{enunciado}
 	
-	TODO: Completar
+	Obtener información sobre los recursos de la GPU
 	
 \end{enunciado}
 
@@ -197,11 +197,10 @@ Como datos a destacar, vemos que tenemos 65536 registros disponibles por bloque,
 
 \begin{enunciado}
 	
-	TODO: Completar
+	Escribe un programa en CUDA que realice la suma de dos vectores
 	
 \end{enunciado}
 
-Construiremos en varias etapas un programa en CUDA que realiza la suma de dos vectores.
 
 \subsubsection{Suma de dos enteros}
 
@@ -296,7 +295,7 @@ Como vemos, tenemos una única llamada a la función \inline{add}, $3$ llamadas 
 \subsubsection{Paralelizando}
 \subsubsection*{Sumando vectores}
 
-El objetivo ahora será modificar el código actual para que la suma de vectores se realice según los bloques y las hebras que se le indiquen. En particular, querremos modificar el número de hebras para que se puedan paralelizar las operaciones. Comenzamos cambiando el número de hebras a $512$. Podemos apreciar en el código de la suma un cambio:
+El objetivo ahora será modificar el código actual para que la suma de vectores se realice según los bloques y las hebras que se le indiquen. En particular, querremos modificar el número de hebras para que se puedan paralelizar las operaciones. Comenzamos cambiando el número de bloques a $512$. Podemos apreciar en el código de la suma un cambio:
 \begin{minted}{CUDA}
 __global__ void add(int *a, int *b, int *c) {
     //*c = *a + *b;
@@ -502,7 +501,7 @@ add<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 
 
 \begin{enunciado}
-	\textquestiondown Qué ocurre cuando se aumenta $N$?
+	Qué ocurre cuando se aumenta $N$?
 \end{enunciado}
 
 Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos que habrá datos que queden sin calcular. Por ejemplo, si ponemos $N=1025^2$ obtenemos la siguiente salida:
@@ -512,16 +511,188 @@ Todos los valores de c valen lo mismo (1 true, 0 false): 0
 
 Que es un resultado negativo en cuanto a que todos los valores valen lo mismo. Lo mismo ocurre cuando usamos un número menor de $N$, pues se nos desajusta la exactitud del número de bloques.
 
-Por ello, debemos actualizar el código para que se calcule bien el número de bloques que necesitamos según el número de hebras que hemos establecido, usando la siguiente \href{https://www.nvidia.com/docs/IO/116711/sc11-cuda-c-basics.pdf}{fórmula}:
+Por ello, debemos actualizar el código para que se calcule bien el número de bloques que necesitamos según el número de hebras que hemos establecido, usando la siguiente \href{https://www.nvidia.com/docs/IO/116711/sc11-cuda-c-basics.pdf}{fórmula} que ya hemos explicado anteriormente:
 \begin{minted}[]{CUDA}
-add<<<(N + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
+add<<<(N + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK,
+                        THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 \end{minted}
 Si volvemos a ejecutar el código, esta vez obtenemos un $1$ en la salida, indicando que la operación se ha hecho correctamente.
 
 \subsection{Suma de 2 matrices}
 
-TODO
+Vamos ahora a hacer una implementación de una suma de matrices. Esto no es más que una extensión del ejercicio anterior, pues sabemos que además las matrices se representan en memoria como vectores de dimensión $R \times C$ donde $R$ es el número de filas y $C$ el de columnas.
 
+Nuestro interés estará en conseguir, usando grids de bloques y hebras, que el la hebra que esté en la posición $(i,j)$ en el grid de bloques-hebras, realice la suma $c_{i,j} = a_{i,j} + b_{i,j}$. Para llevar esto a cabo, usaremos bloques de dimensión $8\times 8$, pues hemos visto en la información inicial que el tamaño máximo de un bloque de hebras es $(x,y,z) = (1024,1024,64)$. Así, podremos usar 16 bloques en cada SM sin tener errores.
+
+Para calcular el número de bloques, lo que haremos será usar la fórmula anterior tanto por filas como por columnas, obteniendo:
+\[
+(R + 63)/64 \quad \quad y (C + 63)/64
+\]
+bloques. Escribimos entonces nuestra función del kérnel como sigue:
+
+\begin{minted}{CUDA}
+
+__global__ void add(int *a, int *b, int *c, int r, int col) {
+    int i = (blockIdx.x * blockDim.x) + threadIdx.x;
+    int j = (blockIdx.y * blockDim.y) + threadIdx.y;
+    int index = col*i + j;
+
+   # Comprobamos que no nos salimos de la matriz
+    if (i < r && j < col)
+      c[index] = a[index] + b[index];
+}
+\end{minted}
+
+Inicializamos la matriz $a$ con todas las posiciones a $2$ y la matriz $b$ con todas las posiciones a $3$, simplemente por cambiar de valores respecto al ejercicio anterior. Vamos a comenzar sumando matrices cuadradas de $1024\times 1024$, aunque el código debe ser igualmente válido para matrices no cuadradas y/o cuyas dimensiones no sean potencias de 2 (lo cual podríamos pensar que puede dar error al estar divididos los bloques de hebras en estas potencias).
+
+Seguimos también los mismos pasos que hicimos en el ejercicio anterior:
+\begin{minted}{CUDA}
+int *a, *b, *c;        // host copies of variables a, b & c
+int *d_a, *d_b, *d_c;  // device copies of variables a, b & c
+int size = R*C*sizeof(int);
+// int N = R*C;
+
+// Allocate space for host copies of a, b, c   Setup input values
+a =  (int *) malloc(size);
+b =  (int *) malloc(size);
+c =  (int *) malloc(size);
+
+
+// Setup input values
+
+for( int i = 0; i < R; i++ ){
+    for(int j = 0; j < C; j++){
+        a[i*C + j] = 2;
+        b[i*C + j] = 3;
+    }
+}
+
+
+// Allocate space for device copies of a, b, c
+cudaMalloc((void **) &d_a, size);
+cudaMalloc((void **) &d_b, size);
+cudaMalloc((void **) &d_c, size);
+
+
+// Copy inputs to device
+cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
+cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
+\end{minted}
+
+En este bloque hemos inicializado la memoria en el host, inicializado las variables y luego las hemos copiado a la memoria de la GPU.
+
+\begin{minted}{CUDA}
+dim3 dimGrid((R + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK, (C + THREADS_PER_BLOCK -1)/THREADS_PER_BLOCK, 1);
+
+dim3 dimBlock(THREADS_PER_BLOCK, THREADS_PER_BLOCK, 1);
+
+
+
+add<<<dimGrid,dimBlock>>>(d_a, d_b, d_c,R,C);
+
+cudaDeviceSynchronize();
+\end{minted}
+
+En este bloque, declaramos las dimensiones del grid y de los bloques y ejecutamos el kernel. Tras la ejecución, el profiler nos muestra lo siguiente:
+
+\begin{minted}{bash}
+==1114== NVPROF is profiling process 1114, command: ./sumaMatrices
+==1114== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
+Número de errores: 0
+==1114== Profiling application: ./sumaMatrices
+==1114== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   52.13%  1.5977ms         1  1.5977ms  1.5977ms  1.5977ms  [CUDA memcpy DtoH]
+                   39.13%  1.1991ms         2  599.57us  586.88us  612.26us  [CUDA memcpy HtoD]
+                    8.74%  267.84us         1  267.84us  267.84us  267.84us  add(int*, int*, int*, int, int)
+      API calls:   96.00%  194.95ms         3  64.984ms  122.30us  194.70ms  cudaMalloc
+                    2.07%  4.2101ms         3  1.4034ms  707.86us  2.7744ms  cudaMemcpy
+                    0.86%  1.7499ms         1  1.7499ms  1.7499ms  1.7499ms  cuDeviceTotalMem
+                    0.68%  1.3737ms         3  457.91us  164.43us  607.69us  cudaFree
+                    0.19%  388.20us         1  388.20us  388.20us  388.20us  cudaDeviceSynchronize
+                    0.16%  332.80us       101  3.2950us     235ns  155.81us  cuDeviceGetAttribute
+                    0.02%  35.570us         1  35.570us  35.570us  35.570us  cuDeviceGetName
+                    0.01%  28.411us         1  28.411us  28.411us  28.411us  cudaLaunchKernel
+                    0.00%  6.8700us         1  6.8700us  6.8700us  6.8700us  cuDeviceGetPCIBusId
+                    0.00%  2.2460us         3     748ns     198ns  1.0250us  cuDeviceGetCount
+                    0.00%  1.5120us         2     756ns     404ns  1.1080us  cuDeviceGet
+                    0.00%     515ns         1     515ns     515ns     515ns  cuDeviceGetUuid
+\end{minted}
+
+
+Como vemos, no tenemos errores en la ejecución. Podemos probar a cambiar las dimensiones poniendo una matriz no cuadrada. Modificamos el archivo directamente usando la orden de bash `sed`.
+
+\begin{minted}{bash}
+!sed -i '/#define R/c\#define R 512' sumaMatrices.cu
+!sed -i '/#define C/c\#define C 1024' sumaMatrices.cu
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true sumaMatrices.cu -o sumaMatrices_changedim -lcudadevrt
+!nvprof ./sumaMatrices_changedim
+\end{minted}
+
+
+La salida mostrada por el profiler es la siguiente:
+
+\begin{minted}{bash}
+nvcc warning : The 'compute_35', 'compute_37', 'compute_50', 'sm_35', 'sm_37' and 'sm_50' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+==708== NVPROF is profiling process 708, command: ./sumaMatrices_changedim
+==708== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
+Número de errores: 0
+==708== Profiling application: ./sumaMatrices_changedim
+==708== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   59.12%  569.54us         2  284.77us  282.66us  286.88us  [CUDA memcpy HtoD]
+                   28.03%  270.02us         1  270.02us  270.02us  270.02us  [CUDA memcpy DtoH]
+                   12.85%  123.74us         1  123.74us  123.74us  123.74us  add(int*, int*, int*, int, int)
+      API calls:   98.16%  203.58ms         3  67.859ms  124.40us  203.27ms  cudaMalloc
+                    0.96%  1.9813ms         3  660.42us  291.06us  1.2887ms  cudaMemcpy
+                    0.37%  767.02us         3  255.67us  137.30us  318.07us  cudaFree
+                    0.25%  519.54us         1  519.54us  519.54us  519.54us  cuDeviceTotalMem
+                    0.13%  262.87us         1  262.87us  262.87us  262.87us  cudaDeviceSynchronize
+                    0.09%  187.58us       101  1.8570us     152ns  77.437us  cuDeviceGetAttribute
+                    0.02%  41.571us         1  41.571us  41.571us  41.571us  cuDeviceGetName
+                    0.02%  35.077us         1  35.077us  35.077us  35.077us  cudaLaunchKernel
+                    0.01%  20.030us         1  20.030us  20.030us  20.030us  cuDeviceGetPCIBusId
+                    0.00%  2.0600us         3     686ns     199ns  1.1440us  cuDeviceGetCount
+                    0.00%  1.6560us         2     828ns     302ns  1.3540us  cuDeviceGet
+                    0.00%     317ns         1     317ns     317ns     317ns  cuDeviceGetUuid
+\end{minted}
+
+De nuevo, nos muestra que no ha habido ningún error. Por último, podemos probar a poner matrices cuyas dimensiones no sean potencias de dos, para reafirmarnos en que la forma de crear el grid y el kernel es correcta para cualesquiera dimensiones:
+
+\begin{minted}{bash}
+!sed -i '/#define R/c\#define R 111' sumaMatrices.cu
+!sed -i '/#define C/c\#define C 333' sumaMatrices.cu
+!/usr/local/cuda/bin/nvcc -arch=sm_35 -rdc=true sumaMatrices.cu -o sumaMatrices_changedim_2 -lcudadevrt
+!nvprof ./sumaMatrices_changedim_2
+\end{minted}
+
+Que nos da como resultado:
+\begin{minted}{bash}
+nvcc warning : The 'compute_35', 'compute_37', 'compute_50', 'sm_35', 'sm_37' and 'sm_50' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+==792== NVPROF is profiling process 792, command: ./sumaMatrices_changedim_2
+==792== Warning: Auto boost enabled on device 0. Profiling results may be inconsistent.
+Número de errores: 0
+==792== Profiling application: ./sumaMatrices_changedim_2
+==792== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   58.69%  46.240us         2  23.120us  22.080us  24.160us  [CUDA memcpy HtoD]
+                   26.97%  21.248us         1  21.248us  21.248us  21.248us  [CUDA memcpy DtoH]
+                   14.34%  11.296us         1  11.296us  11.296us  11.296us  add(int*, int*, int*, int, int)
+      API calls:   99.39%  207.92ms         3  69.306ms  4.0150us  207.91ms  cudaMalloc
+                    0.26%  546.53us         1  546.53us  546.53us  546.53us  cuDeviceTotalMem
+                    0.12%  243.93us         3  81.309us  52.364us  130.09us  cudaMemcpy
+                    0.12%  240.88us       101  2.3840us     177ns  87.481us  cuDeviceGetAttribute
+                    0.07%  144.59us         3  48.196us  3.9960us  120.94us  cudaFree
+                    0.02%  38.427us         1  38.427us  38.427us  38.427us  cudaLaunchKernel
+                    0.02%  31.407us         1  31.407us  31.407us  31.407us  cuDeviceGetName
+                    0.01%  18.388us         1  18.388us  18.388us  18.388us  cudaDeviceSynchronize
+                    0.00%  8.4000us         1  8.4000us  8.4000us  8.4000us  cuDeviceGetPCIBusId
+                    0.00%  2.7880us         3     929ns     279ns  1.2740us  cuDeviceGetCount
+                    0.00%  1.8820us         2     941ns     412ns  1.4700us  cuDeviceGet
+                    0.00%     317ns         1     317ns     317ns     317ns  cuDeviceGetUuid
+\end{minted}
+
+Nuevo resultado sin errores. Vemos como en este caso al ser las dimensiones más pequeñas, los tiempos de copia entre CPU y GPU son bastante menores que en los casos anteriores.
 
 \subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
 
@@ -532,7 +703,7 @@ Compile el siguiente código, explique su funcionamiento y compruebe si la salid
 	
 \end{enunciado}
 
-Analizamos primero el código por partes:
+Analizamos primero el código por partes. Comenzamos con el kernel \inline{void stenci_1d(int* i, int *out)}:
 
 \begin{minted}{CUDA}
 __shared__ int temp[BLOCK_SIZE + 2 * RADIUS];
@@ -548,8 +719,22 @@ if (threadIdx.x < RADIUS){
     temp[lindex - RADIUS] = in[gindex - RADIUS];
     temp[lindex + BLOCK_SIZE] = in[gindex + BLOCK_SIZE];
 }
+// Make sure all threads get to this point before proceeding!
+    //__syncthreads();
 \end{minted}
-Aquí, se actualizan los valores de la variable compartida que habíamos declarado. El valor de la posición $lindex$ en el vector $temp$ para a valer lo que vale el vector de entrada en la posición $gindex$. Entonces, si el índice de la hebra es menor que el radio fijado, se ajusta de nuevo en la variable compartida cambiando la posición \inline{lindex - RADIUS} en la variable temporal por la posición \ por
+Aquí, se actualizan los valores de la variable compartida que habíamos declarado. Además, y más importante, nos encontramos un \inline{__syncthreads} comentado. Esto posiblemente tendremos que modificarlo a continuación para activar la sincronización de las hebras.
+
+\begin{minted}{CUDA}
+// Apply the stencil
+    int result = 0;
+    for (int offset = -RADIUS ; offset <= RADIUS ; offset++)
+        result += temp[lindex + offset];
+
+    // Store the result
+    out[gindex-RADIUS] = result;
+\end{minted}
+
+En este último trozo de la función se realiza la operación requerida: \textbf{en la posición i de la salida, estará la suma de los elementos desde $i-RADIUS$ hasta $i+RADIUS$}.
 
 \section{Parte 2: Programación con QisKit: (Computación cuántica)}
 
@@ -1082,7 +1267,7 @@ Explicaremos el proceso a través de su interpretación geométrica. El algoritm
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{figures/grover_step1.png}
+	\includegraphics[scale=0.5]{figures/grover_step1}
 	\caption{\textbf{Paso 1:} El proceso de amplificación de amplitud comienzo en el estado de superposición uniforme $|s\ra$.}
 \end{figure}
 
