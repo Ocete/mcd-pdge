@@ -505,28 +505,51 @@ add<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 	\textquestiondown Qué ocurre cuando se aumenta $N$?
 \end{enunciado}
 
-Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos algunos datos que no podremos procesar, los dejaremos fuera de la cuenta. Por ello, debemos actualizar el código para que se calcule bien el número de bloques que necesitamos según el número de hebras que hemos establecido:
+Con el código actual si aumentamos $N$, el cociente no será exacto y tendremos que habrá datos que queden sin calcular. Por ejemplo, si ponemos $N=1025^2$ obtenemos la siguiente salida:
+\begin{minted}{bash}
+Todos los valores de c valen lo mismo (1 true, 0 false): 0
+\end{minted}
+
+Que es un resultado negativo en cuanto a que todos los valores valen lo mismo. Lo mismo ocurre cuando usamos un número menor de $N$, pues se nos desajusta la exactitud del número de bloques.
+
+Por ello, debemos actualizar el código para que se calcule bien el número de bloques que necesitamos según el número de hebras que hemos establecido, usando la siguiente \href{https://www.nvidia.com/docs/IO/116711/sc11-cuda-c-basics.pdf}{fórmula}:
 \begin{minted}[]{CUDA}
 add<<<(N + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
 \end{minted}
-
-\href{https://www.nvidia.com/docs/IO/116711/sc11-cuda-c-basics.pdf}{esta presentación de la documentación de CUDA}
-
-\begin{minted}[]{CUDA}
-#define N (1024*1024)
-#define THREADS_PER_BLOCK 512 
-\end{minted}
+Si volvemos a ejecutar el código, esta vez obtenemos un $1$ en la salida, indicando que la operación se ha hecho correctamente.
 
 \subsection{Suma de 2 matrices}
+
+TODO
 
 
 \subsection{Stencil1d: Estudiar el efecto de la memoria compartida}
 
+
 \begin{enunciado}
 	
-	TODO: Completar
+Compile el siguiente código, explique su funcionamiento y compruebe si la salida es correcta. En caso de que sea necesario realice las modificaciones oportunas.
 	
 \end{enunciado}
+
+Analizamos primero el código por partes:
+
+\begin{minted}{CUDA}
+__shared__ int temp[BLOCK_SIZE + 2 * RADIUS];
+int gindex = threadIdx.x + (blockIdx.x * blockDim.x) + RADIUS;
+int lindex = threadIdx.x + RADIUS;
+\end{minted}
+
+Tenemos una declaración de una variable \inline{__shared__}, que será compartida entre las hebras del mismo bloque. Entonces, se obtienen los dos índices usando el índice de la hebra, el del bloque, y un radio que está previamente fijado a $3$. En concreto, lo que se hace es coger como \inline{gindex} el índice que está en la posición $j + i + RADIUS$, donde $j$ es el índice de la hebra, $i$ es el número: $bloque*num\_bloques$. Además, tenemos fijado $RADIUS=3$.
+\begin{minted}{CUDA}
+// Read input elements into shared memory
+temp[lindex] = in[gindex];
+if (threadIdx.x < RADIUS){
+    temp[lindex - RADIUS] = in[gindex - RADIUS];
+    temp[lindex + BLOCK_SIZE] = in[gindex + BLOCK_SIZE];
+}
+\end{minted}
+Aquí, se actualizan los valores de la variable compartida que habíamos declarado. El valor de la posición $lindex$ en el vector $temp$ para a valer lo que vale el vector de entrada en la posición $gindex$. Entonces, si el índice de la hebra es menor que el radio fijado, se ajusta de nuevo en la variable compartida cambiando la posición \inline{lindex - RADIUS} en la variable temporal por la posición \ por
 
 \section{Parte 2: Programación con QisKit: (Computación cuántica)}
 
