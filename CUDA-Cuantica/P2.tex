@@ -1055,7 +1055,13 @@ Nuestro algoritmo comienza con una superposición equitativa de todos los estado
 
 Si en este instante midiésemos nuestro sistema tendríamos una probabilidad de $\frac{1}{N} = \frac{1}{2^n}$ de obtener el índice $\omega$. Aplicaremos una serie de transformaciones al sistema para aumentar la probabilidad de obtener $\omega$ al medir. Este proceso se denomina \emph{\textbf{amplitud de amplificación}}, amplificando la probabilidad de medir dicho valor. \\
 
-Explicaremos el proceso a través de su interpretación geométrica. El algoritmo se describe a partir de dos reflexiones (es decir, una rotación), en un plano 2-dimensional. Los unos estados que necesitamos considerar son el estado objetivo $|\omega\ra$ y el estado de superposición uniforme $|s\ra$ descrito con anterioridad
+Explicaremos el proceso a través de su interpretación geométrica. El algoritmo se describe a partir de dos reflexiones (es decir, una rotación), en un plano 2-dimensional. Los únicos estados que necesitamos considerar son el estado objetivo $|\omega\ra$ y el estado de superposición uniforme $|s\ra$ descrito con anterioridad. Estos dos vectores generan un plano 2-dimensional en el espacio de estados $\mathbb{C}^{n}$. Dado que $|\omega\ra$ no tiene por qué ser perpendicular, podemos introducir el estado $|s'\ra$ generado a partir de $|\omega\ra$ y $|s\ra$ que sí sea perpendicular a $|\omega\ra$. Este nuevo estado puede ser generado, por ejemplo, con el  \href{https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process}{algoritmo de Gram–Schmidt}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/grover_step1.png}
+	\caption{\textbf{Paso 1:} El proceso de amplificación de amplitud comienzo en el estado de superposición uniforme $|s\ra$.}
+\end{figure}
 
 
 
