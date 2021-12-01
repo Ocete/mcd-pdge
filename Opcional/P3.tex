@@ -143,17 +143,33 @@ En primer lugar, demos una vision intuitiva de este teorema. Supongamos que tene
 
 Para nuestro caso, buscaremos que el hamiltoniano varíe entre dos valores constantes: $H_{initial}$ y $H_{final}$:
 
-$$ H(t) = f(t) \cdot H_{initial} + g(t) \cdot H_{final} \quad \forall t \in [t_{initial}, t_{final}] $$
+$$ H(s) = A(s) \cdot H_{initial} + B(s) \cdot H_{final} \quad \forall s \in [t_{initial}, t_{final}] $$
 
-Donde $f(t)$ disminuirá con el tiempo y $g(t)$ aumentará.
+Donde $A(s)$ disminuirá con el tiempo y $B(s)$ aumentará.
 
-TODO: INCLUIR IMAGEN
+\begin{figure}[h]
+	\includegraphics[scale=.14]{dwave-annealing-functions.png}
+	\centering
+	\caption{Funciones de \emph{Annealing} utilizadas en los sistemas D-Wave 2X}\
+\end{figure}
 
 La codificación inicial, $H_{initial}$, será muy sencilla. De esta forma podremos conocer nuestro sistema a la perfección. De hecho, nuestro estado inicial del sistema será el estado base de $H_{initial}$. Si se cumple el teorema de evolución adiabática (volveremos ahora para ver cuando ocurre), tras la evolución nuestro sistema estará en el estado base de $H_{final}$.
 
 Dado un problema de optimización, codificaremos $H_{final}$ para que el estado propio de menor energía sea el mínimo de nuestra función objetivo. De esta forma, tras aplicar evolución adiabática obtendremos el estado base. Esto es, la solución que minimiza nuestra función objetivo.
 
+La ecuación final utilizada en la práctica por los sistemas D'Wave es la siguiente:
+
+$$ H(s) = \underbrace{- \frac{A(s)}{2} \bigg( \sum_i \upsigma_x^{(i)} \bigg)}_\text{Initial Hamiltonian} 
++ \underbrace{\frac{B(s)}{2} \bigg( \sum_i h_i \upsigma_z^{(i)} + \sum_ {i > j} J_{i,j} \upsigma_z^{(i)} \upsigma_z^{(j)} \bigg)}_\text{Final Hamiltonian} $$
+
 Tras esta explicación quedan dos cuestiones por resolver. En primer lugar, ¿Qué es el "hueco" de la segunda hipótesis del teorema de evolución adiabática y cuándo se cumple? Este hueco hace referencia a la distancia entre los valores propios. Durante la evolución temporal que se produce en el sistema, los valores propios también varían. Cuanto más se acerquen dichos valores, más probable es que el sistema "salte" a otro de los estados propios del sistema. Este fenómeno se conoce como \emph{quantum tunneling}.
+
+\begin{figure}[h]
+	\includegraphics[scale=.3]{dwave-eigenspectrum.png}
+	\centering
+	\caption{Ejemplo de evolución temporal de valores propios}
+	\label{fig:dwave-eigenspectrum}
+\end{figure}
 
 Dado un problema arbitrario es difícil conocer la evolución de los valores propios temporalmente y mucho menos controlarla. Sin embargo, si la evolución es lo suficientemente lenta, podemos disminuir la probabilidad de dicho salto. Ejecutando el algoritmo en múltiples ocasiones -esto es, utilizando métodos de Monte Carlo- aumentaremos la posibilidad de obtener la solución óptima. Aún así, soluciones cercanas al estado base también obtendrán bajos valores de la función objetivo.
 
