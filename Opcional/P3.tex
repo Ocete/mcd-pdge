@@ -214,7 +214,10 @@ Añadimos adicionalmente unos pesos negativos en la diagonal de la matriz para, 
 
 Donde $a,b,c$ son tres parámetros reales que codifican el peso dado a cada restricción. Hemos transformado nuestro problema original con un grafo de $n$ nodos en un problema QUBO con $n^2$ variables. Veámos un ejemplo de esta transformación. Dado el siguiente grafo:
 
-TODO: foto del grafo
+\begin{figure}[H]
+	\includegraphics[scale=1.1]{graphs/salesman-example.pdf}
+	\centering
+\end{figure}
 
 Dado que el grafo tiene $4$ nodos, definimos $4^2 = 16$ variables binarias y las renombramos:
 
@@ -225,11 +228,42 @@ Utilizando los valores $a = 0$ y $b = c = 13$ para los parámetros podemos obten
 
 \[ f_Q(x) = x^T Q x. \]
 
-TODO: foto de la matriz de colores
+\begin{figure}[H]
+	\makebox[\textwidth][c]{
+		\includegraphics[scale=0.4]{salesman-Q-matrix.png}
+	}
+	\centering
+	\caption{Matriz Q final}
+\end{figure}
 
 Esta matriz cuadrada puede verse como una matriz de adyacencia de un grafo con 16 de nodos para obtener una visión intuitiva de las restricciones:
 
-TODO: foto gigante
+\begin{table}[H]
+	\centering
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ccc}		
+			\includegraphics[scale=0.2]{salesman-penalties1.png} &
+			\includegraphics[scale=0.2]{salesman-penalties2.png} &
+			\includegraphics[scale=0.2]{salesman-penalties3.png} \\
+			
+			1: Self-bias & 2: Repetición & 3: Colocación \\
+			
+			\includegraphics[scale=0.2]{salesman-penalties4.png} &
+			\includegraphics[scale=0.2]{salesman-penalties5.png} &
+			\includegraphics[scale=0.2]{salesman-penalties6.png} \\
+			
+			4: Type A tours & 5: Type B tours & 6: Type C tours \\
+			
+			\includegraphics[scale=0.2]{salesman-penalties7.png} &
+			\includegraphics[scale=0.2]{salesman-penalties8.png} &
+			\includegraphics[scale=0.2]{salesman-penalties9.png} \\
+			
+			7: Type D tours & 8: Type E tours & 9: Type F tours \\
+		\end{tabular}
+	}
+	\caption{Graphical representation of penalties between interactions \cite{Sarkar2020}}
+	\label{fig:salesman-penalties}
+\end{table}
 
 \subsection{El ensamble del genoma}
 
@@ -250,9 +284,15 @@ Cabe destacar que nos centramos el método denominado \emph{de novo} que no util
 
 El procedicimiento seguido es transformar este problema en el problema del viajante de comercio, que ya sabemos imbuir en nuestras arquitecturas D-Wave, para posteriormente resolverlo utilizando \emph{quantum annealing}. Para ello creamos un grafo donde cada nodo tiene asignada una cadena. Asignamos peso a los lados del grafo según lo bien que se solapen dichas cadenas de nucleótidos. Un camino hamiltoniano en este grafo será una ordenación de las cadenas. Si minimizamos los pesos de dicho camino hamiltoniano obtenemos la ordenación que maximiza el pegado entre cadenas. Esto es, la ordenación que recompone el ADN original. A este grafo se le denomina \textbf{grafo Overlap-Layout Consensus (OLC)}.\\
 
-TODO: foto del proceso
+\begin{figure}[H]
+	\includegraphics[scale=0.4]{de-novo-process.png}
+	\centering
+	\caption{Diagrama del proceso de resolución del ensamblaje del genoma utilizando \{quantum annealing}}
+\end{figure}
 
 \subsection{Resultados experimentales}
+
+
 
 \section{Conclusiones}
 
