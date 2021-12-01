@@ -72,9 +72,9 @@ En esta asignatura hemos expuesto las bases teóricas de la computación cuánti
 En esta práctica opcional exploraremos otra forma de implementar computación cuántica, basándonos en evolución adiabática y \emph{quantum annealing} (usualmente mal traducido como \emph{enfriamiento cuántico}). En particular exploraremos los siguientes temas:
 
 \begin{itemize}
-	\item El \emph{quantum annealing} comparte algunas de las bases con la computación cuántica basada en circuitos, describiremos de superficial e intuitiva \textbf{las bases de la mecánica cuántica} que subyacen a ambos modelos y dónde residen las diferencias entre ambos.
+	\item El \emph{quantum annealing} comparte algunas de las bases con la computación cuántica basada en circuitos, describiremos de forma superficial e intuitiva \textbf{las bases de la mecánica cuántica} que subyacen a ambos modelos y describiremos dónde residen las diferencias entre ambos.
 	
-	\item Explicaremos en profundidad \textbf{como funcionan los ordenadores D-Wave}, así como los problemas de optimización que pueden resolver.
+	\item Explicaremos en profundidad \textbf{óomo funcionan los ordenadores D-Wave}, así como los problemas de optimización que pueden resolver.
 
 	\item Comentaremos en detalle \textbf{el problema de ensamblaje del genoma}, y cómo resolverlo utilizando ordenadores D-Wave.
 	
@@ -89,30 +89,30 @@ Este problema esta basado en el Trabajo Fin de Grado de uno de los componentes d
 
 Realizaremos una descripción superficial sobre la gran base teórica existente en este respecto. Para más detalle, consúltese el TFG al completo. \\
 
-La mecánica cuántica esta basado en cuatro "simples" postulados, sobre los que se construye toda la teoría necesaria para la física cuántica y la computación cuántica en particular. Los enunciamos y explicamos a continuación.
+La mecánica cuántica esta basado en cuatro ``simples'' postulados, sobre los que se construye toda la teoría necesaria para la física cuántica y la computación cuántica en particular. Los enunciamos y explicamos a continuación.
 
 \begin{enumerate}
 	\item El primer postulado nos indica \textbf{cómo describir matemáticamente un sistema físico}: \emph{Cualquier sistema físico aislado tiene asociado un espacio de Hilbert llamado el \textbf{espacio de estados}. El estado del sistema queda totalmente descrito por un vector unitario de dicho espacio, y se denomina \textbf{vector estado}.} \\
 	
-	Dado que todo espacio de Hilbert finitio es isomorfo a $\mathbb C^n$, donde $n$ es la dimensión de dicho espacio, los vectores estados serán vectores unitarios de $\C^n$ para cierto $n$. En particular, un \emph{qubit} se define como un vector estado del espacio de estados $\C^2$. Es decir, un vector unitario de $\C^2$:
+	Dado que todo espacio de Hilbert finito es isomorfo a $\mathbb C^n$, donde $n$ es la dimensión de dicho espacio, los vectores estados serán vectores unitarios de $\C^n$ para cierto $n$. En particular, un \emph{qubit} se define como un vector estado del espacio de estados $\C^2$. Es decir, un vector unitario de $\C^2$:
 	
 	\[ |\varphi\ra = \alpha|0\ra + \beta|1\ra \]
 	
 	Donde $|\alpha|, |\beta| = 1$.
 	
-	\item El segundo postulado nos indica \textbf{cómo medir nuestro sistema} en este paradigma. De igual forma que medimos la velocidad de un coche o la altura de una persona, hemos de ser capaces de medir ciertas variables en este sistema. El enunciado formal implica unos operadores de medida que unicamente complicarían este texto, así que nos ceñimos a las implicaciones del mismo. \\
+	\item El segundo postulado nos indica \textbf{cómo medir nuestro sistema} en este paradigma. De igual forma que medimos la velocidad de un coche o la altura de una persona, hemos de ser capaces de medir ciertas variables en este sistema. El enunciado formal implica unos operadores de medida que únicamente complicarían este texto, así que nos ceñimos a las implicaciones del mismo. \\
 	
 	La consecuencia más relevante es que \textbf{al medir un sistema, lo alteramos}. Esto se traduce en la computación cuántica en el colapso de los qubits tras la medida a uno de los estados. Adicionalmente, esto establece uno de los principales inconvenientes de la computación cúantica: la imposibilidad de conocer exactamente las amplitudes de un estado, lo que desembocará en el \textbf{Teorema de no clonación}.
 	
 	\item El tercer postulado es el más relevante para nosotros pues \textbf{crea la distinción entre el modelo de computación cuántica basado en circuitos y el basado en \emph{quantum annealing}}. \textbf{Describe la evolución del sistema} y tiene dos enunciados equivalentes que provocan la distinción mencionada. \\
 	
-	En su primera forma, el postulado dicta que la evolución de un sistema cuántica cerrado queda descrita por una \textbf{transformación unitaria} que unicamente depende de los tiempos $t_1,t_2$ en los que se compara el sistema:
+	En su primera forma, el postulado dicta que la evolución de un sistema cuántico cerrado queda descrita por una \textbf{transformación unitaria} que unicamente depende de los tiempos $t_1,t_2$ en los que se compara el sistema:
 	
 	\[ |\varphi_{t_2}\ra = U|\varphi_{t_1}\ra \]
 	
 	En el modelo de circuitos de la computación cuántica este postulado establece las bases teóricas de las puertas cúanticas: transformaciones unitarias aplicadas al estado del sistema (qubits). \\
 	
-	La segunda forma de este postulado viene de la mano de la ecuación de Schrödinger, la exploramos en detalle más adelante.
+	La segunda forma de este postulado viene de la mano de la ecuación de Schrödinger, la cual exploraremos en detalle más adelante.
 	
 	\item Finalmente, el cuarto postulado nos habla de \textbf{la composición de sistemas cuánticos}. Dicta lo siguiente: \emph{El espacio de estados de un sistema físico compuesto es el \textbf{producto tensorial} de los espacios de estados de los subsistemas. Además, el vector de estado del sistema es el producto tensorial de los vectores de estado de los subsistemas:} $|\varphi_1\ra \otimes \dotsc \otimes |\varphi_n\ra$.
 	
@@ -127,7 +127,7 @@ Como se menciono anteriormente, Schrödinger proporcionó una versión equivalen
 
 \[ i \hbar \frac{d|\varphi\ra}{dt} = H|\varphi\ra \]
 
-Donde $\hbar$ es la constante de Plank, $i$ es la unidad imaginaria y $H$ es un operador hamiltoniano. Aunque esta ecuación es intimidante, es más sencilla de lo que parece. Puesto que $\hbar$ e $i$ son constante, lo único desconocido es el operador $H$ (una matriz). Con ello conocemos la derivada del vector de estados. Esto es, cómo evoluciona con el tiempo. \\
+Donde $\hbar$ es la constante de Plank, $i$ es la unidad imaginaria y $H$ es un operador hamiltoniano. Aunque esta ecuación es intimidante, es más sencilla de lo que parece. Puesto que $\hbar$ e $i$ son constantes, lo único desconocido es el operador $H$ (una matriz). Con ello conocemos la derivada del vector de estados. Esto es, cómo evoluciona con el tiempo. \\
 
 La idea que reside bajo el \emph{quantum annealing} es elegir nosotros el hamiltoniano del sistema para hacer que evolucione a nuestro antojo. Utilizaremos la descomposición singular del hamiltoniano:
 
@@ -135,13 +135,13 @@ La idea que reside bajo el \emph{quantum annealing} es elegir nosotros el hamilt
 
 Donde $E$ son los valores propios de $H$ y $v_E$ los respectivos vectores propios. A los valores propios se les suele denominar \emph{energías}, ya que describen la energía del estado propio asociado. Al estado propio con menor energía se le denomina \emph{estado base} o \emph{ground state}. \\
 
-En particular, utilizaremos un hamiltoniano que variarémos con el tiempo:
+En particular, utilizaremos un hamiltoniano que variaremos con el tiempo:
 
 \[ H(t) = \sum_{E(t)} E(t) |v_{E(t)}\ra\la v_{E(t)}| \quad t \in [t_{initial}, t_{final}] \]
 
 Aqui nos apoyamos del \textbf{Teorema de Evolución Adiabática}: un sistema físico se mantiene en un estado propios si las alteraciones realizadas al sistema se producen lo suficientemente despacio y hay un \emph{hueco} lo suficientemente grande entre el valor propio asociado y el resto de valores propios. \\
 
-En primer lugar, demos una vision intuitiva de este teorema. Supongamos que tenemos un péndulo simple oscilando sujeto en su punto superior con la mano. Si movémos la mano muy despacio, la perturbación que sufre el péndulo es inócua, y este permanecerá en su estado propio. Sin embargo, si movémos rápidamente la mano, el péndulo variará drásticamente su trayectoria. \\
+En primer lugar, demos una visión intuitiva de este teorema. Supongamos que tenemos un péndulo simple oscilando sujeto en su punto superior con la mano. Si movemos la mano muy despacio, la perturbación que sufre el péndulo es inócua, y este permanecerá en su estado propio. Sin embargo, si movémos rápidamente la mano, el péndulo variará drásticamente su trayectoria. \\
 
 Para nuestro caso, buscaremos que el hamiltoniano varíe entre dos valores constantes: $H_{initial}$ y $H_{final}$:
 
@@ -149,7 +149,7 @@ Para nuestro caso, buscaremos que el hamiltoniano varíe entre dos valores const
 
 Donde $A(s)$ disminuirá con el tiempo y $B(s)$ aumentará.
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\includegraphics[scale=.14]{figures/dwave-annealing-functions}
 	\centering
 	\caption{Funciones de \emph{Annealing} utilizadas en los sistemas D-Wave 2X}\
@@ -164,9 +164,9 @@ La ecuación final utilizada en la práctica por los sistemas D'Wave es la sigui
 \[ H(s) = \underbrace{- \frac{A(s)}{2} \bigg( \sum_i \upsigma_x^{(i)} \bigg)}_\text{Initial Hamiltonian} 
 + \underbrace{\frac{B(s)}{2} \bigg( \sum_i h_i \upsigma_z^{(i)} + \sum_ {i > j} J_{i,j} \upsigma_z^{(i)} \upsigma_z^{(j)} \bigg)}_\text{Final Hamiltonian} \]
 
-Tras esta explicación quedan dos cuestiones por resolver. En primer lugar, ¿Qué es el "hueco" de la segunda hipótesis del teorema de evolución adiabática y cuándo se cumple? Este hueco hace referencia a la distancia entre los valores propios. Durante la evolución temporal que se produce en el sistema, los valores propios también varían. Cuanto más se acerquen dichos valores, más probable es que el sistema "salte" a otro de los estados propios del sistema. Este fenómeno se conoce como \emph{quantum tunneling}.
+Tras esta explicación quedan dos cuestiones por resolver. En primer lugar, ¿Qué es el ``hueco'' de la segunda hipótesis del teorema de evolución adiabática y cuándo se cumple? Este hueco hace referencia a la distancia entre los valores propios. Durante la evolución temporal que se produce en el sistema, los valores propios también varían. Cuanto más se acerquen dichos valores, más probable es que el sistema ``salte''  a otro de los estados propios del sistema. Este fenómeno se conoce como \emph{quantum tunneling}.
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\includegraphics[scale=.3]{figures/dwave-eigenspectrum.png}
 	\centering
 	\caption{Ejemplo de evolución temporal de valores propios}
@@ -197,7 +197,7 @@ donde $Q$ es una matriz $n \times n$ simétrica que contiene los coeficientes $q
 
 En el texto original queda explicado el método de transformación general, así como algunos de los problemas NP-duros más famosos: el problema de corte máximo (Max-Cut), Max SAT-2, el coloreado de grafo y el viajante de comercio. \\
 
-Este último es especialmente relevante para su posterior aplicación en el problema del ensamblaje del genoma. En dicho problema, dado un grafo $G$ con nodos $v_1, \ldtos, v_n$, y con pesos asociados a cada lado del grafo $w_{i,j}$ para todo $i,j \in [1, \ldots, n]$, buscamos un camino hamiltoniano (que pasa por todos los nodos del grafo una única vez) con pesos mínimos. \\
+Este último es especialmente relevante para su posterior aplicación en el problema del ensamblaje del genoma. En dicho problema, dado un grafo $G$ con nodos $v_1, \ldots, v_n$, y con pesos asociados a cada lado del grafo $w_{i,j}$ para todo $i,j \in [1, \ldots, n]$, buscamos un camino hamiltoniano (que pasa por todos los nodos del grafo una única vez) con pesos mínimos. \\
 
 Para ello definimos $n^2$ variables binarias $x_{i,j}$, que valdrán $1$ si y sólamente si nuestro camino pasa por el nodo $i$ en el instante $j$. Hemos de añadir una serie de restricciones adicionales para que se cumplan las condiciones de ser un camino hamiltoniano por el grafo: unicamente pasamos por un nodo en el instante $j$, y nunca pasamos dos veces por el mismo nodo. A estas condiciones las denominamos \text{colocación} y \textbf{repetición} respectivamente. \\
 
@@ -215,7 +215,7 @@ Añadimos adicionalmente unos pesos negativos en la diagonal de la matriz para, 
 Donde $a,b,c$ son tres parámetros reales que codifican el peso dado a cada restricción. Hemos transformado nuestro problema original con un grafo de $n$ nodos en un problema QUBO con $n^2$ variables. Veámos un ejemplo de esta transformación. Dado el siguiente grafo:
 
 \begin{figure}[H]
-	\includegraphics[scale=1.1]{graphs/salesman-example.pdf}
+	\includegraphics[scale=1.1]{figures/salesman-example.pdf}
 	\centering
 \end{figure}
 
@@ -230,7 +230,7 @@ Utilizando los valores $a = 0$ y $b = c = 13$ para los parámetros podemos obten
 
 \begin{figure}[H]
 	\makebox[\textwidth][c]{
-		\includegraphics[scale=0.4]{salesman-Q-matrix.png}
+		\includegraphics[scale=0.4]{figures/salesman-Q-matrix.png}
 	}
 	\centering
 	\caption{Matriz Q final}
@@ -242,21 +242,21 @@ Esta matriz cuadrada puede verse como una matriz de adyacencia de un grafo con 1
 	\centering
 	\makebox[\textwidth][c]{
 		\begin{tabular}{ccc}		
-			\includegraphics[scale=0.2]{salesman-penalties1.png} &
-			\includegraphics[scale=0.2]{salesman-penalties2.png} &
-			\includegraphics[scale=0.2]{salesman-penalties3.png} \\
+			\includegraphics[scale=0.2]{figures/salesman-penalties1.png} &
+			\includegraphics[scale=0.2]{figures/salesman-penalties2.png} &
+			\includegraphics[scale=0.2]{figures/salesman-penalties3.png} \\
 			
 			1: Self-bias & 2: Repetición & 3: Colocación \\
 			
-			\includegraphics[scale=0.2]{salesman-penalties4.png} &
-			\includegraphics[scale=0.2]{salesman-penalties5.png} &
-			\includegraphics[scale=0.2]{salesman-penalties6.png} \\
+			\includegraphics[scale=0.2]{figures/salesman-penalties4.png} &
+			\includegraphics[scale=0.2]{figures/salesman-penalties5.png} &
+			\includegraphics[scale=0.2]{figures/salesman-penalties6.png} \\
 			
 			4: Type A tours & 5: Type B tours & 6: Type C tours \\
 			
-			\includegraphics[scale=0.2]{salesman-penalties7.png} &
-			\includegraphics[scale=0.2]{salesman-penalties8.png} &
-			\includegraphics[scale=0.2]{salesman-penalties9.png} \\
+			\includegraphics[scale=0.2]{figures/salesman-penalties7.png} &
+			\includegraphics[scale=0.2]{figures/salesman-penalties8.png} &
+			\includegraphics[scale=0.2]{figures/salesman-penalties9.png} \\
 			
 			7: Type D tours & 8: Type E tours & 9: Type F tours \\
 		\end{tabular}
@@ -265,7 +265,7 @@ Esta matriz cuadrada puede verse como una matriz de adyacencia de un grafo con 1
 	\label{fig:salesman-penalties}
 \end{table}
 
-\subsection{El ensamble del genoma}
+\subsection{El ensamblaje del genoma}
 
 El genoma de un organismo contiene toda su información genética. Dicha información se almacena en el ADN (o en el ARN para ciertos organismos) como cadenas de nucleótidos de entre las cuatro siguientes:
 
@@ -280,14 +280,14 @@ Los nucleótidos se colocan en parejas (llamadas \emph{base-pairs} o simplemente
 
 \textbf{El problema del ensamblaje del genoma} consiste en, a partir de un gran conjunto de pequeñas lecturas, recomponer la cadena de ADN original de la que provienen estas lecturas. \\
 
-Cabe destacar que nos centramos el método denominado \emph{de novo} que no utiliza referencia conocida sobre el aDN de la especia, como si hace el método \emph{ab initio}, añadiendo sesgo. De la misma forma, todo este proceso es equivalente para el ARN aunque las parejas de nucleótidos que lo componen son distintas. \\
+Cabe destacar que nos centramos el método denominado \emph{de novo} que no utiliza referencia conocida sobre el ADN de la especie, como si hace el método \emph{ab initio}, añadiendo sesgo. De la misma forma, todo este proceso es equivalente para el ARN aunque las parejas de nucleótidos que lo componen son distintas. \\
 
-El procedicimiento seguido es transformar este problema en el problema del viajante de comercio, que ya sabemos imbuir en nuestras arquitecturas D-Wave, para posteriormente resolverlo utilizando \emph{quantum annealing}. Para ello creamos un grafo donde cada nodo tiene asignada una cadena. Asignamos peso a los lados del grafo según lo bien que se solapen dichas cadenas de nucleótidos. Un camino hamiltoniano en este grafo será una ordenación de las cadenas. Si minimizamos los pesos de dicho camino hamiltoniano obtenemos la ordenación que maximiza el pegado entre cadenas. Esto es, la ordenación que recompone el ADN original. A este grafo se le denomina \textbf{grafo Overlap-Layout Consensus (OLC)}.\\
+El procedicimiento seguido es transformar este problema en el problema del viajante de comercio, que ya sabemos imbuir en nuestras arquitecturas D-Wave, para posteriormente resolverlo utilizando \emph{quantum annealing}. Para ello creamos un grafo donde cada nodo tiene asignada una cadena. Asignamos pesos a los lados del grafo según lo bien que se solapen dichas cadenas de nucleótidos. Un camino hamiltoniano en este grafo será una ordenación de las cadenas. Si minimizamos los pesos de dicho camino hamiltoniano obtenemos la ordenación que maximiza el pegado entre cadenas. Esto es, la ordenación que recompone el ADN original. A este grafo se le denomina \textbf{grafo Overlap-Layout Consensus (OLC)}.\\
 
 \begin{figure}[H]
-	\includegraphics[scale=0.4]{de-novo-process.png}
+	\includegraphics[scale=0.4]{figures/de-novo-process.png}
 	\centering
-	\caption{Diagrama del proceso de resolución del ensamblaje del genoma utilizando \{quantum annealing}}
+	\caption{Diagrama del proceso de resolución del ensamblaje del genoma utilizando quantum annealing}
 \end{figure}
 
 \subsection{Resultados experimentales}
