@@ -1,4 +1,4 @@
-file=P2 # Valor por defecto
+file=P3 # Valor por defecto
 
 all: clean $(file) clean
 

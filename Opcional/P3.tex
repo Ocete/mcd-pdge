@@ -8,6 +8,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{grffile}
+\usepackage{upgreek}
 \usepackage{longtable}
 \usepackage{wrapfig}
 \usepackage{rotating}
@@ -44,7 +45,7 @@
 \usepackage{pdfpages}
 
 \newcommand*{\B}{\mathbb{B}}
-\newcommand*{\C}{\mathds{C}}
+\newcommand*{\C}{\mathbb{C}}
 \newcommand*{\R}{\mathbb{R}}
 \newcommand*{\ra}{\rangle}
 \newcommand*{\la}{\langle}
@@ -57,7 +58,9 @@
 \date{\today}
 \title{D-Wave: computación cuántica mediante \emph{quantum annealing}\\\medskip
 \large Procesamiento de Datos a Gran Escala - Práctica opcional}
-b\begin{document}
+
+
+\begin{document}
 
 \maketitle
 
@@ -92,7 +95,7 @@ La mecánica cuántica esta basado en cuatro "simples" postulados, sobre los que
 \begin{enumerate}
 	\item El primer postulado nos indica \textbf{cómo describir matemáticamente un sistema físico}: \emph{Cualquier sistema físico aislado tiene asociado un espacio de Hilbert llamado el \textbf{espacio de estados}. El estado del sistema queda totalmente descrito por un vector unitario de dicho espacio, y se denomina \textbf{vector estado}.}
 	
-	Dado que todo espacio de Hilbert finitio es isomorfo a $\C^n$, donde $n$ es la dimensión de dicho espacio, los vectores estados serán vectores unitarios de $\C^n$ para cierto $n$. En particular, un \emph{qubit} se define como un vector estado del espacio de estados $\C^2$. Es decir, un vector unitario de $\C^2$:
+	Dado que todo espacio de Hilbert finitio es isomorfo a $\mathbb C^n$, donde $n$ es la dimensión de dicho espacio, los vectores estados serán vectores unitarios de $\C^n$ para cierto $n$. En particular, un \emph{qubit} se define como un vector estado del espacio de estados $\C^2$. Es decir, un vector unitario de $\C^2$:
 	
 	\[ |\varphi\ra = \alpha|0\ra + \beta|1\ra \]
 	
@@ -148,7 +151,7 @@ $$ H(s) = A(s) \cdot H_{initial} + B(s) \cdot H_{final} \quad \forall s \in [t_{
 Donde $A(s)$ disminuirá con el tiempo y $B(s)$ aumentará.
 
 \begin{figure}[h]
-	\includegraphics[scale=.14]{dwave-annealing-functions.png}
+	\includegraphics[scale=.14]{figures/dwave-annealing-functions}
 	\centering
 	\caption{Funciones de \emph{Annealing} utilizadas en los sistemas D-Wave 2X}\
 \end{figure}
@@ -165,7 +168,7 @@ $$ H(s) = \underbrace{- \frac{A(s)}{2} \bigg( \sum_i \upsigma_x^{(i)} \bigg)}_\t
 Tras esta explicación quedan dos cuestiones por resolver. En primer lugar, ¿Qué es el "hueco" de la segunda hipótesis del teorema de evolución adiabática y cuándo se cumple? Este hueco hace referencia a la distancia entre los valores propios. Durante la evolución temporal que se produce en el sistema, los valores propios también varían. Cuanto más se acerquen dichos valores, más probable es que el sistema "salte" a otro de los estados propios del sistema. Este fenómeno se conoce como \emph{quantum tunneling}.
 
 \begin{figure}[h]
-	\includegraphics[scale=.3]{dwave-eigenspectrum.png}
+	\includegraphics[scale=.3]{figures/dwave-eigenspectrum.png}
 	\centering
 	\caption{Ejemplo de evolución temporal de valores propios}
 	\label{fig:dwave-eigenspectrum}
