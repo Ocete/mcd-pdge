@@ -1,0 +1,170 @@
+% Created 2021-10-06 mar 13:05
+% Intended LaTeX compiler: pdflatex
+%%% Local Variables:
+%%% LaTeX-command: "pdflatex --shell-escape"
+%%% End:
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black}
+\setlength{\parindent}{0in}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[spanish]{babel}
+\usepackage{mathtools}
+\usepackage{palatino}
+\usepackage{fancyhdr}
+\usepackage{sectsty}
+\usepackage{engord}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage[compact]{titlesec}
+\usepackage[center]{caption}
+\usepackage{placeins}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{bayesnet}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.text}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{minted}
+\usepackage{pdfpages}
+
+\newcommand*{\B}{\mathbb{B}}
+\newcommand*{\C}{\mathds{C}}
+\newcommand*{\R}{\mathbb{R}}
+\newcommand*{\ra}{\rangle}
+\newcommand*{\la}{\langle}
+
+\def\inline{\lstinline[basicstyle=\ttfamily,keywordstyle={}]}
+
+\titlespacing*{\subsection}{0pt}{5.5ex}{3.3ex}
+\titlespacing*{\section}{0pt}{5.5ex}{1ex}
+\author{José Antonio Álvarez Ocete\\ Francisco Javier Sáez Maldonado}
+\date{\today}
+\title{D-Wave: computación cuántica mediante \emph{quantum annealing}\\\medskip
+\large Procesamiento de Datos a Gran Escala - Práctica opcional}
+b\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Motivación y objetivos}
+
+En esta asignatura hemos expuesto las bases teóricas de la computación cuántica desde el álgebra lineal y la teoría de la computación, para posteriormente explicar los algoritmos más destacados de este nuevo paradigma, como la teleportación cuántica o el algoritmo de Shor.
+
+En esta práctica opcional exploraremos otra forma de implementar computación cuántica, basándonos en evolución adiabática y \emph{quantum annealing} (usualmente mal traducido como \emph{enfriamiento cuántico}). En particular exploraremos los siguientes temas:
+
+\begin{itemize}
+	\item El \emph{quantum annealing} comparte algunas de las bases con la computación cuántica basada en circuitos, describiremos de superficial e intuitiva \textbf{las bases de la mecánica cuántica} que subyacen a ambos modelos y dónde residen las diferencias entre ambos.
+	
+	\item Explicaremos en profundidad \textbf{como funcionan los ordenadores D-Wave}, así como los problemas de optimización que pueden resolver.
+
+	\item Comentaremos en detalle \textbf{el problema de ensamblaje del genoma}, y cómo resolverlo utilizando ordenadores D-Wave.
+	
+	\item Veremos los resultados obtenidos los computadores \emph{D-Wave 2000} y \emph{Advantage} al resolver este problema particular.
+\end{itemize}
+
+Este problema esta basado en el Trabajo Fin de Grado de uno de los componentes de esta pareja de prácticas, José Antonio Álvarez. Dicho documento puede encontrarse en \href{https://github.com/Ocete/TFG/blob/main/thesis.pdf}{el respectivo repositorio de GitHub}.
+
+\section{Desarrollo}
+
+\subsection{El modelo de la mecánica cuántica}
+
+Realizaremos una descripción superficial sobre la gran base teórica existente en este respecto. Para más detalle, consúltese el TFG al completo.
+
+La mecánica cuántica esta basado en cuatro "simples" postulados, sobre los que se construye toda la teoría necesaria para la física cuántica y la computación cuántica en particular. Los enunciamos y explicamos a continuación.
+
+\begin{enumerate}
+	\item El primer postulado nos indica \textbf{cómo describir matemáticamente un sistema físico}: \emph{Cualquier sistema físico aislado tiene asociado un espacio de Hilbert llamado el \textbf{espacio de estados}. El estado del sistema queda totalmente descrito por un vector unitario de dicho espacio, y se denomina \textbf{vector estado}.}
+	
+	Dado que todo espacio de Hilbert finitio es isomorfo a $\C^n$, donde $n$ es la dimensión de dicho espacio, los vectores estados serán vectores unitarios de $\C^n$ para cierto $n$. En particular, un \emph{qubit} se define como un vector estado del espacio de estados $\C^2$. Es decir, un vector unitario de $\C^2$:
+	
+	\[ |\varphi\ra = \alpha|0\ra + \beta|1\ra \]
+	
+	Donde $|\alpha|, |\beta| = 1$.
+	
+	\item El segundo postulado nos indica \textbf{cómo medir nuestro sistema} en este paradigma. De igual forma que medimos la velocidad de un coche o la altura de una persona, hemos de ser capaces de medir ciertas variables en este sistema. El enunciado formal implica unos operadores de medida que unicamente complicarían este texto, así que nos ceñimos a las implicaciones del mismo.
+	
+	La consecuencia más relevante es que \textbf{al medir un sistema, lo alteramos}. Esto se traduce en la computación cuántica en el colapso de los qubits tras la medida a uno de los estados. Adicionalmente, esto establece uno de los principales inconvenientes de la computación cúantica: la imposibilidad de conocer exactamente las amplitudes de un estado, lo que desembocará en el \textbf{Teorema de no clonación}.
+	
+	\item El tercer postulado es el más relevante para nosotros pues \textbf{crea la distinción entre el modelo de computación cuántica basado en circuitos y el basado en \emph{quantum annealing}}. \textbf{Describe la evolución del sistema} y tiene dos enunciados equivalentes que provocan la distinción mencionada.
+	
+	En su primera forma, el postulado dicta que la evolución de un sistema cuántica cerrado queda descrita por una \textbf{transformación unitaria} que unicamente depende de los tiempos $t_1,t_2$ en los que se compara el sistema:
+	
+	\[ |\varphi_{t_2}\ra = U|\varphi_{t_1}\ra \]
+	
+	En el modelo de circuitos de la computación cuántica este postulado establece las bases teóricas de las puertas cúanticas: transformaciones unitarias aplicadas al estado del sistema (qubits).
+	
+	La segunda forma de este postulado viene de la mano de la ecuación de Schrödinger, la exploramos en detalle más adelante.
+	
+	\item Finalmente, el cuarto postulado nos habla de \textbf{la composición de sistemas cuánticos}. Dicta lo siguiente: \emph{El espacio de estados de un sistema físico compuesto es el \textbf{producto tensorial} de los espacios de estados de los subsistemas. Además, el vector de estado del sistema es el producto tensorial de los vectores de estado de los subsistemas:} $|\varphi_1\ra \otimes \dotsc \otimes |\varphi_n\ra$.
+	
+	La diferencia más relevante en nuestro caso entre el producto vectorial al que estamos acostumbrados y el producto tensorial es que la dimensión de los espacio se multiplica en vez de sumarse: $\R^2 \times \R^3 = \R^5$ mientras que $\R^2 \otimes \R^3 = \R^6$. Es por ello que al añadir qubits a nuestro sistema, la información crece de manera exponencial y no lineal como ocurre en el caso de los bits.
+	
+	Como corolario inmediato de este postulado obtenemos que un sistema de $n$ qubits tiene por espacio de estados asociado $\C^{2^n}$. 
+\end{enumerate}
+
+\subsection{Quantum annealing y evolución adiabática}
+
+Como se menciono anteriormente, Schrödinger proporcionó una versión equivalente de este postulado. Esta dicta que la evolución temporal de nuestro sistema viene dada por la famosa \textbf{ecuación de Schrödinger}:
+
+\[ i \hbar \frac{d|\varphi\ra}{dt} = H|\varphi\ra \]
+
+Donde $\hbar$ es la constante de Plank, $i$ es la unidad imaginaria y $H$ es un operador hamiltoniano. Aunque esta ecuación es intimidante, es más sencilla de lo que parece. Puesto que $\hbar$ e $i$ son constante, lo único desconocido es el operador $H$ (una matriz). Con ello conocemos la derivada del vector de estados. Esto es, cómo evoluciona con el tiempo.
+
+La idea que reside bajo el \emph{quantum annealing} es elegir nosotros el hamiltoniano del sistema para hacer que evolucione a nuestro antojo. Utilizaremos la descomposición singular del hamiltoniano:
+
+$$ H = \sum_E E |v_E\ra\la v_E| $$
+
+Donde $E$ son los valores propios de $H$ y $v_E$ los respectivos vectores propios. A los valores propios se les suele denominar \emph{energías}, ya que describen la energía del estado propio asociado. Al estado propio con menor energía se le denomina \emph{estado base} o \emph{ground state}.
+
+En particular, utilizaremos un hamiltoniano que variarémos con el tiempo:
+
+$$ H(t) = \sum_{E(t)} E(t) |v_{E(t)}\ra\la v_{E(t)}| \quad t \in [t_{initial}, t_{final}]$$
+
+Aqui nos apoyamos del \textbf{Teorema de Evolución Adiabática}: un sistema físico se mantiene en un estado propios si las alteraciones realizadas al sistema se producen lo suficientemente despacio y hay un \emph{hueco} lo suficientemente grande entre el valor propio asociado y el resto de valores propios.
+
+En primer lugar, demos una vision intuitiva de este teorema. Supongamos que tenemos un péndulo simple oscilando sujeto en su punto superior con la mano. Si movémos la mano muy despacio, la perturbación que sufre el péndulo es inócua, y este permanecerá en su estado propio. Sin embargo, si movémos rápidamente la mano, el péndulo variará drásticamente su trayectoria.
+
+Para nuestro caso, buscaremos que el hamiltoniano varíe entre dos valores constantes: $H_{initial}$ y $H_{final}$:
+
+$$ H(t) = f(t) \cdot H_{initial} + g(t) \cdot H_{final} \quad \forall t \in [t_{initial}, t_{final}] $$
+
+Donde $f(t)$ disminuirá con el tiempo y $g(t)$ aumentará.
+
+TODO: INCLUIR IMAGEN
+
+La codificación inicial, $H_{initial}$, será muy sencilla. De esta forma podremos conocer nuestro sistema a la perfección. De hecho, nuestro estado inicial del sistema será el estado base de $H_{initial}$. Si se cumple el teorema de evolución adiabática (volveremos ahora para ver cuando ocurre), tras la evolución nuestro sistema estará en el estado base de $H_{final}$.
+
+Dado un problema de optimización, codificaremos $H_{final}$ para que el estado propio de menor energía sea el mínimo de nuestra función objetivo. De esta forma, tras aplicar evolución adiabática obtendremos el estado base. Esto es, la solución que minimiza nuestra función objetivo.
+
+Tras esta explicación quedan dos cuestiones por resolver. En primer lugar, ¿Qué es el "hueco" de la segunda hipótesis del teorema de evolución adiabática y cuándo se cumple? Este hueco hace referencia a la distancia entre los valores propios. Durante la evolución temporal que se produce en el sistema, los valores propios también varían. Cuanto más se acerquen dichos valores, más probable es que el sistema "salte" a otro de los estados propios del sistema. Este fenómeno se conoce como \emph{quantum tunneling}.
+
+Dado un problema arbitrario es difícil conocer la evolución de los valores propios temporalmente y mucho menos controlarla. Sin embargo, si la evolución es lo suficientemente lenta, podemos disminuir la probabilidad de dicho salto. Ejecutando el algoritmo en múltiples ocasiones -esto es, utilizando métodos de Monte Carlo- aumentaremos la posibilidad de obtener la solución óptima. Aún así, soluciones cercanas al estado base también obtendrán bajos valores de la función objetivo.
+
+Por otro lado, resta preguntarse qué problemas podemos codificar en un hamiltoniano y cómo hacerlo. Esto serán los problemas QUBO.
+
+\subsection{Problemas QUBO}
+
+\subsection{El ensamble del genoma}
+
+\subsection{Resultados experimentales}
+
+\section{Conclusiones}
+
+\end{document}
