@@ -382,18 +382,33 @@ Repetimos el experimento utilizando el ordenador cuántico D-Wave 2000. Para ell
 \begin{figure}[H]
 	\includegraphics[scale=0.75]{figures/experiment3 (1.5).png}
 	\centering
-	\caption{Ocurrences of each cycle type in a $10.000$ reads experiment using Quantum Annealing, filtering out invalid cycles, with QUBO parameters $(-1.5; 1.5; 1.5)$}
+	\caption{Ocurrencias para cada tipo de ciclo con $10.000$ repeticiones utilizando Quantum Annealing, quitando ciclos inválidos, con parámetros QUBO $(-1.5; 1.5; 1.5)$}
 	\label{fig:exp3-occ1}
 \end{figure}
 
 \begin{figure}[H]
 	\includegraphics[scale=0.75]{figures/experiment3 (1.6).png}
 	\centering
-	\caption{Ocurrences of each cycle type in a $10.000$ reads experiment using Quantum Annealing, filtering out invalid cycles, with QUBO parameters $(-1.6; 1.6; 1.6)$}
+	\caption{Ocurrencias para cada tipo de ciclo con $10.000$ repeticiones utilizando Quantum Annealing, quitando ciclos inválidos, con parámetros QUBO $(-1.6; 1.6; 1.6)$}
 	\label{fig:exp3-occ2}
 \end{figure}
 
+En primer lugar, el hecho más relevante tras estos experimentos es que obtenemos unicamente un 10\% de ciclos válidos (esto es, soluciones que representan ciclos que mantienen las restricciones impuestas). En segundo lugar, vemos como no se obtiene una distribución parecida a la esperada. La hipótesis final tras realizar estos experimentos es que el algoritmo no ha tenido suficiente tiempo para realizar el annealing correctamente. Sin embargo, no pudimos realizar más experimentos durante la fase de experimentación, D-Wave provee de únicamente un minuto de tiempo de QPU gratuito al mes.
 
 \section{Conclusiones}
+
+En este texto hemos expuesto de forma resumida las bases del Quantum Annealing utilizado para los ordenadores D-Wave. Para ello hemos:
+
+\begin{enumerate}
+	\item Expuesto las bases de la mecánica cuántica que subyacen a este modelo, y sus diferencias con el modelo cuántico de circuitos.
+	
+	\item Explicado en detalle el \emph{quantum annealing} y la evolución adiabática, y el uso que hace D-Wave de estos fenómenos físicos en sus ordenadores.
+	
+	\item Definido los problemas QUBO, y cómo transformar problemas arbitrarios a este modelo. En particular, hemos codificado el viajante de comercio siguiente este formato.
+	
+	\item Desarrollado el problema del ensamblaje del genoma y como resolverlo utilizando \emph{quantum annealing}.
+	
+	\item Expuesto el resultado de diversos experimentos comparando \emph{simulated annealing} y \emph{quantum annealing} para la resolución del problema de ensamblaje del genoma.
+\end{enumerate}
 
 \end{document}
