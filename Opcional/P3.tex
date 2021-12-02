@@ -217,6 +217,7 @@ Donde $a,b,c$ son tres parámetros reales que codifican el peso dado a cada rest
 \begin{figure}[H]
 	\includegraphics[scale=1.1]{figures/salesman-example.pdf}
 	\centering
+	\label{fig:salesman-example}
 \end{figure}
 
 Dado que el grafo tiene $4$ nodos, definimos $4^2 = 16$ variables binarias y las renombramos:
@@ -261,7 +262,7 @@ Esta matriz cuadrada puede verse como una matriz de adyacencia de un grafo con 1
 			7: Type D tours & 8: Type E tours & 9: Type F tours \\
 		\end{tabular}
 	}
-	\caption{Graphical representation of penalties between interactions \cite{Sarkar2020}}
+	\caption{Representación gráfica de las penalizaciones entre las distintas intereracciones}
 	\label{fig:salesman-penalties}
 \end{table}
 
@@ -292,6 +293,105 @@ El procedicimiento seguido es transformar este problema en el problema del viaja
 
 \subsection{Resultados experimentales}
 
+Comentaremos unicamente algunos de los experimentos llevados acabo utilizando los computadores D-Wave. En primer lugar, considerémos un ejemplo con únicamente 4 lecturas:
+
+\begin{itemize}
+	\item $r0 = ATGGCGTGCA$
+	\item $r1 = GCGTGCAATG$
+	\item $r2 = TGCAATGGCG$
+	\item $r3 = AATGGCGTGC$
+\end{itemize}
+
+Donde la solución es unir las lecturas en orden alfanumérico: $r0 \rightarrow r1 \rightarrow r2 \rightarrow r3$. El grafo OLC asociado a este problema es justamente el de la figura \ref{fig:salesman-example}. Estudiando este gráfico nos damos cuenta de que hay 6 tipos de ciclo en el mismo, plasmados en la sigueinte figura:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{ccc}		
+		\includegraphics[scale=.9]{figues/salesman-cycleA.pdf} &
+		\includegraphics[scale=.9]{figues/salesman-cycleB.pdf} &
+		\includegraphics[scale=.9]{figues/salesman-cycleC.pdf} \\
+		
+		Tipo A & Tipo B & Tipo C \\
+		
+		\includegraphics[scale=.9]{figues/salesman-cycleD.pdf} &
+		\includegraphics[scale=.9]{figues/salesman-cycleE.pdf} &
+		\includegraphics[scale=.9]{figues/salesman-cycleF.pdf} \\
+		
+		Tipo D & Tipo E & Tipo F \\
+	\end{tabular}
+	\caption{Tipos de ciclos de un grafo de $4$ nodos}
+	\label{tbl:salesman-cycles}
+\end{table}
+
+Analizando estos ciclos podemos darnos cuenta de que el tipo de ciclo con menor longitud de pegado (también denominada energía) es el tipo A, como cabría esperar pues esta es la solución. Además, los tipos C, D, E y F tienen todos la misma energía. En último lugar, el ciclo de tipo B tiene la mayor energía de todas.
+
+\begin{figure}[H]
+	\makebox[\textwidth][c]{
+		\includegraphics[scale=0.35]{figues/overlap-cycles.png}
+	}
+	\centering
+	\caption{Energía y pegado de los distintos tipos de ciclos.}
+\end{figure}
+
+En primer lugar, utilizamos un Simulated Annealer, también de la empresa D-Wave, para resolver este problema. Para ello basta con configurar correctamente la matriz Q asociada al problema y conectarse a la API de D-Wave para transmitir esta información. Obtenemos los siguientes resultados:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{lrr}
+		\textbf{Tipo de ciclo} & \textbf{Ocurrencias} & \textbf{Energía} \\
+		\hline
+		Tipo A	& 3722	& -7.9811	\\
+		Tipo C	& 1474	& -7.4541	\\
+		Tipo D	& 1469	& -7.4541	\\
+		Tipo F	& 1458	& -7.4541	\\
+		Tipo E	& 1431	& -7.4541	\\
+		Tipo B	& 446	& -6.927                             
+	\end{tabular}
+	\caption{Results of experiment 2}
+	\label{tab:exp2}
+\end{table}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.8]{figures/experiment2.png}
+	\centering
+	\caption{Ocurrencias de cada tipo de ciclo utilizando Simulated Annealing en $10.000$ realizaciones.}
+	\label{fig:exp2-occ}
+\end{figure}
+
+Realizamos el mismo experimento $10.000$ veces y obtenemos la distribución de la figura \ref{fig:exp2-occ}. Estos resultados encajan por completo con el análisis teórico realizado, pues el tipo más frecuente es el A, solución de nuestro problema. Los tipos C, D, E y F obtienen aproximadamente el mismo número de ocurrencias pues tenían la misma energía. Finalmente, el tipo B es el menos común. \\
+
+Repetimos el experimento utilizando el ordenador cuántico D-Wave 2000. Para ello damos distintos valores a los parámetros. En particular, fijamos $a=-X$ y $b=c=X$ para distintos valores de $X$. Los mejores resultados se obtuvieron para $X = 1.5$ y $1.6$, y se muestran a continuación:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{lrrr}
+		\textbf{Tipo de ciclo} & \textbf{Ocurrencias (X=1.5)} & \textbf{Ocurrencias (X=1.6)} & \textbf{Energía} \\
+		\hline
+		Tipo A	& 131	& 50	& -7.9811	\\
+		Tipo C	& 124	& 46	& -7.4541	\\
+		Tipo D	& 40	& 91	& -7.4541	\\
+		Tipo F	& 55	& 117	& -7.4541	\\
+		Tipo E	& 112	& 118	& -7.4541	\\
+		Tipo B	& 99	& 64	& -7.4541	\\    
+		Inválidos & 9221	& 9194	& $>$ -5.6433                         
+	\end{tabular}
+	\caption{$10.000$ ocurrencias utilizando D-Wave 2000Q.}
+	\label{tab:exp3}
+\end{table}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.75]{figures/experiment3 (1.5).png}
+	\centering
+	\caption{Ocurrences of each cycle type in a $10.000$ reads experiment using Quantum Annealing, filtering out invalid cycles, with QUBO parameters $(-1.5; 1.5; 1.5)$}
+	\label{fig:exp3-occ1}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.75]{figures/experiment3 (1.6).png}
+	\centering
+	\caption{Ocurrences of each cycle type in a $10.000$ reads experiment using Quantum Annealing, filtering out invalid cycles, with QUBO parameters $(-1.6; 1.6; 1.6)$}
+	\label{fig:exp3-occ2}
+\end{figure}
 
 
 \section{Conclusiones}
