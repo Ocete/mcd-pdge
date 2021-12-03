@@ -205,7 +205,7 @@ Añadimos adicionalmente unos pesos negativos en la diagonal de la matriz para, 
 
 \begin{equation}
 	\begin{alignedat}{3}
-		& \text{Minimize }	&& \sum_{i=0}^{n-1} \sum_{j=0}^{n-1} w_{i,j}\sum_{p=0}^{n-1} x_{i,p}x_{j,p+1} & \\
+		& \text{Minimizar }	&& \sum_{i=0}^{n-1} \sum_{j=0}^{n-1} w_{i,j}\sum_{p=0}^{n-1} x_{i,p}x_{j,p+1} & \\
 		& && + a \sum_{i=0}^{n-1} \sum_{p=0}^{n-1} x_{i,p} & \qquad \text{(self-bias)} \\
 		& && + b \sum_{i=0}^{n-1} \Big( \sum_{p=0}^{n-1} x_{i,p} - 1 \Big)^2 & \qquad \text{(repetición)} \\
 		& && + c \sum_{p=0}^{n-1} \Big( \sum_{i=0}^{n-1} x_{i,p} - 1 \Big)^2 & \qquad \text{(colocación)}
@@ -307,15 +307,15 @@ Donde la solución es unir las lecturas en orden alfanumérico: $r0 \rightarrow 
 \begin{table}[H]
 	\centering
 	\begin{tabular}{ccc}		
-		\includegraphics[scale=.9]{figues/salesman-cycleA.pdf} &
-		\includegraphics[scale=.9]{figues/salesman-cycleB.pdf} &
-		\includegraphics[scale=.9]{figues/salesman-cycleC.pdf} \\
+		\includegraphics[scale=.9]{figures/salesman-cycleA.pdf} &
+		\includegraphics[scale=.9]{figures/salesman-cycleB.pdf} &
+		\includegraphics[scale=.9]{figures/salesman-cycleC.pdf} \\
 		
 		Tipo A & Tipo B & Tipo C \\
 		
-		\includegraphics[scale=.9]{figues/salesman-cycleD.pdf} &
-		\includegraphics[scale=.9]{figues/salesman-cycleE.pdf} &
-		\includegraphics[scale=.9]{figues/salesman-cycleF.pdf} \\
+		\includegraphics[scale=.9]{figures/salesman-cycleD.pdf} &
+		\includegraphics[scale=.9]{figures/salesman-cycleE.pdf} &
+		\includegraphics[scale=.9]{figures/salesman-cycleF.pdf} \\
 		
 		Tipo D & Tipo E & Tipo F \\
 	\end{tabular}
@@ -327,7 +327,7 @@ Analizando estos ciclos podemos darnos cuenta de que el tipo de ciclo con menor 
 
 \begin{figure}[H]
 	\makebox[\textwidth][c]{
-		\includegraphics[scale=0.35]{figues/overlap-cycles.png}
+		\includegraphics[scale=0.35]{figures/overlap-cycles.png}
 	}
 	\centering
 	\caption{Energía y pegado de los distintos tipos de ciclos.}
